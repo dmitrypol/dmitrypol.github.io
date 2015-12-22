@@ -9,7 +9,6 @@ RailsAdmin is a great gem and it can be extended via [custom actions](https://gi
 
 Create lib/rails_admin/custom_actions.rb
 {% highlight ruby %}
-
 module RailsAdmin
   module Config
     module Actions
@@ -92,7 +91,9 @@ Modify en.yml file
 
 #### Create custom pages
 
-In app/views/rails_admin/main create files such as root.html.haml and collection.html.haml.  They will load when you click appropriate links.  These pages can be used to display high level reports or upload data into the system (just put a form_tag pointing to appropriate controller endpoint)
+In app/views/rails_admin/main create files such as root.html.haml and collection.html.haml.  They will load when you click appropriate links.
+
+These pages can be used to display high level reports or upload data into the system (just put a form_tag pointing to appropriate controller endpoint).  Just think of them as regular Rails pages but the controller code is in the custom_actions.rb.
 
 #### Useful links
 
