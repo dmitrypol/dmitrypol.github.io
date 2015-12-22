@@ -1,0 +1,12 @@
+# Site settings
+title: dmitrypol.github.io
+email: private
+description: > # this means to ignore newlines until "baseurl:"
+  My humble blog.  All feedback is welcomed.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://dmitrypol.github.io" # the base hostname & protocol for your site
+twitter_username: dmitrypol
+github_username:  dmitrypol
+
+# Build settings
+markdown: kramdown
