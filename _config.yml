@@ -16,3 +16,13 @@ defaults:
   -
     values:
       layout: "post"
+
+gems:
+  - jekyll-sitemap
+
+pages_list:
+  About: '/about'
+  Feed: '/feed.xml'
+  Sitemap: '/sitemap.xml'
+
+include: ['_pages']
