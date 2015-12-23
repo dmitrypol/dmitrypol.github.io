@@ -4,7 +4,7 @@ date:   2015-12-20
 categories:
 ---
 
-ActionMailer is great.  It allows you to create view templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.  
+ActionMailer is great.  It allows you to create view templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.
 
 We were able to achieve some perf gains by breaking up our jobs in smaller batches and then running 2 (or more) processes per server with ActiveJob.  But the HTTP REST or SMTP calls are still very time consuming when you are doing one per email.
 
@@ -14,11 +14,11 @@ So here is how we recently attempted to solve it (it's still work in progress).
 
 {% highlight ruby %}
 class MyMailer < ActionMailer::Base
-	...
-	def batch_email(to, from, subject)
-		mail(to: to, from: from, subject: subject)
-	end
-	...
+  ...
+  def batch_email(to, from, subject)
+    mail(to: to, from: from, subject: subject)
+  end
+  ...
 end
 {% endhighlight %}
 Create appropriate templates for this mailer in views.
@@ -28,8 +28,8 @@ Created SendEmailsJob in app/jobs.  It can be run as ActiveJob via Sidekiq, Dela
 class SendEmailsJob < ActiveJob::Base
   queue_as :default
   def perform()
-		#	do appropriate logic to determine which emails needs to be sent and to whom
-  	MyMailer.batch_email(to, from, subject)
+    #	do appropriate logic to determine which emails needs to be sent and to whom
+    MyMailer.batch_email(to, from, subject)
   end
 end
 {% endhighlight %}
@@ -37,12 +37,12 @@ end
 Create EmailInterceptor class.  You can put email_interceptor.rb in mailers folder.
 {% highlight ruby %}
 class EmailInterceptor
-	def self.delivering_email(message)
-		#	stop the actual send
-		message.perform_deliveries = false
-		#	queue up the email with complete message generated
-		SendEmailBatchJob.perform_later(message.to, message.from, message.subject, message.html_part.body.to_s)
-	end
+  def self.delivering_email(message)
+    #	stop the actual send
+    message.perform_deliveries = false
+    #	queue up the email with complete message generated
+    SendEmailBatchJob.perform_later(message.to, message.from, message.subject, message.html_part.body.to_s)
+  end
 end
 {% endhighlight %}
 
@@ -63,7 +63,7 @@ class SendEmailBatchJob < ActiveJob::Base
   queue_as :each_email
   self.queue_adapter= :shoryuken
   def perform()
-  	#	grab 10 or more SQS jobs at a time and send then to email service provider specifying your template and to, from, body, etc.  You need to be careful not to exceed the max size of the payload as you will be passing a large chunk of HTML to replace the body.
+    #	grab 10 or more SQS jobs at a time and send then to email service provider specifying your template and to, from, body, etc.  You need to be careful not to exceed the max size of the payload as you will be passing a large chunk of HTML to replace the body.
   end
 end
 {% endhighlight %}

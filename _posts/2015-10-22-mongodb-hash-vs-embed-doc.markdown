@@ -24,7 +24,7 @@ class Bar
   include Mongoid::Document
   embedded_in :foo
   field :name,                  type: String
-	field :required,              type: Boolean, default: false
+  field :required,              type: Boolean, default: false
   field :options,               type: Array
   #	specify all kinds of fields, add validations and enumeration if you need to
   ...

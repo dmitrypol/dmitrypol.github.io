@@ -37,7 +37,7 @@ module RailsAdmin
         register_instance_option :controller do
           Proc.new do
             # call model.method here
-            flash[:notice] = "Did custon action on #{@object.name}"
+            flash[:notice] = "Did custom action on #{@object.name}"
             redirect_to back_or_index
           end
         end
@@ -90,9 +90,9 @@ Modify en.yml file
 
 #### Create custom pages
 
-In app/views/rails_admin/main create files such as root.html.haml and collection.html.haml.  They will load when you click appropriate links.
+All you have to do is in app/views/rails_admin/main create files such as root.html.haml and collection.html.haml (named after your custom actions).  They will load when you click appropriate links.
 
-These pages can be used to display high level reports or upload data into the system (just put a form_tag pointing to appropriate controller endpoint).  Just think of them as regular Rails pages but the controller code is in the custom_actions.rb.
+These pages can be used to display high level reports or upload data into the system (just put a form_tag pointing to appropriate controller endpoint).  Think of them as regular Rails pages but the controller code is in the custom_actions.rb.
 
 #### Useful links
 

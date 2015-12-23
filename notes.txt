@@ -1,0 +1,4 @@
+pagination
+differerent Jekyll theme
+tagging / categorization
+site search
