@@ -1,11 +1,12 @@
 ---
-layout: post
 title:  "Sending LOTS of emails from Rails ActionMailer"
 date:   2015-12-20
 categories:
 ---
 
-ActionMailer is great.  It allows you to create view templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.  We were able to achieve some perf gains by breaking up our jobs in smaller batches and then running 2 (or more) processes per server with ActiveJob.  But the HTTP REST or SMTP calls are still very time consuming when you are doing one per email.
+ActionMailer is great.  It allows you to create view templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.  
+
+We were able to achieve some perf gains by breaking up our jobs in smaller batches and then running 2 (or more) processes per server with ActiveJob.  But the HTTP REST or SMTP calls are still very time consuming when you are doing one per email.
 
 Alternatively if you build email templates in the Mandrill or Sendgrid UI you can then call their API passing smaller hashes with the appropriate parameters (first_name, last_name, etc) and they will do the appropriate substitution.  That approach is much faster but you loose a lot of flexibility of being able to build your emails in code.  Plus someone could change email template in Mandrill UI and you have no revision control.
 

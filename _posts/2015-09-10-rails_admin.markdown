@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "RailsAdmin Custom Actions"
 date: 	2015-09-10
 categories:

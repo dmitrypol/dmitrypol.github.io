@@ -1,8 +1,7 @@
 ---
-layout: post
 title:  "Tips & Tricks with Redis and Rails"
 date: 	2015-10-15
-categories:
+categories: redis
 ---
 
 Much has been written about using Redis in Rails for various things.  We are using it for [caching data](http://guides.rubyonrails.org/caching_with_rails.html) and running [Sidekiq](https://github.com/mperham/sidekiq).  Sidekiq web UI gives you nice visibility into how Sidekiq is doing but I wanted to have a more in-depth view of what is actually stored in my Redis DB.  I came across [Redis-Browser](https://github.com/monterail/redis-browser) and wanted to share some lessons learned.

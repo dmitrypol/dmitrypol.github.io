@@ -1,5 +1,4 @@
 ---
-layout: post
 title:  "Logging important info"
 date:   2015-11-10
 categories:

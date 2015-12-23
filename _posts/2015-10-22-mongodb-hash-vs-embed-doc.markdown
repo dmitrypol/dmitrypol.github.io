@@ -1,8 +1,7 @@
 ---
-layout: post
 title:  "Using one field hash vs embedded documents in MongoDB"
 date: 	2015-10-22
-categories:
+categories: mongo
 ---
 
 I have been using [MongoDB](https://www.mongodb.org/) for over 2 years and really like for various things.  One useful feature is ability to store complex data types such as Hashes or Arrays in fields.  Actually MongoDB itself does not support Hashes but you can do it using ODM like [Mongoid](https://github.com/mongodb/mongoid).  It is much eaiser than serializing objects and storing them as strings in the DB.
