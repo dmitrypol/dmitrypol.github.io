@@ -11,12 +11,12 @@ Create config/initalizers/redis-browser.rb
 unless Rails.env.test?
   settings = {"connections"=>{
     "default"=>{"url"=>"redis://#{Rails.application.config.redis_host}:6379/0"},
-    "db1"		 =>{"url"=>"redis://#{Rails.application.config.redis_host}:6379/1"},
+    "db1"=>{"url"=>"redis://#{Rails.application.config.redis_host}:6379/1"},
   }}
   RedisBrowser.configure(settings)
 end
 {% endhighlight %}
-This will allow you to connect to Redis DB0 or DB1 via simple selector.  We are storing cache in DB0 and Sidekiq jobs in DB1.  This way we can flushdb on specific DB in emergency.
+This will allow you to connect to Redis DB0 or DB1 via simple selector.  We are storing cache in DB0 and Sidekiq jobs in DB1.  
 
 Modify routes.rb.
 {% highlight ruby %}

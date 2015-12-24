@@ -4,7 +4,7 @@ date:   2015-12-20
 categories:
 ---
 
-ActionMailer is great.  It allows you to create view templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.
+ActionMailer is great.  It allows you to create email templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge CSS, further customizing their look and feel (one customer can have red background and another blue).  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.
 
 We were able to achieve some perf gains by breaking up our jobs in smaller batches and then running 2 (or more) processes per server with ActiveJob.  But the HTTP REST or SMTP calls are still very time consuming when you are doing one per email.
 
@@ -21,7 +21,7 @@ class MyMailer < ActionMailer::Base
   ...
 end
 {% endhighlight %}
-Create appropriate templates for this mailer in views.
+Create appropriate templates for this mailer in app/views.
 
 Created SendEmailsJob in app/jobs.  It can be run as ActiveJob via Sidekiq, DelayedJob or another queue.
 {% highlight ruby %}
