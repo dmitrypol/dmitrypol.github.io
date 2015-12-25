@@ -1,6 +1,6 @@
 ---
 title:  "My first gem"
-date: 	2015-12-01
+date: 	2015-01-01
 categories:
 ---
 

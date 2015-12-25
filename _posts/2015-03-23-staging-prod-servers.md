@@ -4,7 +4,9 @@ date: 2015-03-23
 categories:
 ---
 
-Once we are done coding and testing software on our dev machines it's often important to check it in environment similar to production (at least do basic visual verification).  I worked in a lot of places where we had separate staging/demo environments with dedicated databases.  Code would be deployed there and verified by biz users as the last step before launch.  The problem is that despite best efforts these staging environments were NEVER the same as real production.  Either the hardware was underpowered or DB data was out of date (often the case) or some other configuration differed.  If you had to do manual setup via UI as part of your deploy that had to be done twice (and often forgotten).  
+Once we are done coding and testing software on our dev machines it's often important to check it in environment similar to production (at least do basic visual verification).  I worked in a lot of places where we had separate staging/demo environments with dedicated databases.  Code would be deployed there and verified by biz users as the last step before launch.  
+
+The problem is that despite best efforts these staging environments were NEVER the same as real production.  Either the hardware was underpowered or DB data was out of date (often the case) or some other configuration differed.  If you had to do manual setup via UI as part of your deploy that had to be done twice (and often forgotten).  
 
 Here is how I solved this problem on a few recent projects.  Warning - this will not work for all situations as it does introduce certain risks.  
 
