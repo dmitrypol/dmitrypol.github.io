@@ -4,7 +4,7 @@ date: 2015-08-05
 categories: aws
 ---
 
-When you first launch your site you are not sure of what the traffic load will be and don't want to spend too much $ on hosting.  The nice thing about AWS is you can scale up as you need by adding new instances or upgrading existing ones.  But in those early days you will often have mostly small loads with occasional spikes when you have influx of visitors or are running periodic background process.  
+When you first launch your site you are not sure of what the traffic will be and don't want to spend too much $ on hosting.  The nice thing about AWS is you can scale up as you need by adding new instances or upgrading existing ones.  But in those early days you will often have mostly low volume with occasional spikes when you have influx of visitors or are running periodic background process.  
 
 This is where AWS [T2 instances](https://aws.amazon.com/blogs/aws/low-cost-burstable-ec2-instances/) are very useful.  You can monitor their CPU usage via CloudWatch and get a sense of system load.  The tricky part is differentiating between the usual X% load that your instance supports from the maximum capacity it can handle depending on your CPUCreditBalance.  The article linked to above does a good job explaining how to you accumulate these credits and the max amount you can have.
 

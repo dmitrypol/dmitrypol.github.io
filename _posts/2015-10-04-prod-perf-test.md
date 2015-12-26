@@ -4,7 +4,7 @@ date: 2015-10-04
 categories:
 ---
 
-Recently I had to run an extensive (6 hour) online stress test to prove to an important customer that our system can handle the load.  Internally I have been using tools like [Siege](https://www.joedog.org/siege-home/) and [Wrk](https://github.com/wg/wrk) to stress test the site.  But obviously customer wanted something "official" from a third party service.  We ended up using [Loader.io/](http://loader.io/) from [SendGrid](https://sendgrid.com/).
+Recently I had to run an extensive (6 hour) online stress test to prove to an important customer that our system can handle the load.  Internally I have been using tools like [Siege](https://www.joedog.org/siege-home/) and [Wrk](https://github.com/wg/wrk) to stress test the site.  But obviously customer wanted something "official" from a third party service.  I ended up using [Loader.io](http://loader.io/) from [SendGrid](https://sendgrid.com/).
 
 To speed up our site for this perf test I implemented [caching](http://guides.rubyonrails.org/caching_with_rails.html) in our Rails app.  I also tweaked [Passenger configuration](https://www.phusionpassenger.com/library/config/nginx/reference/#passenger_max_pool_size) to support more processes per server.  There are other tweaks possible for Passenger so read their docs.  I used passenger-status to monitor server load during perf tests.  
 

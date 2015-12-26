@@ -4,7 +4,7 @@ date: 	2015-10-22
 categories: mongo
 ---
 
-I have been using [MongoDB](https://www.mongodb.org/) for over 2 years and really like it.  One useful feature is ability to store complex data types such as Hashes or Arrays in fields.  Actually MongoDB itself does not support Hashes but you can do it using ODM like [Mongoid](https://github.com/mongodb/mongoid).  It is much eaiser than serializing objects and storing them as strings in the DB.
+I have been using [MongoDB](https://www.mongodb.org/) for a few years and really like it.  One useful feature is ability to store complex data types such as Hashes or Arrays in fields.  Actually MongoDB itself does not support Hashes but you can do it using ODM like [Mongoid](https://github.com/mongodb/mongoid).  It is much eaiser than serializing complex structure and storing it as string in the DB.
 
 The challenge comes when you have to manually edit these fields.  You know those situations where you get a call from a customer who made a mistake and you have to fix the data.  We are using [RailsAdmin](https://github.com/sferik/rails_admin) which works very well with Mongoid.
 

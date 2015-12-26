@@ -7,7 +7,7 @@ categories:
 This blog is published using [Jekyll](https://jekyllrb.com/) and [GitHub pages](https://pages.github.com/) so I wanted to share my experience with it.  
 
 #### First the good:
-* The price is right.  Thank you GitHub for free hosting.  Yes, you can run a free Wordpress site on [https://wordpress.com/](https://wordpress.com/) but last time I tried it you could not install your own themes or plugins.  
+* The price is right.  Thank you GitHub for free hosting.  Yes, you can run a free Wordpress site on [wordpress.com](https://wordpress.com) but last time I tried it you could not install your own themes or plugins.  
 * Do you really the extra overhead of Wordpress (MySQL DB, web server, etc) and 5K plugins (which can slow down your site)?  I just want simple HTML content out there.  
 * Scalabilty and reliability.  No platform is 100% reliable but I trust GitHub more than some $5/month Wordpress hosting site.  
 * Content back up and revision history are dead simple with **git pull**.  I have a copy of this blog on my laptop and on my home desktop.  With Wordpress I have to backup content in DB separately from the custom these.  
