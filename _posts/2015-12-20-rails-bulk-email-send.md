@@ -1,7 +1,7 @@
 ---
 title:  "Sending LOTS of emails from Rails ActionMailer"
 date:   2015-12-20
-categories:
+categories: redis aws
 ---
 
 [ActionMailer](http://guides.rubyonrails.org/action_mailer_basics.html) is great.  It allows you to create email templates and put logic in Mailer classes.  You can use [Roadie](https://github.com/Mange/roadie-rails) to merge in CSS, customizing look and feel.  The problem arises when you have to send tens or hundreds of thousands of emails.  Each one is a separate API or SMTP call to your email service provider.

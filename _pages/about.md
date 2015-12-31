@@ -14,5 +14,6 @@ After many years of reading great blog posts written by other developers (and us
 * [http://www.railstips.org/](http://www.railstips.org/)
 * [http://johnnunemaker.com/](http://johnnunemaker.com/)
 * [https://robots.thoughtbot.com/](https://robots.thoughtbot.com/)
+* [http://www.allthingsdistributed.com/](http://www.allthingsdistributed.com/)
 
 This site was generated using [Jekyll](http://jekyllrb.com/) [theme](https://github.com/jglovier/jekyll-new)

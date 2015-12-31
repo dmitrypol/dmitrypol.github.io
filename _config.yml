@@ -10,7 +10,7 @@ github_username:  dmitrypol
 
 # Build settings
 markdown: kramdown
-paginate: 5
+# paginate: 5
 
 defaults:
   -
@@ -19,6 +19,7 @@ defaults:
 
 gems:
   - jekyll-sitemap
+  - jekyll-lunr-js-search
 
 pages_list:
   About: '/about'

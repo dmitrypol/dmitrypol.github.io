@@ -1,7 +1,7 @@
 ---
 title: "Figuring out which DB queries to cache"
 date: 2015-08-23
-categories:
+categories: redis
 ---
 
 I like using [RailsAdmin](https://github.com/sferik/rails_admin) for basic UI.  To calculate certain business stats I implemented various methods on my models (for example Customer model can have total_orders method).  Then in my rails_admin.rb initializer I can do this:

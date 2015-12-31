@@ -1,7 +1,7 @@
 ---
 title: "Avoiding Single Points of Failure"
 date: 2015-06-09
-categories:
+categories: redis
 ---
 
 I hate Single Points of Failure (SPOF).  To me it's rolling the dice over the over hoping that it works and eventually something breaks.  You code may work fine but the server behind it fails.  With modern cloud computing we are largely isolated from hardware failures but there is still (however remote) possibility of OS crash.  Or you could have that particular server down for maintenance.  

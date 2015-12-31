@@ -1,5 +1,5 @@
 ---
-title:  "Using one field hash vs embedded documents in MongoDB"
+title:  "Using Hash fields vs embedded documents in MongoDB"
 date: 	2015-10-22
 categories: mongo
 ---

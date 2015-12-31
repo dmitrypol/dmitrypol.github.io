@@ -1,7 +1,7 @@
 ---
 title:  "Using online perf test services to test your production site"
 date: 2015-10-04
-categories:
+categories: redis
 ---
 
 Recently I had to run an extensive (6 hour) online stress test to prove to an important customer that our system can handle the load.  Internally I have been using tools like [Siege](https://www.joedog.org/siege-home/) and [Wrk](https://github.com/wg/wrk) to stress test the site.  But obviously customer wanted something "official" from a third party service.  I ended up using [Loader.io](http://loader.io/) from [SendGrid](https://sendgrid.com/).

@@ -1,7 +1,7 @@
 ---
 title:  "One way to setup staging servers for final verification before going live"
 date: 2015-03-23
-categories:
+categories: aws
 ---
 
 Once we are done coding and testing software on our dev machines it's often important to check it in environment similar to production (at least do basic visual verification).  I worked in a lot of places where we had separate staging/demo environments with dedicated databases.  Code would be deployed there and verified by biz users as the last step before launch.  

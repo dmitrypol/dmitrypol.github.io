@@ -1,7 +1,7 @@
 ---
 title:  "Structuring background jobs"
 date: 2015-05-14
-categories:
+categories: redis
 ---
 
 All applications need to do certain background tasks such as sending daily emails, generating reports or downloading data.  Rails 4.2 provides a really good framework with [ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html) which also has a [backport](https://github.com/ankane/activejob_backport) to previous Rails versions.  
