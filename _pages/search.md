@@ -1,6 +1,6 @@
 ---
 layout: page
-title1: Search
+title:
 permalink: /search/
 ---
 
