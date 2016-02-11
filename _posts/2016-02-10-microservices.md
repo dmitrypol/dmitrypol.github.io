@@ -1,6 +1,6 @@
 ---
 title: "Microservices with Sidekiq"
-date: 2016-02-10
+date: 2016-02-02
 categories:
 ---
 
