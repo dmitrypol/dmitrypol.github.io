@@ -61,4 +61,6 @@ Then in Foo you create app/jobs/feedback_job.rb and modify sidekiq.yml to watch 
 
 This type of solution can also be applied when you have inbound messages.  You can have several simple web end points using [Sinatra](http://www.sinatrarb.com/).  All they do is put messages onto :inbound queue.  Main app Sidekiq watches :inbound queeue and processes messages (in this design the shared Redis instance could become a bottleneck).
 
+This post is not meant to advocate for breaking up your app into separate services.  Testing microservices can be trickier.  Testing systems integrated with the queue based approach outlined above simply requires you to place items on queues.  If you have HTTP based real-time integration you could use gems like [VCR](https://github.com/vcr/vcr) and [webmock](https://github.com/bblimke/webmock) to stub responses.  Instead of stubbing responses to 3rd party APIs you are stubbing responses to your microservices.  Here is a good [article](https://semaphoreci.com/community/tutorials/stubbing-external-services-in-rails).
+
 I am looking forward to actually implementing this approach in production when it becomes necessary.  For now, we are fine with monolith app.
