@@ -1,5 +1,5 @@
 ---
-title: "Keeping your tests dry"
+title: "Keeping your tests DRY"
 date: 2016-02-19
 categories:
 ---
@@ -71,3 +71,5 @@ end
 {% endhighlight %}
 
 I had to call methods on Foo or Bar that expected a specific instance and it was just too easy to create in the test (only one line) than to properly think through how to setup the factory.
+
+Another important lesson to ease the refactoring pain is following [Law of Demeter](http://rails-bestpractices.com/posts/2010/07/24/the-law-of-demeter/) but that's for a different blog post.

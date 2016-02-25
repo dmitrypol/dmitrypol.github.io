@@ -6,6 +6,8 @@ categories:
 
 Much has been written about pros and cons of monolithic app vs microservices.  Here is a great [post by Martin Fowler](http://martinfowler.com/articles/microservice-trade-offs.html).  I am not going to talk about the big issues but simply share ideas on how I have been thinking of breaking up a Rails app I am working on.
 
+I believe it's important to differentiate how you will integrate these microservices (aka separate applications).  You can have synchronous integration (via HTTP) for tasks such as credit card processing.  You can have asynchronous (approach described below) for tasks like sending email.  You can also have asynchronous tasks that provide feedback to the original application when task is complete (report generation).  If it's not complete w/in certain amount of time an alert could be issued.
+
 Most of these ideas are influenced by this [article](http://brandonhilkert.com/blog/sidekiq-as-a-microservice-message-queue/).  My post assumes you already extacted all necessary logic to your service objects and they are not dependent on your models.  One example of such process is sending out emails.  Each job contains all the necessary information (name, address, etc) that is needed to accomplish the task.
 
 Assuming the the main application is called Foo I created a new Rails project FooJobs.  In FooJobs I deleted all folders except app, bin, config and log.  Inside app folder I deleted everything except jobs and services.  The only gems inside the FooJobs Gemfile are specific to Sidekiq, Redis, Rspec and whatever else I to accomplish the task (talk to external APIs).  But there are no connections to the main DB so no need for Mongoid or ActiveRecord.  So the app is very small and simple.
@@ -57,6 +59,6 @@ end
 {% endhighlight %}
 Then in Foo you create app/jobs/feedback_job.rb and modify sidekiq.yml to watch queue :feedback.  Very loose integration.
 
-Another potential area where this solution could be valuable is when you have inbound messages.  You can have several simple web end points using [Sinatra](http://www.sinatrarb.com/).  All they do is put messages onto :inbound queue.  Main app Sidekiq watches :inbound queeue and processes messages (in this design the shared Redis instance could become a bottleneck).
+This type of solution can also be applied when you have inbound messages.  You can have several simple web end points using [Sinatra](http://www.sinatrarb.com/).  All they do is put messages onto :inbound queue.  Main app Sidekiq watches :inbound queeue and processes messages (in this design the shared Redis instance could become a bottleneck).
 
 I am looking forward to actually implementing this approach in production when it becomes necessary.  For now, we are fine with monolith app.
