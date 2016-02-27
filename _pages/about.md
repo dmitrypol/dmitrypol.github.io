@@ -16,5 +16,10 @@ After many years of reading great blog posts written by other developers (and us
 * [https://robots.thoughtbot.com/](https://robots.thoughtbot.com/)
 * [http://www.allthingsdistributed.com/](http://www.allthingsdistributed.com/)
 * [https://www.igvita.com/](https://www.igvita.com/)
+* [http://www.mikeperham.com/](http://www.mikeperham.com/)
+* [https://samurails.com/](https://samurails.com/)
+* [http://githubengineering.com/](http://githubengineering.com/)
+* [http://www.sandimetz.com/blog/](http://www.sandimetz.com/blog/)
+* [http://blog.codeschool.io/](http://blog.codeschool.io/)
 
 This site was generated using [Jekyll](http://jekyllrb.com/) [theme](https://github.com/jglovier/jekyll-new)
