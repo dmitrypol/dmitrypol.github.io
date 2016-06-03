@@ -19,7 +19,7 @@ defaults:
 
 gems:
   - jekyll-sitemap
-  - jekyll-lunr-js-search
+  # - jekyll-lunr-js-search
 
 pages_list:
   About: '/about'
