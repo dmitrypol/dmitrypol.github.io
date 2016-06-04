@@ -28,7 +28,7 @@ You can see that I am using [readthis gem](https://github.com/sorentwo/readthis)
 
 ### View caching
 
-You can implement caching at different layers in Rails.  You can do Fragment (view) layer caching where you will cache actual HTML of all or portions of your pages.
+You can implement caching in different layers in Rails.  You can do Fragment (view) layer caching where you will cache actual HTML of all or portions of your pages.
 
 {% highlight ruby %}
 # in users/show.html.erb
@@ -80,7 +80,7 @@ users/
 
 ### Method caching
 
-Let's imaging you have a online fundraising system where Users give Donations to Fundraisers.
+Let's imagine you have a online fundraising system where Users give Donations to Fundraisers.
 
 {% highlight ruby %}
 class Fundraiser
@@ -155,11 +155,11 @@ UserDecorator/
 method_name
 {% endhighlight %}
 
-#### Caching data from external APIs
+#### Caching data froml external APIs
 
-Let's imagine an app where users can view weather data for specific zipcodes.  Obviously you are going to call 3rd party API to get the data.  In your MVP you can call on every user request but with more traffic this will become slow and $ expensive.  You could create a background job which run every hour to fetch weather data for all zipcodes, parse JSON and load it into your DB.
+Let's imagine an app where users can view weather data for specific zipcodes.  Obviously you are going to call 3rd party API to get the data.  In your MVP you can call on every user request but with more traffic this will become slow and $ expensive.  You could create an hourly background job to fetch weather data for all zipcodes, parse JSON and load it into your DB.
 
-Or you could implement 1 line caching solution (which cost less because it will only fetch data users actually need).  In this case we have no user ID or timestamp so the cache key is based on class, method and parameter.  We wil need to expire it using default Redis TTL.
+Or you could implement 1 line caching solution (which also costs less because it will only fetch data users actually need).  In this case we have no user ID or timestamp so the cache key is based on class, method and parameter.  We will need to expire it using default Redis TTL.
 
 {% highlight ruby %}
 class WeatherServiceObject
@@ -200,27 +200,22 @@ my_namespace:CacheController/show_cache/3
 
 ### Caching vs pre-generating data in your DB
 
-As you can see caching can be implemented fairly quickly and changed easily but the downside is you cannot use it in your DB queries.  Earlier in this post I described caching total_raised and number_of_donationds methods.  In order to get fundraisers that have at least X number of donations or raised Y dollars I would need fetch all records and loop through them.
+As you can see caching can be implemented fairly quickly and changed easily but the downside is you cannot use results in your DB queries.  Earlier in this post I described caching total_raised and number_of_donationds methods.  In order to get fundraisers that have at least X number of donations or raised Y dollars I would need fetch all records and loop through them.  Here is a simple way to pregenerate data in DB.
 
 {% highlight ruby %}
-# simple counter_cache relationship to do donations_count
 class Donation
+ # simple counter_cache relationship to do donations_count
  belongs_to :fundraiser, counter_cache: true
-end
-class Fundraiser
- field :donations_count, type: Integer
-end
-# query
-Fundraiser.gt(donations_count: 5)
-# or a custom callback to do more complex logic
-class Fundraiser
- field :total_raised, type: Integer
-end
-class Donation
+ # or a custom callback to do more complex logic
  after_create  do   fundraiser.inc(total_raised: amount)       end
  after_destroy do   fundraiser.inc(total_raised: amount * -1)  end
 end
-# query
+class Fundraiser
+ field :donations_count, type: Integer # default for counter_cache
+ field :total_raised,    type: Integer
+end
+# queries
+Fundraiser.gt(donations_count: 5)
 Fundraiser.gt(total_raised: 0)
 {% endhighlight %}
 
