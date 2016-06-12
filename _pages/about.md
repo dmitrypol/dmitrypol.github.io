@@ -21,5 +21,6 @@ After many years of reading great blog posts written by other developers (and us
 * [http://githubengineering.com/](http://githubengineering.com/)
 * [http://www.sandimetz.com/blog/](http://www.sandimetz.com/blog/)
 * [http://blog.codeschool.io/](http://blog.codeschool.io/)
+* [http://www.blackbytes.info/](http://www.blackbytes.info/)
 
-This site was generated using [Jekyll](http://jekyllrb.com/) [theme](https://github.com/jglovier/jekyll-new)
+This site was generated using [Jekyll](http://jekyllrb.com/) with [theme](https://github.com/jglovier/jekyll-new)

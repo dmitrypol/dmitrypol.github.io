@@ -164,13 +164,13 @@ Bonus feature - use model scopes to filter articles by different states.
 {% highlight ruby %}
 class Article
   ...
-  scope :draft,  		  ->{ where(aasm_state: 'draft')  }
+  scope :draft,       ->{ where(aasm_state: 'draft')  }
   scope :submitted,   ->{ where(aasm_state: 'submitted')  }
   scope :published,   ->{ where(aasm_state: 'published')  }
   ...
   rails_admin do
     list do
-      scopes    [nil, 'draft', 'submitted', 'published', 'archived']
+      scopes    [nil, 'draft', 'submitted', 'published']
     end
   end
   ...

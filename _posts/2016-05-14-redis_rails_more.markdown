@@ -6,6 +6,9 @@ categories: redis mongo
 
 Recently I had a chance to present at [RedisConf](http://redisconference.com/) on various ways Redis can be used to quickly scale Rails applications.  This is a blog post is an expansion of the ideas that I discussed.  You also might want to read my previous posts about Redis [here]({% post_url 2016-03-18-sidekiq-batches %}) and [here]({% post_url 2015-10-15-redis-rails-tips %}).
 
+* TOC
+{:toc}
+
 When we think of scalability we usually think of dealing wtih terrabytes of data and millions of users.  We think of a dev team laboring for many months to build great technologies.  But there is another kind of scalabilty when your MVP starts getting more traffic and you need to QUICKLY scale the application, often by yourself.
 
 ## Caching
@@ -198,7 +201,7 @@ class CacheController < ApplicationController
 my_namespace:CacheController/show_cache/3
 {% endhighlight %}
 
-### Caching vs pre-generating data in your DB
+## Caching vs pre-generating data in your DB
 
 As you can see caching can be implemented fairly quickly and changed easily but the downside is you cannot use results in your DB queries.  Earlier in this post I described caching total_raised and number_of_donationds methods.  In order to get fundraisers that have at least X number of donations or raised Y dollars I would need fetch all records and loop through them.  Here is a simple way to pregenerate data in DB.
 
@@ -247,20 +250,20 @@ end
 
 [Ohm](https://github.com/soveran/ohm) gem provides even more functionality but it's more suited for situations where Redis is your primary DB.  I am not quite ready to let go of features provided by SQL (or Mongo) and prefer to use Redis as my secondary DB.
 
-### Background jobs
+## Background jobs
 In an earlier post I described using Sidekiq to import records in batches of jobs.  Here are additonal ideas for background jobs:
 
 Cache warming - you could create a job to run periodically and warm up your cache.  This will help so the first user that hits specific page will have faster load time and keep system load more even.  But you need to be careful so that duration of these jobs is not greater than frequency.  In the past I selectively pre-cached only specific pages and let less traffic pages load on demand.
 
 Report generation - some of our reports were getting slow so in addition to doing code optimization we switched them to run in the background and email user the results.
 
-### Dev and test
+## Dev and test
 
 You often find that you need to implement caching once your application begins to slow down.  In an earlier blog post I write how to use rack-mini-profiler to analyze which pages have slow methods or large number of DB queries.  You also can you use [New Relic gem](https://github.com/newrelic/rpm).  Just browse to [http://localhost:3000/newrelic](http://localhost:3000/newrelic) and you will see lots of useful stats.  And you don't even need to sign up for their service.
 
 Functional testing of your code is pretty much the same when you implement caching.  But what is really important is performance testing.  The approach I usually take is to identify the bottelenecks, implement caching (or other code improvements), deploy to one of the prod servers and run a series of tests using tools like [Siege](https://www.joedog.org/siege-home/) or [wrk](https://github.com/wg/wrk).  Then if I am satisfied, deploy the code to other prod servers.
 
-### DevOps
+## DevOps
 
 The reason I like [readthis](https://github.com/sorentwo/readthis) gem is because of Readthis.fault_tolerant = true option.  This way Rails app will not crash if it can't connect to Redis.  redis-store gem has an [issue](https://github.com/redis-store/redis-rails/issues/14) on this with some monkey patch ideas but readthis solution is more robust.
 
@@ -274,7 +277,7 @@ For monitoring I primarily use AWS BytesUsedForCache to make sure I do not run o
 
 If you do not want to integrate with service like [LogEntries](https://logentries.com/) or [Rollbar](https://rollbar.com) you can try [Logster](https://github.com/discourse/logster) gem.  Just browse to http://yourwebsite.com/logs.  Your can trigger your own alerts based on certain thresholds.
 
-### Additional links
+## Additional links
 * Sample app that I built - https://github.com/dmitrypol/rails_redis
 * http://guides.rubyonrails.org/caching_with_rails.html
 * http://railscasts.com/episodes/115-model-caching-revised

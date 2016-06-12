@@ -1,6 +1,6 @@
 ---
 title: "Single table inheritance"
-date: 2016-02-11
+date: 2016-02-12
 categories:
 ---
 
