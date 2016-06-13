@@ -3,6 +3,8 @@ differerent Jekyll theme
 tagging / categorization
 site search
 
+updating child cache when parent recored is updated (child inherits properties from parent).  Reverse of touch: true (where you calulate something for parent depending on child's data)
+
 https://scotch.io/tutorials/getting-started-with-jekyll-plus-a-free-bootstrap-3-starter-theme
 
 https://milanaryal.com/2015/writing-on-github-pages-and-jekyll-using-markdown/

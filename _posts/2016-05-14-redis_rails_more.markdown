@@ -114,7 +114,7 @@ number_of_donations
 
 By appending method name to cache_key I ensure their uniqueness.  You also see how to override default application cache_key expiration.
 
-You might be asking what if a donation is given after this content is cached.  Currently the application will show stale data until Redis purges the key (which might be OK).  Better solution is to define touch: true on the parent-child relationship.  When child record is created/updated it will touch timestamp of a parent (forcing new key).
+You might be asking what if a donation is given after this content is cached.  Currently the application will show stale data until Redis purges the key (which might be OK).  Better solution is to define `touch: true` on the parent-child relationship.  When child record is created/updated it will touch timestamp of a parent (forcing new key).
 
 {% highlight ruby %}
 class Donation
