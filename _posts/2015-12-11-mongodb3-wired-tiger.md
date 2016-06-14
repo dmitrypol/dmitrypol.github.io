@@ -4,7 +4,7 @@ date:   2015-12-11
 categories: mongo
 ---
 
-We have been using MongoDB for a while and overall it served as well.  Our system has been growing and we began expereincing some pain with our DB writes.  CPU would spike to over 60% and were unable perform some background jobs as fast as we wanted.  Part of the problem is that we need to do better job optimizing our hard drives but that's another story.  
+We have been using MongoDB for a while and overall it served as well.  Our system has been growing and we began expereincing some pain with our DB writes.  CPU would spike to over 60% and were unable perform some background jobs as fast as we wanted.  Part of the problem is that we need to do better job optimizing our hard drives but that's another story.
 
 As a first step in our scalability process we decided to upgrade Mongo to 3.0 to try this new WiredTiger engine.  With document level locking it claimed 7-10 times speed for writes.  We were running Mongo 2.6.5 in prod so we first gradually upgraded to 2.6.11.  [Mongo Cloud Manager](https://cloud.mongodb.com) was great.  I simply selected the server (click the little wrench icon), choose Mongo version and Automation agent did the rest.  As precaution I upgraded one server at a time (we have a standard cluster of 3).  You first might need to enable specific version in Version Manager.  And obviously I first did this on our test/dev systems.
 

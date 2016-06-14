@@ -29,7 +29,7 @@ But how do you read/write these dynamic attributes from your code?  To do that w
 {% highlight ruby %}
 class DynamicAttributes
   include Mongoid::Document
-  embedded_in :store    
+  embedded_in :store
   # there is inverse embeds_many: dynamic_attributes defined in Store model
   field :name,                  type: String
   field :html_control,          type: String # this could be input, boolean or select
@@ -44,7 +44,7 @@ order.store.dynamic_attributes.each do |field|
 end
 {% endhighlight %}
 
-And we used **order.write_attribute(:field_name_here)** and **order.read_attribute(:field_name_here)** in models/controllers to access the data.  This way Order model can have certain common fields and then each store can be configured with dynamic fields.  The example above is not what we actually implemented at work but I wanted to simplify things.  
+And we used **order.write_attribute(:field_name_here)** and **order.read_attribute(:field_name_here)** in models/controllers to access the data.  This way Order model can have certain common fields and then each store can be configured with dynamic fields.  The example above is not what we actually implemented at work but I wanted to simplify things.
 
 #### Usefull links
 * [https://docs.mongodb.org/ecosystem/tutorial/ruby-mongoid-tutorial/#dynamic-fields](https://docs.mongodb.org/ecosystem/tutorial/ruby-mongoid-tutorial/#dynamic-fields)

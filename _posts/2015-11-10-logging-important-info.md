@@ -58,8 +58,8 @@ ErrorLogService.log_errrors self.class.name, __method__, record, nil, msg
 ...
 {% endhighlight %}
 
-You can build simple web interface (we use [RailsAdmin](https://github.com/sferik/rails_admin)) to view contents of ErrorLog model and see which object and method cause the error, what was the exception, when it occured (created_at timestamp), etc.  Having the data in that point in time also helps with investigations.  And you can even train your business users how to use this information to solve simpler issues.  
+You can build simple web interface (we use [RailsAdmin](https://github.com/sferik/rails_admin)) to view contents of ErrorLog model and see which object and method cause the error, what was the exception, when it occured (created_at timestamp), etc.  Having the data in that point in time also helps with investigations.  And you can even train your business users how to use this information to solve simpler issues.
 
-For especially important issues I can choose to send notification email to the dev team.  And information is also written in the log files on the server (just in case).  Obviously you want to use this feature to log ONLY important messages, you don't want to this ErrorLog table cluttered with trivial stuff.  
+For especially important issues I can choose to send notification email to the dev team.  And information is also written in the log files on the server (just in case).  Obviously you want to use this feature to log ONLY important messages, you don't want to this ErrorLog table cluttered with trivial stuff.
 
 There are many equivalents to the specific gems I listed above in Ruby or other languages.  Feel free to try.

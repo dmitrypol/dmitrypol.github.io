@@ -12,6 +12,6 @@ Like all developers I have some bad habits.  And even though I know they are bad
 
 **Lots of commented out code**.  You know how when you refactor it's tempting to leave the code behind (just in case) but to make sure it does not get executed you comment it out.  Except it's still sitting in your repo six months later.  You grep through your code and you find references to entire classes just commented out.  At least when it's your own code you can probably remember that you don't need it.
 
-**Class methods vs instance methods**.  It's just so tempting to do self.method_name.  No need to thinking about properly instantiating the object and passing the right params in.  And pretty soon you are passing in the same params over and over to different methods.  
+**Class methods vs instance methods**.  It's just so tempting to do self.method_name.  No need to thinking about properly instantiating the object and passing the right params in.  And pretty soon you are passing in the same params over and over to different methods.
 
 So what else am I doing to change these bad habits (besides writing this post)?  I have implemented some code analyzer tools.  Here is a good list of [resources](https://infinum.co/the-capsized-eight/articles/top-8-tools-for-ruby-on-rails-code-optimization-and-cleanup).  You can also signup for service like [https://codeclimate.com/](https://codeclimate.com/).

@@ -4,9 +4,9 @@ date: 2016-01-01
 categories:
 ---
 
-Happy New Year.  As we transition from old to new I was thinking about [state machines](https://en.wikipedia.org/wiki/Finite-state_machine).  Well, not really but I thought it was a good opening for this post.  
+Happy New Year.  As we transition from old to new I was thinking about [state machines](https://en.wikipedia.org/wiki/Finite-state_machine).  Well, not really but I thought it was a good opening for this post.
 
-There are various processes at my job where we would benefit from actually enforcing the business rules.  Before implementing solution in production I wanted to prototype it in a standalone app.  There are several [gems](https://www.ruby-toolbox.com/categories/state_machines.html) for this but one I like is [aasm](https://github.com/aasm/aasm).  Let's say you are building a publishing system.  You have authors and editors.  Authors write article drafts and submit them.  Editors have to approve articles before they can be published.  Or editor can reject an article and it goes back to draft state.  
+There are various processes at my job where we would benefit from actually enforcing the business rules.  Before implementing solution in production I wanted to prototype it in a standalone app.  There are several [gems](https://www.ruby-toolbox.com/categories/state_machines.html) for this but one I like is [aasm](https://github.com/aasm/aasm).  Let's say you are building a publishing system.  You have authors and editors.  Authors write article drafts and submit them.  Editors have to approve articles before they can be published.  Or editor can reject an article and it goes back to draft state.
 
 Here is the basic model:
 {% highlight ruby %}
@@ -40,7 +40,7 @@ Rails_admin sees aasm_state field as a string and allows you to edit it anyway y
 extend Enumerize
 enumerize :aasm_state, in: aasm.states
 {% endhighlight %}
-Now rails_admin creates a dropdown with the list of possbile aasm states but it still allows you to set the field to any option w/o enforcing workflow.  
+Now rails_admin creates a dropdown with the list of possbile aasm states but it still allows you to set the field to any option w/o enforcing workflow.
 
 For slightly better solution add this to Article model:
 {% highlight ruby %}
@@ -50,7 +50,7 @@ rails_admin do
     enum do
       bindings[:object].aasm.states(:permitted => true).map(&:name)
     end
-  end    
+  end
 end
 {% endhighlight %}
 This will restrict the options in the dropdown to the ones allowed for specific state of the Article.  Here is appropriate documentation for [aasm](https://github.com/aasm/aasm#inspection) and [rails_admin enum](https://github.com/sferik/rails_admin/wiki/Enumeration)
@@ -160,7 +160,7 @@ en:
         ...
 {% endhighlight %}
 
-Bonus feature - use model scopes to filter articles by different states.  
+Bonus feature - use model scopes to filter articles by different states.
 {% highlight ruby %}
 class Article
   ...
@@ -180,4 +180,4 @@ Now appropriate links/icons with show up depending on user's permissions and art
 
 We now have a very functional UI and were able to build it very quickly by editing only 3 files - article.rb , rails_amdin.rb and en.yml.
 
-There is also a [rails_admin_aasm](https://github.com/zcpdog/rails_admin_aasm) but it does not seem to be actively maintained and I wanted to have more control over certain aspects.  
+There is also a [rails_admin_aasm](https://github.com/zcpdog/rails_admin_aasm) but it does not seem to be actively maintained and I wanted to have more control over certain aspects.

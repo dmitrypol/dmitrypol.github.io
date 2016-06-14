@@ -44,7 +44,7 @@ class Article
 end
 {% endhighlight %}
 
-I recently had to combine both polymorphic and has_and_belongs_to_many relationship between different models in our Mongo DB.  The challenge is that when I store relationship IDs in array with the record, I cannot define the relationship_type.  Solution is to go with mapping table and define polymorphic relationship there.  
+I recently had to combine both polymorphic and has_and_belongs_to_many relationship between different models in our Mongo DB.  The challenge is that when I store relationship IDs in array with the record, I cannot define the relationship_type.  Solution is to go with mapping table and define polymorphic relationship there.
 
 {% highlight ruby %}
 # extract common code for User and Organization to app/models/concerns/
@@ -58,10 +58,10 @@ module ArticleAuthorMap
   end
 end
 class User
-  include ArticleAuthorMap  
+  include ArticleAuthorMap
 end
 class Organization
-  include ArticleAuthorMap  
+  include ArticleAuthorMap
 end
 class Article
   has_many :article_authors
@@ -75,4 +75,4 @@ class ArticleAuthor
 end
 {% endhighlight %}
 
-You can do **article.authors**, **user.articles** and **organization.articles**.  In retrospect the solution was fairly straightforward but I could not find any examples online so I decided to write my own blog post.  
+You can do **article.authors**, **user.articles** and **organization.articles**.  In retrospect the solution was fairly straightforward but I could not find any examples online so I decided to write my own blog post.

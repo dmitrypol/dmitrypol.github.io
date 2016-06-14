@@ -16,7 +16,7 @@ unless Rails.env.test?
   RedisBrowser.configure(settings)
 end
 {% endhighlight %}
-This will allow you to connect to Redis DB0 or DB1 via simple selector.  We are storing cache in DB0 and Sidekiq jobs in DB1.  
+This will allow you to connect to Redis DB0 or DB1 via simple selector.  We are storing cache in DB0 and Sidekiq jobs in DB1.
 
 Modify routes.rb.
 {% highlight ruby %}

@@ -279,7 +279,7 @@ class ReportsController < ApplicationController
   def create
     # do something like this:
     report_permission = "run_#{params[:rep_type]_report"
-    if can? :report_permission
+    if can? :"#{report_permission}"
       ReportJob.perform_later(params[:rep_type], current_user.email)
     else
       redirect_to root_path, alert: 'You are not authorized to run report'
