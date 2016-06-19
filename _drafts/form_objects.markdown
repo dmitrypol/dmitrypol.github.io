@@ -98,6 +98,9 @@ https://github.com/reinteractive-open/simple_form_object
 
 https://github.com/solnic/virtus
 
+http://culttt.com/2015/11/04/using-form-objects-in-ruby-on-rails/
+
+
 ### Reform
 
 https://github.com/apotonick/reform
