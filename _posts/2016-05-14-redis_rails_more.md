@@ -114,14 +114,59 @@ number_of_donations
 
 By appending method name to cache_key I ensure their uniqueness.  You also see how to override default application cache_key expiration.
 
+#### Cache busting
+
 You might be asking what if a donation is given after this content is cached.  Currently the application will show stale data until Redis purges the key (which might be OK).  Better solution is to define `touch: true` on the parent-child relationship.  When child record is created/updated it will touch timestamp of a parent (forcing new key).
 
 {% highlight ruby %}
 class Donation
  belongs_to :user
- belongs_to :fundraiser,  touch: true
+ belongs_to :fundraiser,  touch: true # will bust campaign.total_raised
+end
+class User
+  def total_given
+    # cache will not bust since touch is not set
+    Rails.cache.fetch([cache_key, __method__]) do
+      donations.sum(:amount)
+    end
+  end
 end
 {% endhighlight %}
+
+You also can have a situation where you want to bust child's cache when specific parent attribute changes (you are using parent attribute w/in child's method).  Best way is to use a callback to conditionally update children timestamps if specific parent attribute changed.
+
+{% highlight ruby %}
+class Child
+  belongs_to :parent
+  def method_name
+    Rails.cache.fetch([cache_key, __method__]) do
+      parent.attribute_name
+    end
+  end
+end
+class Parent
+  has_many :children
+  field :attribute_name
+  after_save do
+    children.update_all(updated_at: Time.now) if self.attribute_name_changed?
+  end
+end
+{% endhighlight %}
+
+This will bust ALL cached methods for all children.  If you want to selectively bust specific cached method then do this:
+
+{% highlight ruby %}
+class Parent
+  after_save do
+    return unless self.attribute_name_changed?
+    children.each do |child|
+      Rails.cache.delete([child.cache_key, 'method_name'])
+    end
+  end
+end
+{% endhighlight %}
+
+#### Other classes
 
 Method level cache can be applied to other classes, not just models.  Here I am using object.cache_key and also including self.class.name to ensure key uniqueness.  And you can include parameters in cache keys.
 
@@ -271,7 +316,7 @@ We run our sites on AWS and use ElastiCache with multi AZ replication group. Use
 
 You could run your own Redis on EC2 instances (which also gives you controler over which version of Redis to use) but then you are responsible for backups, failover, etc.  And you could also use a hosted solution like [RedisLabs](https://redislabs.com/).  Services like Heroku provide very simple integrations with free trials but higher long term costs.
 
-For monitoring I primarily use AWS BytesUsedForCache to make sure I do not run out of RAM.  I also have a /health controller endpoint in my application where I check for Redis connection.  The URL gets pinged every minute by 3rd prty solution and will email/text an alert in case of errors.  I also would like implement an monitor on my Sidekiq background jobs (threshold of number of jobs in error state or number of retries).
+For monitoring I primarily use AWS BytesUsedForCache to make sure I do not run out of RAM.  I also have a /health controller endpoint in my application where I check for Redis connection.  The URL gets pinged every minute by 3rd party service and will email/text an alert in case of errors.  I also would like implement a monitor on my Sidekiq background jobs (threshold of number of jobs in error state or number of retries).
 
 [redis-dump](https://github.com/delano/redis-dump) is not actively maintained but allows you to dump Redis data into JSON files and then restore on a different server.  I've used it to move data from prod into dev.
 

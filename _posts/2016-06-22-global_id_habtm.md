@@ -4,7 +4,7 @@ date: 2016-06-22
 categories:
 ---
 
-Recently I had to design a feature where user could save specific reports with preset filter options to make it easier to run them.  The challenge is that reports can be ran across different types of records so modeling the relations was interesting.
+Recently I had to design a feature where user could save specific reports with preset filter options to make it easier to run them.  The challenge is that reports can be ran across different types of records so modeling the relationsips was interesting.
 
 * TOC
 {:toc}
