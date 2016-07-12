@@ -4,7 +4,7 @@ date: 2016-06-22
 categories:
 ---
 
-Recently I had to design a feature where user could save specific reports with preset filter options to make it easier to run them.  The challenge is that reports can be ran across different types of records so modeling the relationsips was interesting.
+Recently I had to design a feature where user could save specific reports with preset filter options to make it easier to run them.  The challenge is that reports can be ran across different types of records so modeling the relationships was interesting.
 
 * TOC
 {:toc}
@@ -45,13 +45,13 @@ class AccountReport < Report
   has_and_belongs_to_many :accounts,  inverse_of: :nil
   validates :accounts, presence: true
   # adds _type field
-  # additonal params for this report
+  # additional params for this report
 end
 class ArticleReport < Report
   has_and_belongs_to_many :articles,  inverse_of: :nil
   validates :articles, presence: true
   # adds _type field
-  # additonal params for this report
+  # additional params for this report
 end
 {% endhighlight %}
 

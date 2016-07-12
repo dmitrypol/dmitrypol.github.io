@@ -9,7 +9,7 @@ Recently I had a chance to present at [RedisConf](http://redisconference.com/) o
 * TOC
 {:toc}
 
-When we think of scalability we usually think of dealing wtih terrabytes of data and millions of users.  We think of a dev team laboring for many months to build great technologies.  But there is another kind of scalabilty when your MVP starts getting more traffic and you need to QUICKLY scale the application, often by yourself.
+When we think of scalability we usually think of dealing with terabytes of data and millions of users.  We think of a dev team laboring for many months to build great technologies.  But there is another kind of scalabilty when your MVP starts getting more traffic and you need to QUICKLY scale the application, often by yourself.
 
 ## Caching
 
@@ -248,7 +248,7 @@ my_namespace:CacheController/show_cache/3
 
 ## Caching vs pre-generating data in your DB
 
-As you can see caching can be implemented fairly quickly and changed easily but the downside is you cannot use results in your DB queries.  Earlier in this post I described caching total_raised and number_of_donationds methods.  In order to get fundraisers that have at least X number of donations or raised Y dollars I would need fetch all records and loop through them.  Here is a simple way to pregenerate data in DB.
+As you can see caching can be implemented fairly quickly and changed easily but the downside is you cannot use results in your DB queries.  Earlier in this post I described caching total_raised and number_of_donations methods.  In order to get fundraisers that have at least X number of donations or raised Y dollars I would need fetch all records and loop through them.  Here is a simple way to pregenerate data in DB.
 
 {% highlight ruby %}
 class Donation
@@ -296,7 +296,7 @@ end
 [Ohm](https://github.com/soveran/ohm) gem provides even more functionality but it's more suited for situations where Redis is your primary DB.  I am not quite ready to let go of features provided by SQL (or Mongo) and prefer to use Redis as my secondary DB.
 
 ## Background jobs
-In an earlier post I described using Sidekiq to import records in batches of jobs.  Here are additonal ideas for background jobs:
+In an earlier post I described using Sidekiq to import records in batches of jobs.  Here are additional ideas for background jobs:
 
 Cache warming - you could create a job to run periodically and warm up your cache.  This will help so the first user that hits specific page will have faster load time and keep system load more even.  But you need to be careful so that duration of these jobs is not greater than frequency.  In the past I selectively pre-cached only specific pages and let less traffic pages load on demand.
 
@@ -304,9 +304,9 @@ Report generation - some of our reports were getting slow so in addition to doin
 
 ## Dev and test
 
-You often find that you need to implement caching once your application begins to slow down.  In an earlier blog post I write how to use rack-mini-profiler to analyze which pages have slow methods or large number of DB queries.  You also can you use [New Relic gem](https://github.com/newrelic/rpm).  Just browse to [http://localhost:3000/newrelic](http://localhost:3000/newrelic) and you will see lots of useful stats.  And you don't even need to sign up for their service.
+You often find that you need to implement caching once your application begins to slow down.  In an earlier blog post I write how to use rack-mini-profiler to analyze which pages have slow methods or large number of DB queries.  You also can you use [New Relic gem](https://github.com/newrelic/rpm).  Just browse to http://localhost:3000/newrelic and you will see lots of useful stats.  And you don't even need to sign up for their service.
 
-Functional testing of your code is pretty much the same when you implement caching.  But what is really important is performance testing.  The approach I usually take is to identify the bottelenecks, implement caching (or other code improvements), deploy to one of the prod servers and run a series of tests using tools like [Siege](https://www.joedog.org/siege-home/) or [wrk](https://github.com/wg/wrk).  Then if I am satisfied, deploy the code to other prod servers.
+Functional testing of your code is pretty much the same when you implement caching.  But what is really important is performance testing.  The approach I usually take is to identify the bottlenecks, implement caching (or other code improvements), deploy to one of the prod servers and run a series of tests using tools like [Siege](https://www.joedog.org/siege-home/) or [wrk](https://github.com/wg/wrk).  Then if I am satisfied, deploy the code to other prod servers.
 
 ## DevOps
 

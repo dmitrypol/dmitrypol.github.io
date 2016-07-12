@@ -14,7 +14,7 @@ Will it be used by only internal users?  In such a case you could go for complet
 
 #### Externally facing UI
 
-Custom UI generated server side.  Frameworks like Rails, Django or Symphony allow to generate UIs via command line tools.  You can then tweak the HTML layout, write CSS and sprinkle in some JQuery.  You can make it visually appealing, intuitive (with apprpriate help tooltips) and fast.  It has a lot to do with psychology of undestanding your users and enabling them to do their job efficiently.  You can pre-generate reports, cache data, etc.
+Custom UI generated server side.  Frameworks like Rails, Django or Symphony allow to generate UIs via command line tools.  You can then tweak the HTML layout, write CSS and sprinkle in some JQuery.  You can make it visually appealing, intuitive (with appropriate help tooltips) and fast.  It has a lot to do with psychology of understanding your users and enabling them to do their job efficiently.  You can pre-generate reports, cache data, etc.
 
 #### Single Page Applications
 

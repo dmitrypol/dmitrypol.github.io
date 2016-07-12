@@ -36,7 +36,7 @@ private
 end
 {% endhighlight %}
 
-You can test priviate method process_row with `.send` and pass various params.  But it's still going to process the records one at a time which is slow.  And what if you restart server?  So let's break up code into separate classes.
+You can test private method process_row with `.send` and pass various params.  But it's still going to process the records one at a time which is slow.  And what if you restart server?  So let's break up code into separate classes.
 
 {% highlight ruby %}
 # app/services/user_import.rb

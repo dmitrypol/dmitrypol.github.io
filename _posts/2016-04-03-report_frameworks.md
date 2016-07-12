@@ -24,14 +24,14 @@ Charts help us to easily visualize data.  There are many libraries out there but
 <%= line_chart Article.group_by_day(:created_at).count %>
 {% endhighlight %}
 
-Instead of putting business logic in our View layer I perfer to do this:
+Instead of putting business logic in our View layer I prefer to do this:
 
 {% highlight ruby %}
 # app/views/articles/index.html.erb
-<%= line_chart(ChartData.new.get_artciles_by_day) %>
+<%= line_chart(ChartData.new.get_articles_by_day) %>
 # app/services/chart_data.rb
 class ChartData
-  def get_artciles_by_day
+  def get_articles_by_day
     # chartkick can pass data as Hash or Array
   end
 end
@@ -52,7 +52,7 @@ If you need more control over the presentation then you could build a custom for
 <% end %>
 class UsersController < ApplicationController
   def index
-    # check for additonal filtering parameters
+    # check for additional filtering parameters
     if params[:created_at].present?
       @users = User.where("created_at > ?", params[:created_at])
     else
@@ -217,7 +217,7 @@ class UserReports
 end
 {% endhighlight %}
 
-Then we schedule a nightly job.  To keep things simple users receive daily reports for previous day's data, weekly reports on Monday (for previous week) and montly reports on the 1st (for previous month).
+Then we schedule a nightly job.  To keep things simple users receive daily reports for previous day's data, weekly reports on Monday (for previous week) and monthly reports on the 1st (for previous month).
 
 {% highlight ruby %}
 # app/jobs/user_report_job.rb
@@ -370,6 +370,6 @@ end
 {% endhighlight %}
 Here is a good blog post on using [AWS S3 Ruby SDK](https://ruby.awsblog.com/post/Tx354Y6VTZ421PJ/Downloading-Objects-from-Amazon-S3-using-the-AWS-SDK-for-Ruby).  You can delete files from S3 using [object expiration](https://aws.amazon.com/blogs/aws/amazon-s3-object-expiration/) policy.
 
-Also I prefer to create separate URL endpoints for APIs (api.mywebsite.com vs mywebsite.com) so it can be directed to different load ballancer using DNS (eaiser to scale if needed).  You could even build API with different technology ([express](http://expressjs.com/), [sinatra](http://www.sinatrarb.com/), or [rails-api](https://github.com/rails-api/rails-api)).
+Also I prefer to create separate URL endpoints for APIs (api.mywebsite.com vs mywebsite.com) so it can be directed to different load balancer using DNS (eaiser to scale if needed).  You could even build API with different technology ([express](http://expressjs.com/), [sinatra](http://www.sinatrarb.com/), or [rails-api](https://github.com/rails-api/rails-api)).
 
 Well, that's it for this post, I hope you find it useful.  All comments are welcomed.

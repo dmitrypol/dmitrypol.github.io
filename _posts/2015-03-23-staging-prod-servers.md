@@ -10,9 +10,9 @@ The problem is that despite best efforts these staging environments were NEVER t
 
 Here is how I solved this problem on a few recent projects.  Warning - this will not work for all situations as it does introduce certain risks.
 
-* Each server has DNS recors for app1.yourdomain.com and stg1.yourdomain.com pointed to the same server IP.  We also have separte DNS records pointed at our load ballancer which is how regular users access the site.
+* Each server has DNS records for app1.yourdomain.com and stg1.yourdomain.com pointed to the same server IP.  We also have separate DNS records pointed at our load balancer which is how regular users access the site.
 * On each of our production servers we have /opt/app_name/app and /opt/app_name/stg folders.
-* Nginx server configuration block loads code from stg folder when you are browsing via stg1.yourdomain.com (or stg2, stg3, etc).  When you browse via app1.yourdomain.com or via the load ballancer Nginx will load the code from app folder.
+* Nginx server configuration block loads code from stg folder when you are browsing via stg1.yourdomain.com (or stg2, stg3, etc).  When you browse via app1.yourdomain.com or via the load balancer Nginx will load the code from app folder.
 * We do NOT have separate config files so applcations in stg folders point to shared prod DB.
 
 #### Benefits
@@ -25,9 +25,9 @@ Here is how I solved this problem on a few recent projects.  Warning - this will
 #### Risks and workarounds
 * Most obvious is you can mess up data in production DB.  Your biz user thinks he/she is on "staging server" and accidentally deletes something.
 * If you are using stored procedures this will not work as well because those need to be loaded into the shared DB.
-* Another challenge is if your deploy requires backwards incompatible schema or data migrations.  Your staging code will not work without the migration yet your production will break once you run the migraiton.
+* Another challenge is if your deploy requires backwards incompatible schema or data migrations.  Your staging code will not work without the migration yet your production will break once you run the migration.
 * If you cannot have shared database you can setup separate DB server and create a separate config file with this DB connection string.  During stg deploy that file would be used to create different DB connection.  You could automate a process where data is periodically moved from prod to stg DB.
-* It's unliely but regular users could accidentaly stumble on your stg1.yourdomain.com URL and login.  You could whitelist your office IP address in the firewall for accessing stg URLs.
+* It's unlikely but regular users could accidentally stumble on your stg1.yourdomain.com URL and login.  You could whitelist your office IP address in the firewall for accessing stg URLs.
 * This approach also does not work for environments like [Heroku](https://www.heroku.com/) or [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/).
 
-Overall this approach has served as well but we have to be carefull.  If your dev team is small each developer can deploy to specific stg server frequently and do appropriate verification there.
+Overall this approach has served as well but we have to be careful.  If your dev team is small each developer can deploy to specific stg server frequently and do appropriate verification there.

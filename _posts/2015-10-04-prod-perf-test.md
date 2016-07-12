@@ -10,7 +10,7 @@ To speed up our site for this perf test I implemented [caching](http://guides.ru
 
 What I liked about Loader.io is that I was able to do both GET and POST requests to simulate various interactions.  I had to enable service to target my domain by uploading a special file provided by Loader.io to my public folder.  I also had to upgrade to their premium plan but even that only allowed max 1 hour duration.  To solve that I simply manually ran six 1 hour tests back to back.  Loader.io also has a free plan for much more limited testing.
 
-But the most important part was the very nice and visual reports their service generates.  We had to manually save them as PDFs (unforunately they do not have such export option) and presented it to our customer.
+But the most important part was the very nice and visual reports their service generates.  We had to manually save them as PDFs (unfortunately they do not have such export option) and presented it to our customer.
 
 Other services we considered were [BlazeMeter](https://blazemeter.com/) (based on JMeter) and [http://www.webperformance.com/load-testing/](http://www.webperformance.com/load-testing/).  They were not as feature rich and significantly more expensive.
 

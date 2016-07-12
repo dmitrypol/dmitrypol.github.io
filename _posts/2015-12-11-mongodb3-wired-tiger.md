@@ -26,7 +26,7 @@ One issue we hit is that when you have Mongo files in one storage engine format 
 {% endhighlight %}
 In production it just resyncs the data from the other servers in the cluster.
 
-Overall the upgrade seems to have helped but we are still evaluating the impact.  We are not sure what steps we will take next.  We might setup new servers based on AWS AMI specifically designed for MongoDB.  Or we might go wtih a dedicated MongoDB hosting provider (like MongoLab or MongoDirector).
+Overall the upgrade seems to have helped but we are still evaluating the impact.  We are not sure what steps we will take next.  We might setup new servers based on AWS AMI specifically designed for MongoDB.  Or we might go with a dedicated MongoDB hosting provider (like MongoLab or MongoDirector).
 
 #### Useful links
 * [https://docs.mongodb.org/v3.0/release-notes/3.0-upgrade/](https://docs.mongodb.org/v3.0/release-notes/3.0-upgrade/)

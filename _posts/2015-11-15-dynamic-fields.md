@@ -46,6 +46,6 @@ end
 
 And we used **order.write_attribute(:field_name_here)** and **order.read_attribute(:field_name_here)** in models/controllers to access the data.  This way Order model can have certain common fields and then each store can be configured with dynamic fields.  The example above is not what we actually implemented at work but I wanted to simplify things.
 
-#### Usefull links
+#### Useful links
 * [https://docs.mongodb.org/ecosystem/tutorial/ruby-mongoid-tutorial/#dynamic-fields](https://docs.mongodb.org/ecosystem/tutorial/ruby-mongoid-tutorial/#dynamic-fields)
 * [http://www.rubydoc.info/github/mongoid/mongoid/Mongoid/Attributes](http://www.rubydoc.info/github/mongoid/mongoid/Mongoid/Attributes)

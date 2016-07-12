@@ -50,7 +50,7 @@ Under the hood Rails uses **foobar_id** and **foobar_type** fields in Foo model.
 
 After I made the change I was going through my code changing **foo.bar** to **foo.foobar**.  I also changed my Rspec test and FactoryGirl factories.  I noticed that while I only changed a few model / controller (core code) files I had to change LOTS of test files.  I do have pretty decent coverage (over 80%) but maintaining those tests can be quite time consuming.
 
-The most common reason I had to change my tests is because I was explicity calling this in my tests:
+The most common reason I had to change my tests is because I was explicitly calling this in my tests:
 {% highlight ruby %}
 bar = create(:bar)
 foo = create(:foo, bar: bar)

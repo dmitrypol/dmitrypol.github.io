@@ -21,7 +21,7 @@ This will allow you to connect to Redis DB0 or DB1 via simple selector.  We are 
 Modify routes.rb.
 {% highlight ruby %}
 ...
-authenticate :user, lambda { |u| u.roles.include? :superadmin } do
+authenticate :user, lambda { |u| u.roles.include? :sysadmin } do
   unless Rails.env.test?
     require 'sidekiq/web'
     mount Sidekiq::Web => '/sidekiq'
@@ -30,7 +30,7 @@ authenticate :user, lambda { |u| u.roles.include? :superadmin } do
 end
 ...
 {% endhighlight %}
-This will ensure that only users with role superadmin will be able to access the route.  Much easier than separate HTTP auth username/password.  Both Sidekiq Web and Redis-Browser run as Sinatra apps so see their respective docs for install instructions.
+This will ensure that only users with role sysadmin will be able to access the route.  Much easier than separate HTTP auth username/password.  Both Sidekiq Web and Redis-Browser run as Sinatra apps so see their respective docs for install instructions.
 
 You can also put this in your Sidekiq initializer to link to /redis URL.
 {% highlight ruby %}

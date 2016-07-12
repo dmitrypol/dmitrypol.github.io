@@ -19,6 +19,7 @@ defaults:
 
 gems:
   - jekyll-sitemap
+  - jekyll-seo-tag
   # - jekyll-lunr-js-search
 
 pages_list:

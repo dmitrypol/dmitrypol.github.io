@@ -4,7 +4,7 @@ date: 2015-06-20
 categories:
 ---
 
-Like many developers today I whole heartedly embrace automated tests.  Both for unit tests and more high level integration tests.  Ability to run a test suite with good (hopefully 90%) code coverage gives me a great feeling even when I make minor changes.  And it's especially important when building major features or doing significant refactoring.
+Like many developers today I embrace automated tests.  Both for unit tests and more high level integration tests.  Ability to run a test suite with good (hopefully 90%) code coverage gives me a great feeling even when I make minor changes.  And it's especially important when building major features or doing significant refactoring.
 
 But with time your application grows and it takes longer and longer to run your test suite.  By longer I do not mean hours or days of manual testing that it would take otherwise.  But waiting over 10 minutes for test to finish just messes up your workflow.  I am done with code and ready to deploy and now I am waiting.  You could integrate with 3rd party service (like [Codeship](https://codeship.com/) or [CircleCI](https://circleci.com/)) but we've seen strange issues where tests that work on our dev machines fail on their systems.  And having tests and fail for weird reasons completely destroys the safety net that automated tests are suppose to give you.
 

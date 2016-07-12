@@ -40,7 +40,7 @@ Rails_admin sees aasm_state field as a string and allows you to edit it anyway y
 extend Enumerize
 enumerize :aasm_state, in: aasm.states
 {% endhighlight %}
-Now rails_admin creates a dropdown with the list of possbile aasm states but it still allows you to set the field to any option w/o enforcing workflow.
+Now rails_admin creates a dropdown with the list of possible aasm states but it still allows you to set the field to any option w/o enforcing workflow.
 
 For slightly better solution add this to Article model:
 {% highlight ruby %}
