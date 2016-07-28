@@ -1,7 +1,7 @@
 ---
 title: "Redis ETL tools"
 date: 2016-07-20
-categories:
+categories: redis
 ---
 
 Redis is a very powerful technology but sometimes we still need to structure our data in more relationsal format.  Lots of people know how to write SQL.

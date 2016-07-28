@@ -1,7 +1,7 @@
 ---
 title: "Redis and probabilistic data structures"
 date: 2016-07-13
-categories:
+categories: redis
 ---
 
 HyperLogLog

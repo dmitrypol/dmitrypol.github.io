@@ -1,7 +1,7 @@
 ---
 title: "Redis for non developers"
 date: 2016-07-20
-categories:
+categories: redis
 ---
 
 Lots of software developers love Redis.  But developers are not the only technical users.  There are also lots of technical analysts.
