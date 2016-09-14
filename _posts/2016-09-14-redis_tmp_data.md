@@ -70,7 +70,7 @@ def remove_uniques
 end
 {% endhighlight %}
 
-Then we loop through remaining keys and members in the SETs to create potential records in the main DB.  These match records will go through the manual review process and corresponding user records could then be merged.  All MEMBERS in each SET need unique comparisons to each other.  SET with key `john smith` and members `[id1, id2, id3]` will become 3 separate records comparing `id1 to id2`, `id1 to id3` and `id2 to id3`.
+Then we loop through remaining keys and members in the SETs to create `potential match` records in the main DB.  These `potential match` records will go through the manual review process and corresponding user records could then be merged (or not).  All MEMBERS in each SET need unique comparisons to each other.  SET with key `john smith` and members `[id1, id2, id3]` will become 3 separate records comparing `id1 to id2`, `id1 to id3` and `id2 to id3`.
 
 {% highlight ruby %}
 def process_results
@@ -80,7 +80,7 @@ def process_results
       user1_id = REDIS_RM.spop(key)
       # => loop through remaining members in the SET
       REDIS_RM.smembers(key).each do |user2_id|
-        RecordMatch.create_match(user1_id: user1_id, user2_id: user2_id)
+        PotentialMatch.create_match(user1_id: user1_id, user2_id: user2_id)
       end
     end
   end
@@ -90,7 +90,7 @@ end
 We store the user ID comparisons in the main DB is because that dataset is much smaller in size so it does not take very long to persist to disk .  Plus we want to use relational DB validations and the data structure fits into our DB model.  
 
 {% highlight ruby %}
-class RecordMatch
+class PotentialMatch  < ApplicationRecord
   belongs_to :user1, class_name: 'User', index: true, inverse_of: nil
   belongs_to :user2, class_name: 'User', index: true, inverse_of: nil
   def self.create_match (user1_id: user2_id:)
@@ -119,4 +119,4 @@ Here are the various Ruby gems we used:
   gem 'readthis'
 {% endhighlight %}
 
-The examples above do not go into actual details but instead focus on the usage of Redis and its flexible and fast data structures.  
+The examples above do not go deep into actual details but instead focus on the usage of Redis and its flexible and fast data structures.  
