@@ -21,6 +21,7 @@ gems:
   - jekyll-sitemap
   - jekyll-seo-tag
   # - jekyll-lunr-js-search
+  - jekyll-redirect-from
 
 pages_list:
   About: '/about'
