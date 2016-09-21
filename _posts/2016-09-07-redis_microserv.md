@@ -12,7 +12,7 @@ To demo these concepts I built a [sample app](https://github.com/dmitrypol/redis
 
 ### API
 
-It has a simple endpoint in `HomeController` that takes requests params and throws them into Redis queue using [Sidekiq](https://github.com/mperham/sidekiq).  It is built using [Rails 5 API](http://edgeguides.rubyonrails.org/api_app.html) but could be implemented with [Ruby Sinatra](http://www.sinatrarb.com/), [NodeJS]([https://nodejs.org/en/) / [Express](https://expressjs.com/) or [Python Flask](http://flask.pocoo.org/).  There is a Sidekiq implementation in [nodejs](https://www.npmjs.com/package/sidekiq) or you could build your own client to throw messages into Redis in the appropriate format.  
+It has a simple endpoint in `HomeController` that takes requests params and throws them into Redis queue using [Sidekiq](https://github.com/mperham/sidekiq).  It is built using [Rails 5 API](http://edgeguides.rubyonrails.org/api_app.html) but could be implemented with [Ruby Sinatra](http://www.sinatrarb.com/), [NodeJS]([https://nodejs.org) / [Express](https://expressjs.com/) or [Python Flask](http://flask.pocoo.org/).  There is a Sidekiq implementation in [nodejs](https://www.npmjs.com/package/sidekiq) or you could build your own client to throw messages into Redis in the appropriate format.  
 
 API is completely unaware of the main DB or any other components.  If you look inside API `ProcessRequestJob` you will see that it does not actually do anything.  It is simply an easy way queue the job with `.perform_later` call from the `HomeController`.  Sidekiq background process does not run w/in API.  
 
