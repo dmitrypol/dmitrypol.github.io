@@ -227,10 +227,7 @@ I personally prefer to require authorize for all controller actions even I put `
 {% highlight ruby %}
 class AccountsController < ApplicationController
   after_action except: [:index] { authorize @account }
-  def index
-    @accounts = Account.all
-    authorize @accounts
-  end
+  after_action only:   [:index] { authorize @accounts }
 end
 {% endhighlight %}
 
