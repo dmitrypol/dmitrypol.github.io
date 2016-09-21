@@ -166,6 +166,7 @@ DEPENDENCIES
   html-proofer
   jekyll-seo-tag
   jekyll-sitemap
+  minima
   octopress (~> 3.0)
   rake
 

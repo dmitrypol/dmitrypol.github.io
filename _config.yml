@@ -26,3 +26,5 @@ pages_list:
   About: '/about'
 
 include: ['_pages']
+
+theme: minima
