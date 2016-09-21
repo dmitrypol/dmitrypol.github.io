@@ -1,6 +1,6 @@
 ---
 title: "Roles and Permissions - switching from CanCanCan to Pundit"
-date: 2016-09-22
+date: 2012-09-22
 categories:
 ---
 
@@ -104,31 +104,42 @@ end
 
 This will give access to internal users to all records
 {% highlight ruby %}
-  class ApplicationPolicy
-    def index?
-      return true if @user.roles.include? ['sysadmin', 'acnt_mngr']
-    end
-    def show?
-      index?
-    end
-    def update?
-      index?
-    end
-    def edit?
-      index?
-    end
-    def create?
-      # must have higher level permissions
-      return true if @user.roles.include? ['sysadmin']
-    end
-    def new?
-      create?
-    end
-    def destroy?
-      create?
-    end
+class ApplicationPolicy
+  def index?
+    return true if @user.roles.include? ['sysadmin', 'acnt_mngr']
   end
+  def show?
+    index?
+  end
+  def update?
+    index?
+  end
+  def edit?
+    index?
+  end
+  def create?
+    # must have higher level permissions
+    return true if @user.roles.include? ['sysadmin']
+  end
+  def new?
+    create?
+  end
+  def destroy?
+    create?
+  end
+end
 {% endhighlight %}
+
+So this works great for granting application wide permissions but client specific users might have different permissions for different clients.  Additionally when we are in `show`, `update`, `edit` or `destroy` we can get client from the record.  In `index` we have multiple records and in `new` / `create` the record does not exist yet.  
+{% highlight ruby %}
+class ApplicationPolicy
+  def get_client_id
+    return @record.client_id if @record.try(:client_id)
+    return @user.user_clients.map(&:client_id)
+  end
+end
+{% endhighlight %}
+
 
 This will give readonly access to Client records via `index` and `show` to `admin` and `readonly_admin` and edit/update access to other roles.  
 {% highlight ruby %}  
@@ -191,7 +202,7 @@ class RoleCheck
   end
   def perform
     roles2 = [:admin, @roles].flatten
-    return true if @client.user_clients.where(user_id: @user.id)
+    return true if @user.user_clients.in(client_id: @client)
       .in(roles: roles2).count > 0
   end
 end
