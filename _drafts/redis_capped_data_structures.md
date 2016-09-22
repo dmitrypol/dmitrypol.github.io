@@ -17,3 +17,4 @@ Redis does not really support things like that out of the box but it's not too h
 ### Sortes Sets
 
 ### Useful links
+https://quickleft.com/blog/how-to-create-and-expire-list-items-in-redis/

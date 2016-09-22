@@ -25,6 +25,9 @@ When I first started using Redis almost 5 years ago I loved the speed.  However 
 read-only access to data
 
 
+### Test / QA
+
+
 ### GUI Tools
 
 https://github.com/ServiceStackApps/RedisReact
@@ -45,6 +48,3 @@ Redis data structures are very powerful but often people are accustomed to worki
 ### Lua scripts
 
 SQL stored procedures
-
-
-
