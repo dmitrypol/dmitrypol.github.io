@@ -1,14 +1,14 @@
 ---
 title: "Redis and async microservices - part deux"
-date: 2016-09-22
+date: 2016-09-24
 categories: redis sidekiq
 ---
 
 I previously wrote about [Microservices with Sidekiq]({% post_url 2016-02-02-microservices %}) and [Redis and async microservices]({% post_url 2016-09-07-redis_microserv %}).  In this post I will continue expanding on those ideas.  
 
-I spent a number of years working in internet advertising and will use relevant examples from my past experience (appropriately abstracted into more general use cases).  A large scale ad platform can easily serve billions of ads and process millions of clicks per day.  You need to be able to quickly cap accounts as they run out of budget.  When end user clicks on the ad the request goes to the click server which records the click and forwards end user to the destination.  
+I spent a number of years working in internet advertising and will use relevant examples from my past experience (appropriately abstracted into more general use cases).  A large scale ad platform can serve billions of ads and process millions of clicks per day.  You need to be able to quickly cap accounts as they run out of budget.  When end user clicks on the ad the request goes to the click server which records the click and forwards end user to the destination.  
 
-You also need UI where internal users or customers themselves can manage their ads.  Typical ad will contain the following attributes: CPC (cost per click), budget, title, body and link to the destination site.  For each click you usually track IP, User Agent, URL of the page where click took place and when it happened.  
+You also need UI to manage ads.  Typical ad will contain the following attributes: CPC (cost per click), budget, title, body and link to the destination site.  For each click you usually track IP, User Agent, URL of the page where click took place and when it happened.  
 
 Separately you track impressions but you can aggregate data by hour to see how often the ad was shown in that period of time.  Recoding each impression will put significant load on your DB.  It also can be useful to aggregate which keywords you are getting ad requests for.  All this information helps you analyze ad performance.  To demo these concepts I built a [sample app](https://github.com/dmitrypol/redis_adsystem).  
 
@@ -133,7 +133,7 @@ class ProcessClickJob < ApplicationJob
 end
 {% endhighlight %}
 
-To actually process the click we have `ProcessClickJob` in UI.  In true microservice architecture it could be a separate application.  This records the click and decrements ad budget (which triggers `update_ads_cache`).
+Notice the special `click` queue which you can set to high priority in [Sidekiq](https://github.com/mperham/sidekiq).  Queueing the job with Redis/Sidekiq is very fast.  To actually process the click we have `ProcessClickJob` in UI app  In true microservice architecture it could be a separate application.  This records the click and decrements ad budget (which triggers `update_ads_cache`).
 
 {% highlight ruby %}
 class ProcessClickJob < ApplicationJob
@@ -151,11 +151,11 @@ end
 
 ### Data storage in Redis
 
-So now we have seen how data flows between UI and Ad Server via Redis.  From UI there is a direct call to Redis API and from Ad Server there is a Sidekiq background job.  But we also want to aggregate stats on how many impressions we served and which keywords are getting requests.  How can Redis help us with that?  
+So now we have seen how data flows between UI and Ad Server via Redis.  From UI there is a direct access to Redis API via model callback.  From Ad Server a Sidekiq background job is queued.  But we also want to aggregate stats on how many impressions we served and which keywords are getting requests.  How can Redis help us with that?  
 
-#### Temporary storage
+#### Temporary data storage
 
-We add a private method to `GetAds`.  It loops through `@ads` and increments Redis counters that look like this `AD_ID:20160922:HOUR`.  Redis speed helps us count impressions with minimum impact to ad serving.  
+We add a method to `GetAds` class in AdServer.  It loops through `@ads` and increments Redis counters that look like this `AD_ID:20160922:HOUR`.  Redis helps us count impressions with minimum impact to ad serving.  
 
 {% highlight ruby %}
 # config/initializers/redis.rb
@@ -208,7 +208,7 @@ class ProcessImpressionJob < ApplicationJob
 end
 {% endhighlight %}
 
-#### Permanent storage
+#### Permanent data storage
 
 But we also want to track which keywords are getting requested at least once an hour.  We add another method to `GetAds`.  This time the key is keyword and value is the counter.
 
@@ -245,26 +245,32 @@ By re-setting TTL on every request Redis will automatically purge keywords that 
 <% end %>
 {% endhighlight %}
 
-The obvious downside is that you cannot easily sort these records by value (Redis limitation).  
+But there is an obvious downside is that you cannot sort these records by value so we cannot see which keywords are requested more often.  For that we need to build a Redis secondary index.  I will cover that in a different blog post.  
 
 ### Testing
 
+Previously I have written about [testing your code with Redis]({% post_url 2016-06-08-redis_tests %}).  You can either setup real Redis instance or use [mock_redis](https://github.com/brigade/mock_redis) gem.  
 
 {% highlight ruby %}
-
+# config/initializers/redis.rb
+if Rails.env.test?
+  REDIS_ADS =  Redis::Namespace.new('ads', redis: MockRedis.new )
+  ...
+else
+  # real Redis connections here
+end
+# spec/rails_helper.rb
+require 'mock_redis'
+...
+config.before(:each) do
+  # data is not saved into real Redis but you still need to clear it
+  REDIS_ADS.flushdb
+end
 {% endhighlight %}
 
+Then in your tests for `ProcessImpressionJob` you can setup data with `REDIS_IMPR.incrby(keyword, 10)` and in tests for `GetAds` check `expect(REDIS_IMPR.keys).to eq ...`
 
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
+Since there are no live HTTP calls between your microservices you do not need to use gems like [webmock](https://github.com/bblimke/webmock), [VCR](https://github.com/vcr/vcr) or [discoball](https://github.com/thoughtbot/capybara_discoball).  For real production system I would still recommend a good overall integration test pass.  But as long as you define message format for how data flows between your applications via Redis you can stub and test components separately.  
 
 
 {% highlight ruby %}

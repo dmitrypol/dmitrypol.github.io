@@ -6,7 +6,7 @@ categories: redis test
 
 In previous posts I blogged about using Redis to store data.  The question is how to test the code that leverages this data?
 
-When tests use records from the main DB (MySQL, PG, Mongo) you can use gems like [FactoryGirl](https://github.com/thoughtbot/factory_girl) and [DatabaseCleaner](https://github.com/DatabaseCleaner/database_cleaner) to get data into the right state for your tests.  How do you do the same with Redis?
+When your Rails tests use records from the main DB (MySQL, PG, Mongo) you can use gems like [FactoryGirl](https://github.com/thoughtbot/factory_girl) and [DatabaseCleaner](https://github.com/DatabaseCleaner/database_cleaner) to get data into the right state for your tests.  How do you do the same with Redis?
 
 I am using [mock_redis](https://github.com/brigade/mock_redis) gem which helps avoid having Redis instance up just to run tests (makes it easier to run tests via [Travis CI](https://travis-ci.com/) or [CodeShip](https://codeship.com/)).
 

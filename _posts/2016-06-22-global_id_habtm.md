@@ -11,7 +11,7 @@ Recently I had to design a feature where user could save specific reports with p
 
 ### Separate relationships in the same class
 
-Here is the first design I went with:
+Here is the first design I went with in my Rails 4.2 application.
 
 {% highlight ruby %}
 class Report

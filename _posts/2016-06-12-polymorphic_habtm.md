@@ -4,7 +4,7 @@ date: 2016-06-12
 categories: mongo
 ---
 
-When we first start designing appliciations we encounter typical has_many and belongs_to relationships.  User has_many Articles and Article belongs_to User.
+When we first start designing Rails (or other framework) appliciations we encounter typical has_many and belongs_to relationships.  User has_many Articles and Article belongs_to User.
 
 {% highlight ruby %}
 class User

@@ -6,7 +6,7 @@ categories:
 
 More thoughts on structuring code and running it via background jobs.  This post was inspired by me trying to wrap my head around [Sandi Metz' Rules For Developers](https://robots.thoughtbot.com/sandi-metz-rules-for-developers).
 
-Let's imagine we need to import CSV file into our DB.  It's easy to write a simple class with a single method (or a Rake task).
+Let's imagine we need to import CSV file into our DB in a Rails application.  It's easy to write a simple class with a single method (or a Rake task).
 
 {% highlight ruby %}
 # app/services/user_import.rb

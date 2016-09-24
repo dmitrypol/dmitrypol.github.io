@@ -6,7 +6,7 @@ categories: redis
 
 Usually our applications have a DB (MySQL, Postgres, etc) that we use to permanently store information about our users and other records.  But there are also situations where we need to temporary store data used by a background process.  This data might be structured very differently and would not fit into our relational DB.
 
-Recently we were doing large scale analysis in our system to determine which users might have duplicate records.  Long story why we have such records but I assure you there is a legitimate reason.  What we needed was a process that would flag likely duplicates so humans could make a decision on whether to merge them or not.  
+Recently we were doing large scale analysis in our system (built on Rails 4.2 framework) to determine which users might have duplicate records.  Long story why we have such records but I assure you there is a legitimate reason.  What we needed was a process that would flag likely duplicates so humans could make a decision on whether to merge them or not.  
 
 As "unique" identifier for likely users we decided to use combination of "first_name last_name".  Obviously we knew that there would be many false positives but this was a starting point.  In reality our business logic was much more complex but I am omitting many confidential details.  
 
