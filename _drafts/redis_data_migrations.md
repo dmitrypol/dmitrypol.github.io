@@ -1,7 +1,7 @@
 ---
 title: "Redis data migrations"
 date: 2016-08-31
-categories:
+categories: redis
 ---
 
 When you use Redis for caching changing data structure is much simpler.  New code generates new data in new format and you let old data expire.

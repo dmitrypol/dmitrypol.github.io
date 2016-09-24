@@ -1,7 +1,7 @@
 ---
 title: "Redis data sharding"
 date: 2016-09-20
-categories:
+categories: redis
 ---
 
 One of the downdsides of Redis is that all data is stored in RAM.  So if you cannot scale up you need to scale out and shard your data.  

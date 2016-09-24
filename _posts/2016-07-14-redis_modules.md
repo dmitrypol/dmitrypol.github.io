@@ -4,7 +4,7 @@ date: 2016-07-14
 categories: redis
 ---
 
-A couple of months ago I had a chance to attend [RedisConf](http://redisconf.com/) and present about using Rails with Redis.  You can read my blog post about it [here]({% post_url 2015-10-15-redis-rails-tips %}) or [watch the presentation](https://www.youtube.com/watch?v=p-XNGlUoPQg&index=20&list=PL83Wfqi-zYZHtHoGv3PcGQA3lvE9p1eRl).
+A couple of months ago I had a chance to attend [RedisConf](http://redisconf.com/) and present about using Rails with Redis.  You can read my blog post about it [here]({% post_url 2015-10-15-redis_rails_tips %}) or [watch the presentation](https://www.youtube.com/watch?v=p-XNGlUoPQg&index=20&list=PL83Wfqi-zYZHtHoGv3PcGQA3lvE9p1eRl).
 
 At the conference [RedisLabs](https://redislabs.com/) announced new [Redis Modules](http://redismodules.com/) feature.  You can read the details at this [post by antirez](http://antirez.com/news/106).  The feature is still in beta but RedisLabs and antirez are working hard to improve it before official release.  What I wanted to share are my personally expereince and lessions learned from configuing Redis with modules.  You can also watch the [video](https://www.youtube.com/watch?v=fzkq0UrLK_I&list=PL83Wfqi-zYZHtHoGv3PcGQA3lvE9p1eRl&index=26) from RedisConf.  Dislaimer:  this is a personal blog post and the process for configuring Redis Modules might change before the official release.
 

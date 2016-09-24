@@ -76,7 +76,7 @@ Ads are stored in [Redis SET](http://redis.io/commands/smembers) with `keyword` 
 ...
 ]
 {% endhighlight %}
-`url` param in `link` is a simple Base64 encoding of the destination URL for that ad.  
+`url` param in `link` is a simple Base64 encoding of the destination URL for that ad.  In real ad server you woud have complex logic to show the best match that is most likely result in a click.  
 
 ### Ads Cache
 
@@ -133,7 +133,7 @@ class ProcessClickJob < ApplicationJob
 end
 {% endhighlight %}
 
-Notice the special `click` queue which you can set to high priority in [Sidekiq](https://github.com/mperham/sidekiq).  Queueing the job with Redis/Sidekiq is very fast.  To actually process the click we have `ProcessClickJob` in UI app  In true microservice architecture it could be a separate application.  This records the click and decrements ad budget (which triggers `update_ads_cache`).
+Notice the special `click` queue which you can set to high priority in [Sidekiq](https://github.com/mperham/sidekiq).  Queueing the job with Redis/Sidekiq is very fast.  To actually process the click we have `ProcessClickJob` in UI app.  In true microservice architecture it could be a separate application.  This records the click and decrements ad budget (which triggers `update_ads_cache`).
 
 {% highlight ruby %}
 class ProcessClickJob < ApplicationJob
@@ -210,7 +210,7 @@ end
 
 #### Permanent data storage
 
-But we also want to track which keywords are getting requested at least once an hour.  We add another method to `GetAds`.  This time the key is keyword and value is the counter.
+But we also want to track which keywords are getting requested at least once a week.  We add another method to `GetAds`.  This time the key is keyword and value is the counter.
 
 {% highlight ruby %}
 # config/initializers/redis.rb
@@ -234,7 +234,7 @@ private
 end
 {% endhighlight %}
 
-By re-setting TTL on every request Redis will automatically purge keywords that get requested infrequently or seasonally.  To display this data in our UI we built a simple page with you can see at `http://localhost:3001/admin/keywords` (ui\app\views\rails_admin\main\keywords.html.erb)
+By re-setting TTL on every request Redis will automatically purge keywords that get requested infrequently.  To display this data in our UI we built a simple page with you can see at `http://localhost:3001/admin/keywords` (ui\app\views\rails_admin\main\keywords.html.erb)
 
 {% highlight ruby %}
 <% REDIS_KW.keys.each do |keyword| %>

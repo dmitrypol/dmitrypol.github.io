@@ -1,7 +1,7 @@
 ---
 title: "Mongo Atlas"
 date: 2016-08-23
-categories:
+categories: mongo
 ---
 
 We have been running MongoDB as the primary database for our Rails app for close to two years.  And gradualy the amount of data has increased so we started having scalability issues.  Problems were primary in disk IO as we did not do a good job optimizing the drives in our EC2 instances.

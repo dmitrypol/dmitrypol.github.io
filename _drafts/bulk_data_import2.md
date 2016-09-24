@@ -4,7 +4,7 @@ date: 2016-06-08
 categories: redis
 ---
 
-In previous [post]({% post_url 2016-03-18-sidekiq-batches %}) I wrote about using Redis and Sidekiq to do bulk data imports.  But as with all scalability challenges this solution only goes so far.
+In previous [post]({% post_url 2016-03-18-sidekiq_batches %}) I wrote about using Redis and Sidekiq to do bulk data imports.  But as with all scalability challenges this solution only goes so far.
 
 The problem becomes when you have very large import (hundreds of thousands of records).  At that point even queuing Sidekiq jobs can take a long time (over an hour).  And if you do server restart, that queuing process dies.
 

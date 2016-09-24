@@ -1,7 +1,7 @@
 ---
-title: "Redis and other DB technologies"
+title: "Redis and other data technologies"
 date: 2016-09-22
-categories:
+categories: redis
 ---
 
 Integration with

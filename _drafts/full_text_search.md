@@ -1,7 +1,7 @@
 ---
 title: "Full_text_search"
 date: 2016-06-14
-categories:
+categories: mongo
 ---
 
 I am using https://github.com/artsy/mongoid_fulltext
