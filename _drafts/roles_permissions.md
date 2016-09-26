@@ -1,6 +1,6 @@
 ---
 title: "Roles and Permissions - switching from CanCanCan to Pundit"
-date: 2012-09-22
+date: 2012-09-26
 categories:
 ---
 
@@ -71,7 +71,8 @@ end
 
 ### Mapping roles to permissions
 
-Users can belong to one or more clients and same user can have different roles for various clients.
+In our case users can belong to one or more clients and same user can have different roles for various clients.
+
 {% highlight ruby %}
 class User
   has_many :user_clients
@@ -92,7 +93,7 @@ class UserClientPolicy < ApplicationPolicy
 end
 {% endhighlight %}
 
-`admin` can do anything for client (including granting roles to other users).  `readonly_admin` can only view all records, `account_admin` can create/edit/delete accounts and `company_admin` can do the same for company records.  For this we needed to create separate policies for Client, Account and Company models.  
+`admin` can do anything for client (including granting roles to other users).  `readonly_admin` can only view all records, `account_admin` can do CRUD operations on accounts and `company_admin` can do the same for company records.  For this we needed to create separate policies for Client, Account and Company models.  
 
 Additionally there are system wide roles (for internal users) defined directly on User model.  Only internal users can create/destroy create new clients but Client Admins can modify Client attributes.
 {% highlight ruby %}
@@ -102,7 +103,8 @@ class User
 end
 {% endhighlight %}
 
-This will give access to internal users to all records
+This will give internal users access to all records.
+
 {% highlight ruby %}
 class ApplicationPolicy
   def index?
@@ -131,6 +133,11 @@ end
 {% endhighlight %}
 
 So this works great for granting application wide permissions but client specific users might have different permissions for different clients.  Additionally when we are in `show`, `update`, `edit` or `destroy` we can get client from the record.  In `index` we have multiple records and in `new` / `create` the record does not exist yet.  
+
+
+
+
+
 {% highlight ruby %}
 class ApplicationPolicy
   def get_client_id
@@ -140,55 +147,29 @@ class ApplicationPolicy
 end
 {% endhighlight %}
 
-
 This will give readonly access to Client records via `index` and `show` to `admin` and `readonly_admin` and edit/update access to other roles.  
-{% highlight ruby %}  
-  class ClientPolicy
-    def index?
-      return true if @user.user_clients.where(client: @record)
-      .in(roles: ['admin', 'readonly_admin']).count > 0
-      super
-    end
-    def show?
-      index?
-    end
-    def edit?
-      return true if @user.user_clients.where(client: @record)
-      .in(roles: ['admin']).count > 0      
-      super
-    end
-    def update?
-      edit?
-    end
-    #  new?, create? and destroy? are not set so it uses ApplicationPolicy
-  end
-{% endhighlight %}  
 
-Permissions for Account and Company are a little different.
-{% highlight ruby %}  
-  class AccountPolicy
-    def index?
-      return true if @user.user_clients.where(client: @record.client)
-      .in(roles: ['admin', 'readonly_admin', 'account_admin']).count > 0    
-      super
-    end
-    def show?
-      index?
-    end
-    def edit?
-      return true if @user.user_clients.where(client: @record.client)
-      .in(roles: ['admin', 'account_admin']).count > 0    
-      super
-    end
-    def update?
-      edit?
-      # same checks for new?, create? and destroy?
-    end
+{% highlight ruby %}
+class ClientPolicy
+  def index?
+    return true if @user.user_clients.where(client: @record)
+    .in(roles: ['admin', 'readonly_admin']).count > 0
+    super
   end
-  class CompanyPolicy
-    # similar checks using 'company_admin' role instead of 'account_admin'
-  end  
-{% endhighlight %}
+  def show?
+    index?
+  end
+  def edit?
+    return true if @user.user_clients.where(client: @record)
+    .in(roles: ['admin']).count > 0      
+    super
+  end
+  def update?
+    edit?
+  end
+  #  new?, create? and destroy? are not set so it uses ApplicationPolicy
+end
+{% endhighlight %}  
 
 Checking for `@user.user_clients.where(client: @record.client).in(roles: ...)` is not DRY so we can extract it into separate class.
 
@@ -215,6 +196,40 @@ class AccountPolicy
 end
 {% endhighlight %}
 
+Permissions for Account and Company are a little different.
+
+{% highlight ruby %}
+class AccountPolicy
+  def index?
+    RoleCheck.new(user: user, client: @record.client,
+      roles: [:account_admin, :readonly_admin]).perform
+    super
+  end
+  def show?
+    index?
+  end
+  def edit?
+    RoleCheck.new(user: user, client: @record.client,
+      roles: [:account_admin]).perform
+    super
+  end
+  def update?
+    edit?
+    # same checks for new?, create? and destroy?
+  end
+end
+class CompanyPolicy
+  # similar checks using 'company_admin' role instead of 'account_admin'
+end  
+{% endhighlight %}
+
+
+
+
+
+
+
+
 You also could use [Rolify](https://github.com/RolifyCommunity/rolify) gem to map users to roles but we already had UserClient model for other reasons so we leveraged that.  
 
 ### Beyond REST actions
@@ -233,6 +248,7 @@ end
 These kinds of custom actions will usually be specific to only one model but if they are common to several you could push them into lower policy class and inherit from it in the model specific policy.  
 
 ### Require authorize in application controller for all actions
+
 I personally prefer to require authorize for all controller actions even I put `def index?   true; end` to give everyone access.
 
 {% highlight ruby %}
@@ -243,7 +259,15 @@ end
 {% endhighlight %}
 
 
+
+
+
+
+
+
+
 ### Field level permissions
+
 Sometimes you need to define permissiosn on specific field w/in record.  Sales reps should able to see their own commissions on each sale but NOT be able to change them no be able to see other reps commissions.  A manager should be able to see all reps commissions in his/her team and Admin might need to be able to change the commissions.
 I even posted question http://stackoverflow.com/questions/34822084/field-level-permissions-using-cancancan-or-pundit
 
@@ -278,6 +302,20 @@ unable to find policy `DashboardPolicy` for `:dashboard`
 https://github.com/elabs/pundit/issues/77
 
 Let's say you have `Report_admin` that allows user to run various reports from the dashboard.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### UI
@@ -315,7 +353,6 @@ class AccountsController < ApplicationController
       format.html
       format.json  { render  json: @accounts }
     end
-    authorize @accounts
   end
 end
 {% endhighlight %}
@@ -344,11 +381,11 @@ Now your frontend application JS can use output from `http://localhost:3000/acco
 
 ### More resources
 
-http://blog.carbonfive.com/2013/10/21/migrating-to-pundit-from-cancan/
-https://www.viget.com/articles/pundit-your-new-favorite-authorization-library
-http://through-voidness.blogspot.com/2013/10/advanced-rails-4-authorization-with.html
-https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/
-https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/
+* [http://blog.carbonfive.com/2013/10/21/migrating-to-pundit-from-cancan/](http://blog.carbonfive.com/2013/10/21/migrating-to-pundit-from-cancan/)
+* [https://www.viget.com/articles/pundit-your-new-favorite-authorization-library](https://www.viget.com/articles/pundit-your-new-favorite-authorization-library)
+* [http://through-voidness.blogspot.com/2013/10/advanced-rails-4-authorization-with.html](http://through-voidness.blogspot.com/2013/10/advanced-rails-4-authorization-with.html)
+* [https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/](https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/)
+* [https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/](https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/)
 
 https://github.com/sudosu/rails_admin_pundit
 https://github.com/chrisalley/pundit-matchers

@@ -17,7 +17,7 @@ Separately you track impressions but you can aggregate data by hour to see how o
 
 ### UI
 
-It is build on top of [Rails 5](http://weblog.rubyonrails.org/2016/6/30/Rails-5-0-final/) with SQL DB and [RailsAdmin](https://github.com/sferik/rails_admin) CRUD dashboard so you can view the `Ads`, `Clicks` and `Impressions` tables at `http://localhost:3000/admin`.  After cloning the repo you need to `cd ui && bundle && rake db:seed && rails s -p 3001`.  You can then login with `admin@email.com / password`.  
+It is build on top of [Rails 5](http://weblog.rubyonrails.org/2016/6/30/Rails-5-0-final/) with SQL DB and [RailsAdmin](https://github.com/sferik/rails_admin) CRUD dashboard so you can view the `Ads`, `Clicks` and `Impressions` tables at `http://localhost:3001/admin`.  After cloning the repo you need to `cd ui && bundle && rake db:seed && rails s -p 3001`.  You can then login with `admin@email.com / password`.  
 
 The basic models are:
 {% highlight ruby %}
@@ -45,8 +45,7 @@ It is built using [Rails 5 API](http://edgeguides.rubyonrails.org/api_app.html) 
 # app/controllers/ad_controller.rb
 class AdController < ApplicationController
   def index
-    ad_params = request.params.except(:controller, :action)
-    ads = GetAds.new(keyword: ad_params[:kw]).perform
+    ads = GetAds.new(keyword: request.params[:kw]).perform
     render json: ads
   end
 end
@@ -76,7 +75,7 @@ Ads are stored in [Redis SET](http://redis.io/commands/smembers) with `keyword` 
 ...
 ]
 {% endhighlight %}
-`url` param in `link` is a simple Base64 encoding of the destination URL for that ad.  In real ad server you woud have complex logic to show the best match that is most likely result in a click.  
+`url` param in `link` is a simple Base64 encoding of the destination URL for that ad.  In real ad server you would have complex logic to show the best match that is most likely result in a click.  
 
 ### Ads Cache
 
@@ -172,12 +171,14 @@ private
   def record_impressions
     # => current date and hour
     date_hour = Time.now.strftime("%Y%m%d:%H")
-    @ads.each do |ad|
-      # => grab ad_id from each JSON
-      ad2 = JSON.parse(ad)
-      ad_id = ad2['ad_id']
-      key = [ad_id, date_hour].join(':')
-      REDIS_IMPR.incr key
+    REDIS_IMPR.pipelined do
+      @ads.each do |ad|
+        # => grab ad_id from each JSON
+        ad2 = JSON.parse(ad)
+        ad_id = ad2['ad_id']
+        key = [ad_id, date_hour].join(':')
+        REDIS_IMPR.incr key
+      end
     end
   end
 end
