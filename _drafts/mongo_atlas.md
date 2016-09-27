@@ -43,3 +43,5 @@ Mongo support is great, just file a ticket and they respond very quickly.
 
 Overall very happy.  Previously evaluated other services like https://scalegrid.io/ and https://mlab.com/.  Not only is Atlast cheaper but also knowing that MongoDB company is behind it makes me sleep better at night.
 
+
+http://blog.cloud.mongodb.com/post/146993789415/atlas-on-day-one-importing-data
