@@ -1,7 +1,7 @@
 ---
-title: "Data_space_usage"
+title: "How much space does data take stored in different DBs?"
 date: 2016-07-12
-categories:
+categories: redis mongo mysql
 ---
 
 How much space does it take to store data in different ways?
