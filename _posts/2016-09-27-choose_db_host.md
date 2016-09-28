@@ -6,7 +6,7 @@ categories: redis mongo mysql aws
 
 Small tech startup often use cloud services like [AWS](https://aws.amazon.com/), [Azure](https://azure.microsoft.com/) or [Google Cloud](https://cloud.google.com/compute/).  When you are just getting started (perhaps paying for it yourself) you can get by with a single EC2 instance hosting both DB and application on the same server.  But with success come scalabilty problems.
 
-Scaling application and DB servers usually present different challenges.  We can scale out applications by adding more servers (which also creates redundancy).  For DBs WRITES we usually have to scale UP (getting bigger instances) but for READS we could scale OUT (creating read only replicas).  But we also have to worry about proper drive sizing, IOPS, RAM / CPU ratio, etc.  Most of us are not experts in those areas.  We can choose a hosting service paying premium for time saving, convinience and piece of mind.
+Scaling application and DB servers usually present different challenges.  We can scale out applications by adding more servers (which also creates redundancy).  For DBs WRITES we usually have to scale UP (getting bigger instances) but for READS we could scale OUT (creating read only replicas).  But we also have to worry about proper drive sizing, IOPS, RAM / CPU ratio, etc.  Most of us are not experts in those areas.  We can choose a hosting service paying premium for time savings, convinience and piece of mind.
 
 When you do choose such a service you will likely loose some flexiblity.  For example, if you are running Postgres you might not be able to install [Postgis](http://postgis.net/) unless the provider allows it.  
 

@@ -56,7 +56,7 @@ class Company
 end
 {% endhighlight %}
 
-This can be a common case with [Single Table Inhertiance](https://en.wikipedia.org/wiki/Single_Table_Inheritance).  Often the permissions for the different classes are the same so you could share policies.  
+This can be a common case with [Single Table Inhertiance](https://en.wikipedia.org/wiki/Single_Table_Inheritance).  Often the permissions for the different models derived form the same base model are the same so you could share policies.  
 
 Alternatively you could create separate policies for Client, Account and Company and then you would not need to do  `self.policy_class`.  You also could specify more granular permissions for Client, Account and Company models if needed.  
 {% highlight ruby %}
@@ -73,11 +73,11 @@ end
 
 ### Mapping roles to permissions
 
-In our case users can belong to one or more clients and same user can have different roles for various clients.
+To keep things simpler users can belong to only one client.
 
 {% highlight ruby %}
 class User
-  has_many :user_clients
+  has_one :user_client
 end
 class Client
   has_many :user_clients
@@ -134,20 +134,18 @@ class ApplicationPolicy
 end
 {% endhighlight %}
 
-So this works great for granting application wide permissions but client specific users might have different permissions for different clients.  Additionally when we are in `show`, `update`, `edit` or `destroy` we can get client from the record.  In `index` we have multiple records and in `new` / `create` the record does not exist yet.  
-
-TODO
+So this works great for granting application wide permissions but client specific users need to be resticted more.  Additionally when we are in `show`, `update`, `edit` or `destroy` we can get client from the record.  In `index` we have multiple records and in `new` / `create` the record does not exist yet so we need to get client from user.  
 
 {% highlight ruby %}
 class User
-  def get_client_ids
-    user_clients.map(&:client_id)
+  def get_client_id
+    user_client.map(&:client_id)
   end
 end
 class ApplicationPolicy
   def get_client_id
     return @record.client_id if @record.try(:client_id)
-    return @user.get_client_ids
+    return @user.get_client_id
   end
 end
 {% endhighlight %}
@@ -194,10 +192,10 @@ class RoleCheck
   end
 end
 #
-class AccountPolicy
+class ClientPolicy
   def index?
-    RoleCheck.new(user: user, client: @record.client,
-      roles: [:account_admin, :readonly_admin]).perform
+    RoleCheck.new(user: user, client: get_client_id,
+      roles: [:client_admin, :readonly_admin]).perform
   end
 end
 {% endhighlight %}
@@ -207,7 +205,7 @@ Permissions for Account and Company are a little different.
 {% highlight ruby %}
 class AccountPolicy
   def index?
-    RoleCheck.new(user: user, client: @record.client,
+    RoleCheck.new(user: user, client: get_client_id,
       roles: [:account_admin, :readonly_admin]).perform
     super
   end
@@ -215,7 +213,7 @@ class AccountPolicy
     index?
   end
   def edit?
-    RoleCheck.new(user: user, client: @record.client,
+    RoleCheck.new(user: user, client: get_client_id,
       roles: [:account_admin]).perform
     super
   end
@@ -225,7 +223,7 @@ class AccountPolicy
   end
 end
 class CompanyPolicy
-  # similar checks using 'company_admin' role instead of 'account_admin'
+  # similar checks using 'company_admin' role instead often perm 'account_admin'
 end  
 {% endhighlight %}
 
@@ -244,7 +242,7 @@ class AccountPolicy
 end
 {% endhighlight %}
 
-These kinds of custom actions will usually be specific to only one model but if they are common to several you could push them into lower policy class and inherit from it in the model specific policy.  
+These kinds often the perm custom actions will usually be specific to only one model but if they are common to several you could push them into lower policy class and inherit from it in the model specific policy.  
 
 To check these custom permissions you could create a non-RESTful action in your AccountsController.
 
@@ -257,10 +255,10 @@ class AccountsController < ApplicationController
 end
 {% endhighlight %}
 
-Or to stick with traditional REST actions you need to create a separate controller (interesting [artcile](http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/)).  Then you just call `authorize`.
+Or to stick with traditional REST actions you need to create a separate controller (read this  [artcile](http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/) for more ideas).  Then you just call `authorize`.
 
 {% highlight ruby %}
-class AccountsActivateController < ApplicationController
+class Accounts::ActivateController < ApplicationController
   def update
     authorize @account
     @account.update(status: 'active')
@@ -281,12 +279,12 @@ end
 
 ### Headless policies
 
-Let's say you have `Report_admin` role that allows user to run various reports from the dashboard.  This check will be done across all Clients that user belongs to.
+Let's say you have `report_admin` role that allows user to run various reports from the dashboard.  
 
 {% highlight ruby %}
 class DashboardPolicy < Struct.new(:user, :dashboard)
   def index?
-    RoleCheck.new(user: user, client: user.get_client_ids,
+    RoleCheck.new(user: user, client: user.get_client_id,
     roles: [:report_admin]).perform  
   end
 end
@@ -301,15 +299,24 @@ Pundit::NotDefinedError at /dashboard
 unable to find policy `DashboardPolicy` for `:dashboard`
 {% endhighlight %}
 
-
-
-
 ### Scopes
 
+Internal users can see all records but client specific users can see only accounts and companyies scoped to that client.  
 
-
-
-
+{% highlight ruby %}
+class AccountPolicy < ApplicationPolicy
+  ...
+  class Scope < Scope
+    def resolve
+      if @user.roles.include? ['sysadmin', 'acnt_mngr']
+        scope.all
+      else
+        scope.in(client_id: @user.get_client_id)
+      end
+    end
+  end
+end
+{% endhighlight %}
 
 
 
@@ -317,7 +324,9 @@ unable to find policy `DashboardPolicy` for `:dashboard`
 
 ### Field level permissions
 
-Sometimes you need to define permissiosn on specific field w/in record.  Sales reps should able to see their own commissions on each sale but NOT be able to change them no be able to see other reps commissions.  A manager should be able to see all reps commissions in his/her team and Admin might need to be able to change the commissions.
+Sometimes you need to define permissions on specific field w/in record.  
+
+Sales reps should able to see their own commissions on each sale but NOT be able to change them no be able to see other reps commissions.  A manager should be able to see all reps commissions in his/her team and Admin might need to be able to change the commissions.
 I even posted question http://stackoverflow.com/questions/34822084/field-level-permissions-using-cancancan-or-pundit
 
 
@@ -387,28 +396,48 @@ Now your frontend application JS can use output from `http://localhost:3000/acco
 ]
 {% endhighlight %}
 
-
 ### Testing
 
-For testing I like to use stubbing
+Testing these policies interaction with the common `RoleCheck` code can get quite repetitive.  That's where [stubbing](https://www.relishapp.com/rspec/rspec-mocks/docs) can be a valuable tool.  This will simulate passing user, client and roles parameters to RoleCheck and returning true or nil.  
 
+{% highlight ruby %}
+# spec/policies/account_policy_spec.rb
+permissions :index?, :show? do
+  it 'valid' do
+    rl = double('RoleCheck', perform: true)
+    RoleCheck.stub(:new).with(user: user, client: client,
+      roles: ['admin', 'readonly_admin']).and_return(rl)
+    expect(subject).to permit(user, Account.new(client: client))
+  end
+  it 'invalid' do
+    rl = double('RoleCheck', perform: nil)
+    RoleCheck.stub(:new).with(user: user, client: client,
+      roles: ['admin', 'readonly_admin']).and_return(rl)
+    expect(subject).to permit(user, Account.new(client: client))
+  end
+end
+permissions :create?, :update?, :new?, :edit?, :destroy? do
+  it 'valid' do
+    rl = double('RoleCheck', perform: true)
+    RoleCheck.stub(:new).with(user: user, client: client,
+      roles: ['admin']).and_return(rl)
+    expect(subject).to permit(user, Account.new(client: client))
+  end
+  ...
+end
+{% endhighlight %}
 
+You also could use [pundit-matchers](https://github.com/chrisalley/pundit-matchers) gem.  
 
-
-### More resources
+### Usefull links
 
 * [http://blog.carbonfive.com/2013/10/21/migrating-to-pundit-from-cancan/](http://blog.carbonfive.com/2013/10/21/migrating-to-pundit-from-cancan/)
 * [https://www.viget.com/articles/pundit-your-new-favorite-authorization-library](https://www.viget.com/articles/pundit-your-new-favorite-authorization-library)
 * [http://through-voidness.blogspot.com/2013/10/advanced-rails-4-authorization-with.html](http://through-voidness.blogspot.com/2013/10/advanced-rails-4-authorization-with.html)
 * [https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/](https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/)
 * [https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/](https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/)
+* [https://github.com/sudosu/rails_admin_pundit](https://github.com/sudosu/rails_admin_pundit)
 
-https://github.com/sudosu/rails_admin_pundit
-https://github.com/chrisalley/pundit-matchers
-
-{% highlight ruby %}
-
-{% endhighlight %}
 
 
 {% highlight ruby %}
