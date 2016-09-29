@@ -1,6 +1,6 @@
 ---
 title: "Roles and Permissions - switching from CanCanCan to Pundit"
-date: 2012-09-26
+date: 2016-09-29
 categories:
 ---
 
@@ -17,6 +17,7 @@ Pundit separates permissions into individual policy classes which can inherit fr
 Frequently you have lots of models that need to share the same permsisions.  So you might not want to create policy files to each model and duplicate code.  Since your policy files are just Ruby classes you can do this:
 
 {% highlight ruby %}
+# app/policies/application_policy.rb
 class ApplicationPolicy
   # define common permissions here
 end
@@ -31,6 +32,7 @@ end
 
 Your models may look like this. We are using [Mongoid](https://github.com/mongodb/mongoid) but the same design would work with ActiveRecord.  
 {% highlight ruby %}
+# app/models/user.rb
 class User
   belongs_to :client
   # will automatically use UserPolicy
@@ -73,7 +75,7 @@ end
 
 ### Mapping roles to permissions
 
-To keep things simpler users can belong to only one client.
+To keep things simple users can belong to only one client.
 
 {% highlight ruby %}
 class User
@@ -95,7 +97,7 @@ class UserClientPolicy < ApplicationPolicy
 end
 {% endhighlight %}
 
-`admin` can do anything for client (including granting roles to other users).  `readonly_admin` can only view all records, `account_admin` can do CRUD operations on accounts and `company_admin` can do the same for company records.  For this we needed to create separate policies for Client, Account and Company models.  
+`admin` can edit it's client record and do CRUD on client children records.  `readonly_admin` can only view all records, `account_admin` can do CRUD operations on accounts and `company_admin` can do the same for company records.  For this we needed to create separate policies for Client, Account and Company models.  
 
 Additionally there are system wide roles (for internal users) defined directly on User model.  Only internal users can create/destroy create new clients but Client Admins can modify Client attributes.
 {% highlight ruby %}
@@ -122,14 +124,14 @@ class ApplicationPolicy
     index?
   end
   def create?
-    # must have higher level permissions
-    return true if @user.roles.include? ['sysadmin']
+    index?
   end
   def new?
-    create?
+    index?
   end
   def destroy?
-    create?
+    # must have higher level permissions  
+    return true if @user.roles.include? ['sysadmin']
   end
 end
 {% endhighlight %}
@@ -139,11 +141,12 @@ So this works great for granting application wide permissions but client specifi
 {% highlight ruby %}
 class User
   def get_client_id
-    user_client.map(&:client_id)
+    user_client.client_id
   end
 end
 class ApplicationPolicy
   def get_client_id
+    # or we could just always get client from user
     return @record.client_id if @record.try(:client_id)
     return @user.get_client_id
   end
@@ -177,7 +180,7 @@ end
 Checking for `@user.user_clients.where(client: @record.client).in(roles: ...)` is not DRY so we can extract it into separate class.
 
 {% highlight ruby %}
-# app/service/role_check.rb
+# app/services/role_check.rb
 class RoleCheck
   def initialize user:, client:, roles: nil
     @user = user
@@ -223,13 +226,13 @@ class AccountPolicy
   end
 end
 class CompanyPolicy
-  # similar checks using 'company_admin' role instead often perm 'account_admin'
+  # similar checks using 'company_admin' role
 end  
 {% endhighlight %}
 
 You also could use [Rolify](https://github.com/RolifyCommunity/rolify) gem to map users to roles but we already had UserClient model for other reasons so we leveraged that.  
 
-### Beyond REST actions
+### Beyond RESTful actions
 
 You start with `:index?`, `:show?`, etc but then you need to define more custom permissions.  Let's say user has to be `admin` to `activate?` an `account`.
 
@@ -242,7 +245,7 @@ class AccountPolicy
 end
 {% endhighlight %}
 
-These kinds often the perm custom actions will usually be specific to only one model but if they are common to several you could push them into lower policy class and inherit from it in the model specific policy.  
+These kinds of custom actions will usually be specific to only one model but if they are common to several you could push them into lower policy class and inherit from it in the model specific policy.  
 
 To check these custom permissions you could create a non-RESTful action in your AccountsController.
 
@@ -253,11 +256,7 @@ class AccountsController < ApplicationController
     @account.update(status: 'active')
   end
 end
-{% endhighlight %}
-
-Or to stick with traditional REST actions you need to create a separate controller (read this  [artcile](http://jeromedalbert.com/how-dhh-organizes-his-rails-controllers/) for more ideas).  Then you just call `authorize`.
-
-{% highlight ruby %}
+# or to stick with traditional REST actions you create a separate controller
 class Accounts::ActivateController < ApplicationController
   def update
     authorize @account
@@ -265,6 +264,8 @@ class Accounts::ActivateController < ApplicationController
   end
 end
 {% endhighlight %}
+
+Then you just call `authorize`.
 
 ### Require authorize in application controller for all actions
 
@@ -301,7 +302,7 @@ unable to find policy `DashboardPolicy` for `:dashboard`
 
 ### Scopes
 
-Internal users can see all records but client specific users can see only accounts and companyies scoped to that client.  
+Internal users can see all records but client specific users can see only accounts and companies scoped to that client.  
 
 {% highlight ruby %}
 class AccountPolicy < ApplicationPolicy
@@ -318,26 +319,39 @@ class AccountPolicy < ApplicationPolicy
 end
 {% endhighlight %}
 
-
-
-
-
 ### Field level permissions
 
-Sometimes you need to define permissions on specific field w/in record.  
+Sometimes you need to define permissions on specific field w/in record.  Let's say that that only `sysadmin` can edit Client status field.  
 
-Sales reps should able to see their own commissions on each sale but NOT be able to change them no be able to see other reps commissions.  A manager should be able to see all reps commissions in his/her team and Admin might need to be able to change the commissions.
-I even posted question http://stackoverflow.com/questions/34822084/field-level-permissions-using-cancancan-or-pundit
+{% highlight ruby %}
+class ClientPolicy < ApplicationPolicy
+  def permitted_attributes
+    if user.roles.include? :sysadmin
+      [:name, :status]
+    else
+      [:name]
+    end
+  end
+end
+class ClientController < ApplicationController
+  def update
+    if @client.update_attributes(permitted_attributes(@client))
+    ...
+end
+{% endhighlight %}
 
+You also want to show/hide the Status field in the Client edit page.  Just call `permitted_attributes` method.  
 
+{% highlight ruby %}
+# app/views/clients/_form.html.erb
+<% if policy(@client).permitted_attributes.include? :status %>
+  <div class="form-inputs">
+    <%= f.input :status %>
+  </div>
+<% end %>
+{% endhighlight %}
 
-
-
-
-
-
-
-
+I am working on a better solution to use CSS **visibility** or **disabled** attributes and push the logic into decorator.  
 
 ### UI
 
@@ -365,7 +379,7 @@ class AccountSerializer < ApplicationSerializer
 end
 {% endhighlight %}
 
-You controller could respond with either HTML or JSON output.  
+Your controller responds with either HTML or JSON output.  
 {% highlight ruby %}
 class AccountsController < ApplicationController
   def index
@@ -427,7 +441,7 @@ permissions :create?, :update?, :new?, :edit?, :destroy? do
 end
 {% endhighlight %}
 
-You also could use [pundit-matchers](https://github.com/chrisalley/pundit-matchers) gem.  
+Also checkout [pundit-matchers](https://github.com/chrisalley/pundit-matchers) gem.  
 
 ### Usefull links
 
@@ -437,9 +451,3 @@ You also could use [pundit-matchers](https://github.com/chrisalley/pundit-matche
 * [https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/](https://www.sitepoint.com/straightforward-rails-authorization-with-pundit/)
 * [https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/](https://www.varvet.com/blog/simple-authorization-in-ruby-on-rails-apps/)
 * [https://github.com/sudosu/rails_admin_pundit](https://github.com/sudosu/rails_admin_pundit)
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
