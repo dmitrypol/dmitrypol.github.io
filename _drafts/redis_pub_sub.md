@@ -5,3 +5,5 @@ categories: redis
 ---
 
 Redis has a great PubSub feature http://redis.io/topics/pubsub
+
+https://github.com/krisleech/wisper

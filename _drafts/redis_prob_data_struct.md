@@ -16,3 +16,5 @@ https://en.wikipedia.org/wiki/Skip_list
 https://dzone.com/articles/introduction-probabilistic-0
 http://stackoverflow.com/questions/27307169/what-are-probabilistic-data-structures
 https://highlyscalable.wordpress.com/2012/05/01/probabilistic-structures-web-analytics-data-mining/
+
+https://dzone.com/articles/hyperloglogs-in-redis
