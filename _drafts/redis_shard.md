@@ -16,3 +16,6 @@ The system was tracking phone calls so we sharded on the last integer in the num
 
 
 ### Reballancing data after adding / removing nodes
+
+
+https://github.com/ksss/digest-murmurhash

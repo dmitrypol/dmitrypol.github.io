@@ -1,5 +1,5 @@
 ---
-title: "Redis_code_usage_analysis"
+title: "Redis code coverage"
 date: 2016-09-26
 categories: redis
 ---
