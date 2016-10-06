@@ -4,7 +4,7 @@ date: 2016-10-05
 categories: redis
 ---
 
-Frequently your application captures highly volatile data in [Redis](http://redis.io/) but you also need to [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load) some of those data points to your relational DB.  Due to Redis speed you can change the same value (increment a counter) tens of thousands of times per second but you can't (and don't really need to) make the same updates in your SQL DB.  
+Frequently your application captures highly volatile data in [Redis](http://redis.io/) but you also need to [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load) some of those data points to a different DB or data warehouse.  Due to Redis speed you can change the same value (increment a counter) tens of thousands of times per second but you can't (and don't really need to) make the same updates in your SQL DB (where data is persisted to disk).  
 
 What you often need is to keep your SQL DB in [near real-time](https://en.wikipedia.org/wiki/Real-time_computing#Near_real-time) sync with Redis.  Your business users might not care if this data is 10-15 minutes delayed.  So how would you design such a system?  Examples below are using [Ruby on Rails](http://rubyonrails.org/) framework.
 
@@ -20,9 +20,9 @@ redis_conn = Redis.new(host: 'localhost', port: 6379, db: 0, driver: :hiredis)
 REDIS_VISIT_COUNT =  Redis::Namespace.new('vst', redis: redis_conn)
 # app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
-  before_action :returning_visitor_check
+  before_action :return_visitor_check
 private
-  def returning_visitor_check
+  def return_visitor_check
     key = Digest::MurmurHash1.hexdigest "#{request.remote_ip}:#{request.user_agent}"
     @returning_visitor = true if REDIS_VISIT_COUNT.get(key).present?
     REDIS_VISIT_COUNT.pipelined do
@@ -33,7 +33,7 @@ private
 end
 {% endhighlight %}
 
-`returning_visitor_check` will be extremely fast thanks to Redis speed.  And now you can use `if @returning_visitor == true` in your controllers or view templates.  Data will be automatically purged at the end of the month using [Redis TTL](http://redis.io/commands/ttl).  
+`return_visitor_check` will be extremely fast thanks to Redis speed.  And now you can use `if @returning_visitor == true` in your controllers or view templates.  Data will be automatically purged at the end of the month using [Redis TTL](http://redis.io/commands/ttl).  
 
 So the feature works great.  But let's say our business users need to see how many total visitors site had that month and how many of them were returning.  And they want to see this data by date.  For that you want to aggregate those records separately in Redis using different namespace.  
 
@@ -41,7 +41,7 @@ So the feature works great.  But let's say our business users need to see how ma
 # config/initializers/redis.rb
 REDIS_VISIT_COUNT_DATE =  Redis::Namespace.new('vst_date', redis: redis_conn)
 # app/controllers/application_controller.rb
-def returning_visitor_check
+def return_visitor_check
   ...
   REDIS_VISIT_COUNT_DATE.pipelined do
     # separately aggregate stats by date
@@ -63,11 +63,20 @@ end
 class VisitCountJob < ApplicationJob
   queue_as :low
   # can run this job manually and specify a date  20161005
-  def perform(date = Time.now.strftime("%Y%m%d"))
+  def perform
+    VisitCount.new.perform
+  end
+end
+# app/services/visit_count.rb
+class VisitCount
+  def initialize(date = Time.now.strftime("%Y%m%d"))
+    @date = date
+  end
+  def perform
     total_count = 0
     unique_count = 0
     # grab keys that match pattern for today's date
-    REDIS_VISIT_COUNT_DATE.keys("*:#{today}").each do |key|
+    REDIS_VISIT_COUNT_DATE.keys("*:#{@date}").each do |key|
       value = REDIS_VISIT_COUNT_DATE.get(key)
       total_count += value
       unique_count += 1
@@ -75,7 +84,7 @@ class VisitCountJob < ApplicationJob
     # persist data
     v = Visit.where(date: date).first_or_create
     v.update(total_count: total_count, unique_count: unique_count)
-  end
+  end    
 end
 {% endhighlight %}
 
@@ -103,6 +112,20 @@ Sidekiq.configure_server do |config|
 end
 Sidekiq.configure_client do |config|
   config.redis = { host: 'localhost', post: 6379, db: 0, namespace: 'sidekiq' }
+end
+{% endhighlight %}
+
+But what if you don't want that 15 minute delay?  Why not wrap that `VisitCount` class in a [daemon](https://github.com/thuehlinger/daemons) running w/in your application?  A couple of useful articles [here](http://michalorman.com/2015/03/daemons-in-rails-environment/) and [here](http://codeincomplete.com/posts/ruby-daemons/).  
+
+{% highlight ruby %}
+# lib/redis_etl.rb
+class RedisEtl
+  def perform
+    while true
+      VisitCount.new.perform
+      sleep(1)
+    end
+  end
 end
 {% endhighlight %}
 
