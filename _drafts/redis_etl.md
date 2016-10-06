@@ -193,4 +193,14 @@ class Etl
 end
 {% endhighlight %}
 
+### Daemonize
+
+Methods for Extract, Tranform, Load called from Perform
+
+### From Redis to Redis
+
+### Ruby ETL tools
+
+
+
 This article was inspired by [mosql](https://github.com/stripe/mosql) but I could not think of a way to extract these ideas into a gem.  There is also [Pentaho ETL tools](https://github.com/mattyb149/pdi-redis-plugin) for Redis but does not seem be maintained.  

@@ -1,6 +1,6 @@
 ---
 title: "Redis code coverage"
-date: 2016-09-26
+date: 2016-10-06
 categories: redis
 ---
 
@@ -14,28 +14,39 @@ This can be a great tool to see which parts of your code are used often and perh
 ### Config
 
 {% highlight ruby %}
-# config/initializers/redis.rb
+# config/initializers/redis_code_cov.rb
 redis_conn = Redis.new(host: Rails.application.config.redis_host, port: 6379, db: 0, driver: :hiredis)
 REDIS_CODE_COV =  Redis::Namespace.new('codecov', redis: redis_conn)
 {% endhighlight %}
 
-Performance impact?  This needs to be selectively turned on specific classes or groups of classes.  
+If you are concerned about performance impact you can selectively enable this for specific classes or groups of classes using steps outlined below.  
 
 Default TTL of 1 week to expire
-
-What do you hook into to fire each time a method is called?  before_ callback?  
 
 ### Controllers
 
 {% highlight ruby %}
+# app/controllers/application_controller.rb
 class ApplicationController < ActionController::Base
-  before_action :redis_code_cov
-private
+  include RedisCodeCovController
+end
+# app/controllers/concerns/redis_code_cov_controlle.rb
+module RedisCodeCovController
+  extend ActiveSupport::Concern
+  included do
+    before_action :redis_code_cov
+  end
   def redis_code_cov
-   key = [self.class.name, params[:action]].join('.')
-   REDIS_CODE_COV.incr key
+    key = [self.class.name, params[:action]].join('.')
+    REDIS_CODE_COV.incr key
+  end
 end
 {% endhighlight %}
+
+Create concern and load from app controller or select controllers.
+
+
+What do you hook into to fire each time a method is called?  before_ callback?  
 
 
 ### Models
@@ -63,6 +74,8 @@ end
 ### Data analysis
 
 Get the list of all classes / methods in Rails app?  Show the diff and you have classes/methods that were not called.  
+
+### Config
 
 
 
