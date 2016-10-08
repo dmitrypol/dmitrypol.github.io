@@ -8,6 +8,8 @@ Redis is an extremely reliable technology.  But all technologies can fail.  I am
 
 Exceed RAM
 
-Max number of values in lists / sets
+Max number of values in lists / sets / sorted sets / hashes
 
 Too long key / value
+
+Max integer for count and score on sorted set.  Use incrby
