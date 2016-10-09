@@ -1,5 +1,5 @@
 ---
-title: "Redis and Disaster Recovery"
+title: "Pushing Redis beyond its limits"
 date: 2016-07-26
 categories: redis
 ---
@@ -10,6 +10,8 @@ Exceed RAM
 
 Max number of values in lists / sets / sorted sets / hashes
 
-Too long key / value
+Too long key / values
 
 Max integer for count and score on sorted set.  Use incrby
+
+Max number of DBs (default is 16)

@@ -20,3 +20,8 @@ This approach increases the length of your key by prepending namespace to it.  S
 
 users:1
 accounts:2
+
+
+When you have multiple applications using the same Redis server I personally prefer NOT to share Redis DBs between application.  The reason is I might decide to setup dedicated Redis server for one of the applications.  It's easier to just move data from one specific Redis DB to the new Redis server.  Plus scanning through keys (even separated by namespaces) costs time.  If one application has a HUGE number of keys (even in its own namespace) it can impact the other applications.  
+
+Also, when I have data that I might need to get rid of (think cache) I prefer to use separate Redis DB so I can `flushdb`.  
