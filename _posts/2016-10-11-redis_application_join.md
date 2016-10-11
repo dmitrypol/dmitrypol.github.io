@@ -1,5 +1,5 @@
 ---
-title: "Redis and application-side joins"
+title: "Redis as temp cache for application-side joins"
 date: 2016-10-11
 categories: redis mongo
 ---
@@ -74,7 +74,7 @@ users.each do |record|
 end
 {% endhighlight %}
 
-Data cached in Redis will looks like this:
+Data cached in Redis will look like this:
 
 {% highlight ruby %}
 {"db":0,"key":"User:57fc62651d41c873ba6c880c","ttl":-1,"type":"hash",
@@ -84,7 +84,7 @@ Data cached in Redis will looks like this:
 ...
 {% endhighlight %}
 
-Now we can loop through `Comments` but instead of using regular relationships `c.article.body` and `c.article.user.name` (which would have caused DB queries) we are grabbing data attributes from records cached in Redis.  
+`57fc62651d41c873ba6c880c` is part of User key AND is stored as `user_id` in Article hash. Now we can loop through `Comments` but instead of using regular relationships `c.article.body` and `c.article.user.name` (which would have caused DB queries) we are grabbing data attributes from records cached in Redis.  If we use `Comments.includes(:article)` then we only need Redis for User records caching.  
 
 {% highlight ruby %}
 # app/services/report.rb
@@ -100,9 +100,7 @@ Comment.recent.each do |c|
 end
 {% endhighlight %}
 
-We can combine this with `includes(:article)` and only use Redis for User records caching.  
-
-Last we remove the cached records in Redis.  
+Last we remove the records cached in Redis.  
 
 {% highlight ruby %}
 r_article_ids = article_ids.map(&:to_s).map{ |id| id.prepend('Article:') }
@@ -112,4 +110,4 @@ r_user_ids = user_ids.map(&:to_s).map{ |id| id.prepend('User:') }
 REDIS.del(r_user_ids)
 {% endhighlight %}
 
-This design requires writing more code but it speeds up your application AND decreases DB load.  It can also work when querying records from two separate SQL DBs or from 3rd party APIs.  We fetch each dataset separately and use Redis as temp data store.
+This design requires writing more code but it speeds up your report generator AND decreases DB load.  It can also work when querying records from multiple SQL DBs or from 3rd party APIs.  We fetch each dataset separately and use Redis as temp data store.
