@@ -26,12 +26,12 @@ class UserGame
   field :buzzword_matches, type: Array
 end
 {% endhighlight %}
- 
+
 `buzzwords` array would contain random set of 25 for each `user_game`.  When users `match` the buzzword the position of the buzzword (0, 3, 24, etc) would be added to `buzzword_matches` array.  Then the code would check if a [row, column or diagonal](https://en.wikipedia.org/wiki/Bingo_(U.S.)) has been completed.  There are other ways to model it with [Mongoid hashes](https://docs.mongodb.com/ruby-driver/master/tutorials/5.1.0/mongoid-documents/#fields) or creating separate records for each `match`.  
 
 In Redis we do not have separate tables / collections.  What we can do is define namespaced keys.  We also do not have [primary keys](http://www.w3schools.com/sql/sql_primarykey.asp) or [Mongo ObjectIds](https://docs.mongodb.com/manual/reference/method/ObjectId/).  With [SecureRandom](http://ruby-doc.org/stdlib-2.3.0/libdoc/securerandom/rdoc/SecureRandom.html) we can generate fairly random game IDs.  `SecureRandom.hex(5)` will create alphanumeric strings like "12c56f343f".  Combined with user's email it will create a unique combination for each `UserGame`.
 
-User woud `create` a game and `invite` friends by email to play.  Game `show` page will load 
+User woud `create` a game and `invite` friends by email to play.  Game `show` page will load
 
 Since we are not using traditional ORM solution we do not have many common tools.
 
@@ -106,3 +106,5 @@ https://github.com/nateware/redis-objects
 {% highlight ruby %}
 
 {% endhighlight %}
+
+http://tylerstroud.com/2014/11/18/storing-and-querying-objects-in-redis/

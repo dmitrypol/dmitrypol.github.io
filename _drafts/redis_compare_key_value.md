@@ -15,3 +15,4 @@ LMDB
 Aerospike
 Riak
 Cassandra
+RethinkDB
