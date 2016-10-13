@@ -4,7 +4,7 @@ date: 2016-10-11
 categories: redis mongo
 ---
 
-[SQL joins](http://www.w3schools.com/sql/sql_join.asp) are a powerful feature that enables using DB functionality to bring back records from different tables needed w/o making multiple queries.  Unfortunately some the new NoSQL DBs do not support them.
+[SQL joins](http://www.w3schools.com/sql/sql_join.asp) are a powerful feature that enables using DB functionality to bring back records from different tables needed w/o making multiple queries.  Unfortunately some of the new NoSQL DBs do not support them.
 
 We have been using [MongoDB](http://mongodb.com) for several years and overall really like it.  Except that sometimes we have to do N+1 queries looping through child records and fetching data attributes from the parent or grandparent.  
 
