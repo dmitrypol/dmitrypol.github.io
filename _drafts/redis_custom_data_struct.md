@@ -7,7 +7,7 @@ categories: redis
 
 ### Data structures
 
-We all have used various data structures (linked lists, arrays, hashes, sets, binary trees).  They are usually implemented in memory but what if you need persistence AND speed?  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
+We all have used various data structures (linked lists, arrays, hashes, sets, binary trees, stack, queue).  They are usually implemented in memory but what if you need persistence AND speed?  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
 
 Redis already supports a number of data structures but what if you need something like binary tree?  How would you do that?  
 
