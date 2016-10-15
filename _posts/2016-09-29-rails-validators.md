@@ -2,6 +2,8 @@
 title: "Rails validators"
 date: 2016-09-29
 categories:
+redirect_from:
+  - 2016/09/29/rails_validators.html
 ---
 
 Rails model validations are very important for ensuring data integrity.  You usually start with really simple [inline](http://edgeguides.rubyonrails.org/active_record_validations.html#presence) `validates :name, presence: true`.  

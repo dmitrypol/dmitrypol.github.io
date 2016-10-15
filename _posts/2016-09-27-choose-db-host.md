@@ -2,6 +2,8 @@
 title: "Choosing a DB hosting service"
 date: 2016-09-27
 categories: redis mongo mysql aws
+redirect_from:
+  - 2016/09/27/choose_db_host.html
 ---
 
 Small tech startup often use cloud services like [AWS](https://aws.amazon.com/), [Azure](https://azure.microsoft.com/) or [Google Cloud](https://cloud.google.com/compute/).  When you are just getting started (perhaps paying for it yourself) you can get by with a single EC2 instance hosting both DB and application on the same server.  But with success come scalabilty problems.

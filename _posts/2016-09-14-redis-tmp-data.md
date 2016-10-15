@@ -2,6 +2,8 @@
 title: "Storing ephemeral data in Redis"
 date: 2016-09-14
 categories: redis
+redirect_from:
+  - /2016/09/14/redis_tmp_data.html
 ---
 
 Usually our applications have a DB (MySQL, Postgres, etc) that we use to permanently store information about our users and other records.  But there are also situations where we need to temporary store data used by a background process.  This data might be structured very differently and would not fit into our relational DB.

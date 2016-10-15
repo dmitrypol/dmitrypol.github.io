@@ -2,6 +2,8 @@
 title: "Roles and Permissions - switching from CanCanCan to Pundit"
 date: 2016-09-29
 categories:
+redirect_from:
+  - 2016/09/29/roles_permissions.html
 ---
 
 Recently we switched our application from [CanCanCan](https://github.com/CanCanCommunity/cancancan) to [pundit](https://github.com/elabs/pundit).  CanCanCan is a great gem but we outgrew it.  Here are the various lessons learned.

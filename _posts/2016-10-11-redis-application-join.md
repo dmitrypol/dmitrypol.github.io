@@ -2,6 +2,8 @@
 title: "Redis as temp cache for application-side joins"
 date: 2016-10-11
 categories: redis mongo
+redirect_from:
+  - 2016/10/11/redis_application_join.html
 ---
 
 [SQL joins](http://www.w3schools.com/sql/sql_join.asp) are a powerful feature that enables using DB functionality to bring back records from different tables needed w/o making multiple queries.  Unfortunately some of the new NoSQL DBs do not support them.
