@@ -3,7 +3,7 @@ title: "Redis and production code coverage"
 date: 2016-10-13
 categories: redis
 redirect_from:
-  - 2016/10/13/redis_code_coverage.html
+  - redis/2016/10/13/redis_code_coverage.html
 ---
 
 Would you like to know how much of your code in production is actually getting used?  And how often?  When we run our tests we can use code coverage metrics (like [simplecov](https://github.com/colszowka/simplecov)) to see which parts of our code are tested or not.  

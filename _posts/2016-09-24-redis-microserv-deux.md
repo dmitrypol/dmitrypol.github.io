@@ -3,7 +3,7 @@ title: "Redis and async microservices - part deux"
 date: 2016-09-24
 categories: redis sidekiq
 redirect_from:
-  - 2016/09/24/redis_microserv_deux.html
+  - redis/sidekiq/2016/09/24/redis_microserv_deux.html
 ---
 
 I previously wrote about [Microservices with Sidekiq]({% post_url 2016-02-02-microservices %}) and [Redis and async microservices]({% post_url 2016-09-07-redis_microserv %}).  In this post I will continue expanding on those ideas.  
