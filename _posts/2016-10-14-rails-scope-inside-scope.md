@@ -2,6 +2,8 @@
 title: "Rails scopes inside other scopes"
 date: 2016-10-14
 categories:
+redirect_from:
+  - /2016/10/14/rails_scope_inside_scope.html
 ---
 
 [Rails scopes](http://guides.rubyonrails.org/active_record_querying.html#scopes) are a useful feature.  We can define biz logic in the scopes and use them from controller actions or other model methods.  We can also pass parameters into scopes and chain scopes together.  I am not going to go into all the options but instead share how I recently started using scopes inside other scopes in the models.  

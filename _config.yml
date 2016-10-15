@@ -29,6 +29,10 @@ gems:
   # - jekyll-lunr-js-search
   - jekyll-redirect-from
 
+whitelist:
+  - jekyll-seo-tag
+  - jekyll-redirect-from
+
 pages_list:
   About: '/about'
 
