@@ -12,7 +12,7 @@ Let's imagine a system where we have Accounts that can be `active` or `pending`.
 
 {% highlight ruby %}
 # config/application.rb
-config.demo_accounts = [id, id2]
+config.demo_accounts = [id1, id2]
 # app/models/account.rb
 field :status,          type: String
 extend Enumerize
@@ -23,7 +23,7 @@ scope :active,     ->{ where(status: :active)  }
 scope :pending,    ->{ where(status: :inactive) }
 {% endhighlight %}
 
-One option is to chain scopes `active.not_demo` but we might forget.  Or we can modify [default_scope](http://api.rubyonrails.org/classes/ActiveRecord/Scoping/Default/ClassMethods.html) to exclude `demo` but that is usually not recommended.  Instead we can simply chain scopes inside the scope.  Now whenever we call `.active` or `.pending` in our code the demo accounts will be excluded.  
+One option is to chain scopes `active.not_demo` but we might forget in our application code.  Or we can modify [default_scope](http://api.rubyonrails.org/classes/ActiveRecord/Scoping/Default/ClassMethods.html) to exclude `demo` but that is usually not recommended.  Instead we can simply chain scopes inside the scope.  Now whenever we call `.active` or `.pending` in our code the demo accounts will be excluded.  
 
 {% highlight ruby %}
 # app/models/account.rb
@@ -31,7 +31,7 @@ scope :active,     ->{ where(status: :active).not_demo  }
 scope :pending,    ->{ where(status: :inactive).not_demo }
 {% endhighlight %}
 
-We also can chaing other scopes inside `->{ ... }` to create new scopes.  
+Or we can chain multiple scopes inside `->{ ... }` to create new scopes.  
 
 {% highlight ruby %}
 # app/models/account.rb
