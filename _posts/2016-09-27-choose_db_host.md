@@ -29,7 +29,7 @@ There is a fine ballance between hosting provider's experts creating optimum con
 
 Having used Mongo Atlas UI we really like how it allows us to upgrade the cluster, add nodes or change disk size.  One thing we wish it allowed us to do is to create smaller singleton instances.  That can be useful in small POC projects where it's hard to justify the budget.  Plus they only allow you to buy extra IOPS once you reach a certain instance size.  But overall it is a great service.  We tested the upgrade process serveral times and it worked w/o any issues.  
 
-We also use [AWS ElastiCache Redis]((https://aws.amazon.com/elasticache/redis/)) but in VPC their smallest size is 1.3 GB (which is more than we need).  Other hosting providers (such as [RedisLabs](https://redislabs.com/)) allow you to have instances as small as 100MB which is a little more expensive per GB but cheaper overall.
+We also use [AWS ElastiCache Redis](https://aws.amazon.com/elasticache/redis/) but in VPC their smallest size is 1.3 GB (which is more than we need).  Other hosting providers (such as [RedisLabs](https://redislabs.com/)) allow you to have instances as small as 100MB which is a little more expensive per GB but cheaper overall.
 
 You also want to be able to control which version of the DB software you are running so it matches your dev environment.  Sometimes those choices can be limited by the hosting provider.  For example, AWS ElastiCache Redis only supports Redis 2.8.x versions which was released in 2015.  Since then there have been a number of Redis releases with interesting new features but they are not available with ElastiCache.  
 
