@@ -6,7 +6,7 @@ redirect_from:
   - redis/sidekiq/2016/09/24/redis_microserv_deux.html
 ---
 
-I previously wrote about [Microservices with Sidekiq]({% post_url 2016-02-02-microservices %}) and [Redis and async microservices]({% post_url 2016-09-07-redis_microserv %}).  In this post I will continue expanding on those ideas.  
+I previously wrote about [Microservices with Sidekiq]({% post_url 2016-02-02-microservices %}) and [Redis and async microservices]({% post_url 2016-09-07-redis-microserv %}).  In this post I will continue expanding on those ideas.  
 
 I spent a number of years working in internet advertising and will use relevant examples from my past experience (appropriately abstracted into more general use cases).  A large scale ad platform can serve billions of ads and process millions of clicks per day.  You need to be able to quickly cap accounts as they run out of budget.  When end user clicks on the ad the request goes to the click server which records the click and forwards end user to the destination.  
 
@@ -251,7 +251,7 @@ But there is an obvious downside is that you cannot sort these records by value 
 
 ### Testing
 
-Previously I have written about [testing your code with Redis]({% post_url 2016-06-08-redis_tests %}).  You can either setup real Redis instance or use [mock_redis](https://github.com/brigade/mock_redis) gem.  
+Previously I have written about [testing your code with Redis]({% post_url 2016-06-08-redis-tests %}).  You can either setup real Redis instance or use [mock_redis](https://github.com/brigade/mock_redis) gem.  
 
 {% highlight ruby %}
 # config/initializers/redis.rb

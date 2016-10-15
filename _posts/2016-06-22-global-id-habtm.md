@@ -59,7 +59,7 @@ Here the logic is spread across appropriate classes so it's much more modular.  
 
 ### Polymorphic HABTM relationship with a mapping table
 
-I previously wrote about creating [polymorphic has_and_belongs_to_many]({% post_url 2016-06-12-polymorphic_habtm %}) relationships.
+I previously wrote about creating [polymorphic has_and_belongs_to_many]({% post_url 2016-06-12-polymorphic-habtm %}) relationships.
 
 {% highlight ruby %}
 class Report

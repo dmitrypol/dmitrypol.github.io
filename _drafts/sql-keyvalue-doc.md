@@ -15,7 +15,7 @@ You do not want to create optional columns `color` and `size` in your DB.  It wi
 
 ### Document structure
 
-If you are already using a document DB like [Mongo](https://www.mongodb.com) or [Couch](http://couchdb.apache.org/) you are not constrained by that rigid table structure.  On my current project we are using [Mongoid Dynamic attributes](http://www.rubydoc.info/github/mongoid/mongoid/Mongoid/Attributes/Dynamic).  It gives us ability to define these custom fields that are only present in some of the records.  I previously wrote about that [here]({% post_url 2015-11-15-dynamic_fields %})
+If you are already using a document DB like [Mongo](https://www.mongodb.com) or [Couch](http://couchdb.apache.org/) you are not constrained by that rigid table structure.  On my current project we are using [Mongoid Dynamic attributes](http://www.rubydoc.info/github/mongoid/mongoid/Mongoid/Attributes/Dynamic).  It gives us ability to define these custom fields that are only present in some of the records.  I previously wrote about that [here]({% post_url 2015-11-15-dynamic-fields %})
 
 {% highlight ruby %}
 class Store

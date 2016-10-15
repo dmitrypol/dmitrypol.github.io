@@ -4,7 +4,7 @@ date: 2016-09-24
 categories: redis
 ---
 
-Redis makes a great choice for secondary DB.  It can be used for [caching]({% post_url 2016-05-14-redis_rails_more %}), [temp data storage]({% post_url 2016-09-14-redis_tmp_data %}) or [background queue]({% post_url 2016-09-24-redis_microserv_deux %}).  But what if we were to build a system where Redis was THE primary database?  
+Redis makes a great choice for secondary DB.  It can be used for [caching]({% post_url 2016-05-14-redis-rails-more %}), [temp data storage]({% post_url 2016-09-14-redis-tmp-data %}) or [background queue]({% post_url 2016-09-24-redis-microserv-deux %}).  But what if we were to build a system where Redis was THE primary database?  
 
 How many of you have attended a conference or a large meeting where the presenter was using too many buzzwords.  Have you heard of [buzzword bingo](https://en.wikipedia.org/wiki/Buzzword_bingo)?  As a POC let's build a simple application backed by Redis to pay buzzword bingo.
 

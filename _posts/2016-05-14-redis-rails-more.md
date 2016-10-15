@@ -4,7 +4,7 @@ date: 2016-05-14
 categories: redis mongo
 ---
 
-Recently I had a chance to present at [RedisConf](http://redisconference.com/) on various ways Redis can be used to quickly scale Rails applications.  This is a blog post is an expansion of the ideas that I discussed.  You also might want to read my previous posts about Redis [here]({% post_url 2016-03-18-sidekiq_batches %}) and [here]({% post_url 2015-10-15-redis_rails_tips %}).
+Recently I had a chance to present at [RedisConf](http://redisconference.com/) on various ways Redis can be used to quickly scale Rails applications.  This is a blog post is an expansion of the ideas that I discussed.  You also might want to read my previous posts about Redis [here]({% post_url 2016-03-18-sidekiq-batches %}) and [here]({% post_url 2015-10-15-redis-rails-tips %}).
 
 * TOC
 {:toc}

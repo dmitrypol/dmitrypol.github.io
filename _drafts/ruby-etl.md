@@ -5,7 +5,7 @@ categories:
 ---
 
 
-In previous [post]({% post_url 2016-04-03-report_frameworks %}) I wrote about various reporting tools in Ruby world.  That post turned out to be quite large so I decided to write another one about [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load), a topic closely related to reporting.  
+In previous [post]({% post_url 2016-04-03-report-frameworks %}) I wrote about various reporting tools in Ruby world.  That post turned out to be quite large so I decided to write another one about [ETL](https://en.wikipedia.org/wiki/Extract,_transform,_load), a topic closely related to reporting.  
 
 Moving data between different types of databases (SQL or NoSQL)
 
