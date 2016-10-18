@@ -1,14 +1,14 @@
 ---
-title: "Redis and complex data structures"
+title: "Storing complex data structures in Redis"
 date: 2016-10-16
 categories: redis
 ---
 
-We all uses various data structures (linked lists, arrays, hashes, etc).  They are usually implemented in memory but what if we need persistence AND speed?  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
+We use various data structures (linked lists, arrays, hashes, etc) in our applications.  They are usually implemented in memory but what if we need persistence AND speed?  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
 
 Redis has a number of powefull [data types](http://redis.io/topics/data-types-intro) but what if we need something more complex?  In this post I would like to go through commonly used data structures and see how they can be implemented using underlying Redis data types.  
 
-One of the advantages of these approaches is that we can restart some of the processes or even shutdown parts of the system for maintenance and data will be stored in Redis awaiting to be processed.
+One of the advantages of these approaches is that we can restart some of the application processes or even shutdown parts of the system for maintenance.  Data will be stored in Redis awaiting to be processed.
 
 I will use examples in [Ruby on Rails](http://rubyonrails.org/).  First, let's create a Redis connection in initializer file.  
 
@@ -35,33 +35,41 @@ http://redis.io/topics/data-types#sets
 Redis already has [hashes](http://redis.io/topics/data-types#hashes) built in.  Previously I wrote about using Redis hashes for [application-side joins]({% post_url 2016-10-11-redis-application-join %}).  
 
 {% highlight ruby %}
-#	store User data in Redis
-User.some_scope.only(:first_name, :last_name, :email).each do |u|
-	key = u.id.to_s
-	data = u.attributes.except(:_id)
-	REDIS.mapped_hmset(key, data)
+# store data in Redis
+users = User.some_scope.only(:first_name, :last_name, :email)
+RedisHash.new.set(records: users)
+#
+class RedisHash
+  def set(records:)
+    records.each do |record|
+      key = [record.class.name, record.id.to_s].join(':')
+      data = record.attributes.except(:_id, :id)
+      REDIS.mapped_hmset(key, data)
+    end
+  end
 end
-# 
-{"db":0,"key":"user_id1","ttl":-1,"type":"hash","value":
-	{"email":"user1@email.com","first_name":"first1","last_name":"last1"}...}
-{"db":0,"key":"user_id2","ttl":-1,"type":"hash","value":
-	{"email":"user2@email.com","first_name":"first2","last_name":"last2"}...}
+# data in Redis
+{"db":0,"key":"gid://your-app-name/User/user_id1","ttl":-1,"type":"hash",
+  "value":{"email":"user1@email.com","first_name":"first 1","last_name":"last 1"},...}
+{"db":0,"key":"gid://your-app-name/User/user_id1","ttl":-1,"type":"hash",
+  "value":{"email":"user2@email.com","first_name":"first 2","last_name":"last 2"}...}
 ...
 {% endhighlight %}
 
 Now when fetching records we need to go to Redis instead of using of querying main DB.  We use [OpenStruct](http://ruby-doc.org/stdlib-2.3.0/libdoc/ostruct/rdoc/OpenStruct.html) to return an object to access attributes using `user.email` vs. `user['email']`.  
 
 {% highlight ruby %}
-class GetUserData
-	def perform(user_id:)
-		data = REDIS.hgetall(user_id)
-		return OpenStruct.new(data)
-	end
+class RedisHash
+  def get(record_id:, record_class:)
+	  key = [record_class, record_id.to_s].join(':')
+	  data = REDIS.hgetall(key)
+	  return OpenStruct.new(data)
+  end
 end
-#	user has_many articles and article belongs_to user
+# user has_many articles and article belongs_to user
 Articles.each do |a|
-	puts a.user #	query DB
-	puts GetUserData.perform(a.user_id) # fetch from Redis
+  puts a.user #	query DB
+  puts RedisHash.new.get(record_id: d.user_id, record_class: 'User') # fetch from Redis
 end
 {% endhighlight %}
 
@@ -73,21 +81,21 @@ Let's imagine we have an array of email addresses `emails = ['email1', 'email2',
 {% highlight ruby %}
 # save the records
 REDIS.lpush('array', emails)
-#	data will be stored like this
+# data in Redis
 {"db":0,"key":"array","ttl":-1,"type":"list","value":["email3","email2","email1"]...}
-#	
+#
 class EmailSender
-	def perform
-		#	check if there are still records using LLEN
-		while REDIS.llen('array') > 0	
-			#	fetch email addresses in batches of 10
-			emails = REDIS.lrange('array', 0, 9)
-			emails.each do |email|
-				#	send email code here
-				REDIS.lrem('array', 1, email) # O(n) complexity
-			end	
-		end
-	end
+  def perform
+    # check if there are still records using LLEN
+    while REDIS.llen('array') > 0
+      #	fetch email addresses in batches of 10
+      emails = REDIS.lrange('array', 0, 9)
+      emails.each do |email|
+        # send email code here
+        REDIS.lrem('array', 1, email) # O(n) complexity
+      end
+     end
+   end
 end
 {% endhighlight %}
 
@@ -100,21 +108,20 @@ We can use combination of `REDIS.srandmember('array', 10)` to fetch emails in ba
 We can use `REDIS.spop(array)` which will remove and return a random member with O(1) complexity but we will have to send emails one at a time.  Usually the performance impact of making an outbound request to send email is greater than Redis operations so I would lean away from using `spop`.  
 
 {% highlight ruby %}
-#	save the records
+# save the records
 REDIS.sadd('array', emails)
-#	
+# data in Redis
 {"db":0,"key":"array","ttl":-1,"type":"set","value":["email3","email1","email2"]...}
 #
 class EmailSender
-	def perform
-		#	check if there are still records using SCARD
-		while REDIS.scard('array') > 0
-			#	fetch and remove records using options above
-			#	send email
-		end
-	end
+  def perform
+    # check if there are still records using SCARD
+    while REDIS.scard('array') > 0
+      #	fetch and remove records using options above
+      #	send email
+    end
+  end
 end
-
 {% endhighlight %}
 
 
@@ -129,12 +136,12 @@ end
 # config/routes.rb
 resources :stack, only: [:index]
 class StackController < ApplicationController
-	def index
-		REDIS.lpush('stack', params[:my_param])
-		render nothing: true, status: 200
-	end
+  def index
+    REDIS.lpush('stack', params[:my_param])
+    render nothing: true, status: 200
+  end
 end
-# data in Redis is stored like this
+# data in Redis
 {"db":0,"key":"stack","ttl":-1,"type":"list","value":["foo2","foo1","foo"]...}
 {% endhighlight %}
 
@@ -142,11 +149,11 @@ To process messages we create another Ruby class.  It which can be run via daemo
 
 {% highlight ruby %}
 class ProcessStack
-	def perform
-		while REDIS.llen('stack') > 0
-			item = REDIS.lpop('stack')	#	grab first item
-		end
-	end
+  def perform
+    while REDIS.llen('stack') > 0
+      item = REDIS.lpop('stack')	#	grab first item
+    end
+  end
 end
 {% endhighlight %}
 
@@ -157,18 +164,18 @@ For Queues the design similar.  We can use `lpush` and `rpop` or swtich to `rpus
 resources :queue, only: [:index]
 #
 class QueueController < ApplicationController
-	def index
-		REDIS.rpush('queu', params[:my_param])
-		render nothing: true, status: 200
-	end
+  def index
+    REDIS.rpush('queu', params[:my_param])
+    render nothing: true, status: 200
+  end
 end
-# 
+#
 class ProcessQueue
-	def perform
-		while REDIS.llen('queue') > 0
-			item = REDIS.lpop('queue') #	grab last item
-		end
-	end
+  def perform
+    while REDIS.llen('queue') > 0
+      item = REDIS.lpop('queue') #	grab last item
+    end
+  end
 end
 {% endhighlight %}
 

@@ -11,3 +11,9 @@ categories: redis
 Let's explore how can we build a real CRUD dashboard for Redis data in RailsAdmin.  
 
 https://github.com/soveran/ohm
+
+check for different data structures and load the necessary partials to edit them.  Else check 'unknown Redis data types'
+
+Pagination
+
+Search
