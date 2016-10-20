@@ -49,9 +49,9 @@ class RedisHash
   end
 end
 # data in Redis
-{"db":0,"key":"gid://your-app-name/User/user_id1","ttl":-1,"type":"hash",
+{"db":0,"key":"User/user_id1","ttl":-1,"type":"hash",
   "value":{"email":"user1@email.com","first_name":"first 1","last_name":"last 1"},...}
-{"db":0,"key":"gid://your-app-name/User/user_id1","ttl":-1,"type":"hash",
+{"db":0,"key":"User/user_id1","ttl":-1,"type":"hash",
   "value":{"email":"user2@email.com","first_name":"first 2","last_name":"last 2"}...}
 ...
 {% endhighlight %}
