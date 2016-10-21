@@ -54,6 +54,8 @@ We could create a dedicated field to store serialized version of multiple custom
 
 The downside with this approach is that it significantly limits using rich SQL querying capabilities.  How do you query all Orders where size is large if size is serialized in this JSON field?  You have to do [SQL LIKE](http://www.tutorialspoint.com/sql/sql-like-clause.htm) queries which is slow and less reliable.  
 
+https://www.sitepoint.com/use-json-data-fields-mysql-databases/
+
 ### Custom tables per client
 
 At a previous job we ended building custom solution that created special tables (one for each customer).  They had the columns that those customer's user recoreds needed and were linked to the main `Users` table.  It took a long time to build and maintain.  
