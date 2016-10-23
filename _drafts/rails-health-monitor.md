@@ -17,3 +17,5 @@ https://github.com/sportngin/okcomputer
 http://blog.arkency.com/2016/02/the-smart-way-to-check-health-of-a-rails-app/
 
 Create my own gem - Rails Engine, mount route, create initializer where checks are configured
+
+http://godrb.com/

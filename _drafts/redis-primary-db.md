@@ -108,3 +108,5 @@ https://github.com/nateware/redis-objects
 {% endhighlight %}
 
 http://tylerstroud.com/2014/11/18/storing-and-querying-objects-in-redis/
+
+https://www.sitepoint.com/semi-relational-data-modeling-redis-ohm/

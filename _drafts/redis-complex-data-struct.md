@@ -1,6 +1,6 @@
 ---
 title: "Storing complex data structures in Redis"
-date: 2016-10-22
+date: 2016-10-23
 categories: redis
 ---
 
@@ -16,18 +16,6 @@ I will use examples in [Ruby on Rails](http://rubyonrails.org/).  First, let's c
 # config/initializers/redis.rb
 REDIS = Redis.new(host: 'localhost', port: 6379, db: 0, driver: :hiredis)
 {% endhighlight %}
-
-
-#### Linked lists
-
-https://www.tutorialspoint.com/data_structures_algorithms/linked_list_algorithms.htm
-
-[Redis Lists](http://redis.io/topics/data-types#lists)
-
-
-#### Sets
-
-http://redis.io/topics/data-types#sets
 
 
 #### Hashes
@@ -73,13 +61,13 @@ class EmailSender
 end
 {% endhighlight %}
 
-Alternatively we can persist our array as Redis Sets.  Sets do not allow repeated members so that will ensure our email addresses are unique (which could be desirable or not).  There are a few different ways we can fetch needed records from Redis.  
+Alternatively we can persist our array as [Redis Sets](http://redis.io/topics/data-types#sets).  Sets do not allow repeated members so that will ensure our email addresses are unique (which could be desirable or not).  There are a few different ways we can fetch needed records from Redis.  
 
 We can use `REDIS.smembers('array')` which will return all records at once (but we might not want that).  We will then use `REDIS.srem(array, email)` (which is O(n) complexity) to remove records after sending each one.  But if our application crashes in the middle of sending we will still have unsent email addresses saved in Redis.  
 
 We can use combination of `REDIS.srandmember('array', 10)` to fetch emails in batches of 10.  Then we loop through the batch, send the messages and `REDIS.srem(array, email)`.  `srandmember` is also O(n) complexity.  
 
-We can use `REDIS.spop(array)` which will remove and return a random member with O(1) complexity but we will have to send emails one at a time.  Usually the performance impact of making an outbound request to send email is greater than Redis operations so I would lean away from using `spop`.  
+We can use `REDIS.spop(array)` which will remove and return a random member with O(1) complexity but we will have to send emails one at a time.  Usually the performance impact of making an outbound request to send email is greater than Redis operations so I would stay away from using `spop`.  
 
 {% highlight ruby %}
 # save the records
@@ -99,12 +87,6 @@ end
 {% endhighlight %}
 
 
-#### Ranges
-
-One option is to convert range to array and then save it to Redis.  
-
-
-
 #### Stacks and Queues
 
 [Stacks](https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm) and [Queues](https://www.tutorialspoint.com/data_structures_algorithms/dsa_queue.htm) can be implemented with Redis Lists.  Let's imagine an API endpoint that receives messages `http://localhost:3000/stack?my_param=foo`
@@ -122,7 +104,7 @@ end
 {"db":0,"key":"stack","ttl":-1,"type":"list","value":["foo2","foo1","foo"]...}
 {% endhighlight %}
 
-To process messages we create another Ruby class.  It which can be run via daemon, [ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html) or even cron).
+To process messages we create another Ruby class.  It can be run via [daemon](https://github.com/thuehlinger/daemons), [ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html) or even cron).
 
 {% highlight ruby %}
 class ProcessStack
@@ -157,7 +139,76 @@ end
 {% endhighlight %}
 
 
+
+
+
+
+#### Sets
+
+Redis already has a [Set](http://redis.io/topics/data-types#sets) data type so this is pretty straightforward.  Here is an example with [Ruby Set](http://ruby-doc.org/stdlib-2.3.1/libdoc/set/rdoc/Set.html).  
+
+{% highlight ruby %}
+set1 = Set.new([1,2,3])
+REDIS.sadd('set1', set1.to_a)
+#
+{"db":0,"key":"pundit:a","ttl":-1,"type":"set","value":["#<Set:0x00000004ba6d10>"],"size":23}
+{"db":0,"key":"pundit:b","ttl":-1,"type":"set","value":["1","2","3"],"size":3}
+{% endhighlight %}
+
+val1 = REDIS.spop('set1')
+
+We can see [here](http://redis.io/commands#set) how to do powerful operations with by adding/removing items from different Sets.  We also can do more interesting things with [Sorted Sets](http://redis.io/commands#sorted_set).  
+
+
+
+
+#### Ranges
+
+https://www.tutorialspoint.com/ruby/ruby_ranges.htm
+
+One option is to convert range to array and then save it to Redis.  But that will require more memory.  
+
+{% highlight ruby %}
+
+{% endhighlight %}
+
+
+Another choice is to store the first element of the range and the last one.  We return those and let application handle it.  The problem is that we might need to loop through the items in the range and what if our process is restarted during that?  
+
+
+
+
+{% highlight ruby %}
+
+{% endhighlight %}
+
+
+
+#### Linked lists
+
+https://www.tutorialspoint.com/data_structures_algorithms/linked_list_algorithms.htm
+
+https://www.sitepoint.com/rubys-missing-data-structure/
+
+
+
+[Redis Lists](http://redis.io/topics/data-types#lists)
+
+
+
+
+
+
+{% highlight ruby %}
+
+{% endhighlight %}
+
+
+
+
 #### Binary trees
+
+
 
 
 #### Graphs
@@ -167,18 +218,18 @@ https://www.tutorialspoint.com/data_structures_algorithms/graph_data_structure.h
 https://github.com/agoragames/amico
 
 
-{% highlight ruby %}
-
-{% endhighlight %}
 
 
 
 {% highlight ruby %}
 
 {% endhighlight %}
+
+
 
 
 https://www.sitepoint.com/ruby-interview-questions-linked-lists-and-hash-tables/
 
 https://github.com/nateware/redis-objects
 
+http://jimneath.org/2011/03/24/using-redis-with-ruby-on-rails.html#redis_data_types

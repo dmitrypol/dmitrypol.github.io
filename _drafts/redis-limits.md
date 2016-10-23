@@ -15,3 +15,5 @@ Too long key / values
 Max integer for count and score on sorted set.  Use incrby
 
 Max number of DBs (default is 16)
+
+Set value for blank key
