@@ -1,10 +1,10 @@
 ---
 title: "Storing complex data structures in Redis"
-date: 2016-10-16
+date: 2016-10-22
 categories: redis
 ---
 
-We use various data structures (linked lists, arrays, hashes, etc) in our applications.  They are usually implemented in memory but what if we need persistence AND speed?  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
+We use various data structures (linked lists, arrays, hashes, etc) in our applications.  They are usually implemented in memory but sometimes we need persistence AND speed.  This is where in memory DB like [Redis](http://redis.io/) can be very useful.  
 
 Redis has a number of powefull [data types](http://redis.io/topics/data-types-intro) but what if we need something more complex?  In this post I would like to go through commonly used data structures and see how they can be implemented using underlying Redis data types.  
 
@@ -32,47 +32,21 @@ http://redis.io/topics/data-types#sets
 
 #### Hashes
 
-Redis already has [hashes](http://redis.io/topics/data-types#hashes) built in.  Previously I wrote about using Redis hashes for [application-side joins]({% post_url 2016-10-11-redis-application-join %}).  
+Redis already has [hashes](http://redis.io/topics/data-types#hashes) built in.  Previously I wrote about using Redis hashes for [application-side joins]({% post_url 2016-10-22-redis-app-join-gem %}) and the [redis_app_join](https://rubygems.org/gems/redis_app_join) gem I created.  
 
 {% highlight ruby %}
-# store data in Redis
+include RedisAppJoin
+# cache records
 users = User.some_scope.only(:first_name, :last_name, :email)
-RedisHash.new.set(records: users)
-#
-class RedisHash
-  def set(records:)
-    records.each do |record|
-      key = [record.class.name, record.id.to_s].join(':')
-      data = record.attributes.except(:_id, :id)
-      REDIS.mapped_hmset(key, data)
-    end
-  end
-end
+cache_records(records: users)
 # data in Redis
 {"db":0,"key":"User/user_id1","ttl":-1,"type":"hash",
   "value":{"email":"user1@email.com","first_name":"first 1","last_name":"last 1"},...}
-{"db":0,"key":"User/user_id1","ttl":-1,"type":"hash",
-  "value":{"email":"user2@email.com","first_name":"first 2","last_name":"last 2"}...}
-...
+# fetch records
+users = fetch_records(record_class: 'User', record_ids: [id1, id2, ...])
 {% endhighlight %}
 
-Now when fetching records we need to go to Redis instead of using of querying main DB.  We use [OpenStruct](http://ruby-doc.org/stdlib-2.3.0/libdoc/ostruct/rdoc/OpenStruct.html) to return an object to access attributes using `user.email` vs. `user['email']`.  
-
-{% highlight ruby %}
-class RedisHash
-  def get(record_id:, record_class:)
-	  key = [record_class, record_id.to_s].join(':')
-	  data = REDIS.hgetall(key)
-	  return OpenStruct.new(data)
-  end
-end
-# user has_many articles and article belongs_to user
-Articles.each do |a|
-  puts a.user #	query DB
-  puts RedisHash.new.get(record_id: d.user_id, record_class: 'User') # fetch from Redis
-end
-{% endhighlight %}
-
+The gem uses `mapped_hmset` to store and `hget` to fetch data.  It also uses [OpenStruct](http://ruby-doc.org/stdlib-2.3.0/libdoc/ostruct/rdoc/OpenStruct.html) to return an object to access attributes using `user.email` vs. `user['email']`.  
 
 #### Arrays
 
@@ -126,6 +100,9 @@ end
 
 
 #### Ranges
+
+One option is to convert range to array and then save it to Redis.  
+
 
 
 #### Stacks and Queues
@@ -187,6 +164,7 @@ end
 
 https://www.tutorialspoint.com/data_structures_algorithms/graph_data_structure.htm
 
+https://github.com/agoragames/amico
 
 
 {% highlight ruby %}
@@ -201,3 +179,6 @@ https://www.tutorialspoint.com/data_structures_algorithms/graph_data_structure.h
 
 
 https://www.sitepoint.com/ruby-interview-questions-linked-lists-and-hash-tables/
+
+https://github.com/nateware/redis-objects
+
