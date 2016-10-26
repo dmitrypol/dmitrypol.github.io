@@ -27,26 +27,43 @@ You can have a controller end point that queues up a background job that will qu
 
 ### View only
 
-Often in your application you would have a `home#index` page (and perhaps also `home#about` and `home#help).  If those pages only present static text you can just need routes and a blank controller w/o any actions.
+Often in your application you would have a `home#index` page (and perhaps also `home#about` and `home#help).  If those pages only present static text you can just need routes and a blank controller w/o any actions.  
 
 {% highlight ruby %}
 # config/routes.rb
 Rails.application.routes.draw do
-  get 'home/home'
   get 'home/index'
   get 'home/about'
+  get 'home/help'
 end
 # app/controllers/welcome_controller.rb
 class WelcomeController < ApplicationController
 end
+# app/views/welcome/index.html.erb
+Welcome to our site
 {% endhighlight %}
-
 
 
 
 ### Expand concept of model
 
 Not just something tied to a DB table but a place to put business model logic.  
+
+#### Form objects
+
+Receive data from controller and save to multiple tables or send emails.  
+
+Often we include different Rails modules in some of the classes.  
+
+{% highlight ruby %}
+class UserForm
+  include ActiveModel::Model
+  attr_accessor :name, :email
+  validates :name, :email, presence: true
+  def initialize(attributes={})
+  end
+end
+{% endhighlight %}
 
 
 #### Service objects
@@ -55,11 +72,13 @@ Either save or extract data.
 
 CanCanCan `ability.rb` lives in app/models but it's not fied to a table.  
 
+We can also include specific Rails modules to get the functionality we need.
 
-#### Form objects
-
-Receive data from controller and save to multiple tables or send emails.  
-
+{% highlight ruby %}
+class MyService
+  include Rails.application.routes.url_helpers
+end
+{% endhighlight %}
 
 #### Decorators and Serializers
 
@@ -78,7 +97,6 @@ Closesly tied to models backed by DB tables.
 
 
 ### Conclusion
-
 
 
 
