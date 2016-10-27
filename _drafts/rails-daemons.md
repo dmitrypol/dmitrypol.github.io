@@ -11,6 +11,9 @@ https://github.com/thuehlinger/daemons
 Let's envision a system where Users update their records.  Once
 
 
+Running daemons on multiple servers but ensuring that only one does the work.  How does Sidekiq runs jobs
+
+
 {% highlight ruby %}
 
 {% endhighlight %}

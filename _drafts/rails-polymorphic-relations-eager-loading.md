@@ -1,14 +1,12 @@
 ---
 title: "Rails polymorphic relations and eager loading"
-date: 2016-10-26
+date: 2016-10-27
 categories:
 ---
 
+This is a follow up on previous post about [nested routes and polymorphic associations]({% post_url 2016-10-26-rails-nested-routes-polymorphic-associations %}).  
 
-2016-10-26-rails-nested-routes-polymorphic-associations.md
-
-
-Let's imagine a CMS where Article can belong to either User or Company.  With polymorphic relations we can model it like this:
+Let's look at our CMS where Article can belong to either User or Company.  Here are the DB models:
 
 {% highlight ruby %}
 # app/models/user.rb
@@ -25,7 +23,18 @@ class Article
 end
 {% endhighlight %}
 
-Now on to controller
+UI behind `http://localhost:3000/articles` will have this:
+
+{% highlight ruby %}
+# app/views/articles/index.html.erb
+<% @articles.each do |article| %>
+  ...
+  <td><%= article.author.name %></td>
+  ...
+<% end %>
+{% endhighlight %}
+
+The problem is it will cause N+1 queries as we fetch each user and company names separately.  We can try to implement the usual [Rails includes](http://guides.rubyonrails.org/active_record_querying.html)
 
 {% highlight ruby %}
 class ArticlesController < ApplicationController
@@ -35,4 +44,22 @@ class ArticlesController < ApplicationController
 end
 {% endhighlight %}
 
-Otherwise we cause N+1 queries as we query for each author (user or company)
+
+http://stackoverflow.com/questions/22012832/rails-includes-with-polymorphic-association
+
+
+
+This does not work with [Mongoid includes](http://www.rubydoc.info/github/mongoid/mongoid/Mongoid%2FCriteria%3Aincludes) and  results in error message:
+
+{% highlight ruby %}
+message:
+  Eager loading :author is not supported since it is a polymorphic
+  belongs_to relation.
+summary:
+  Mongoid cannot currently determine the classes it needs to eager load when
+  the relation is polymorphic. The parents reside in different collections
+  so a simple id lookup is not sufficient enough.
+resolution:
+  Don't attempt to perform this action and have patience,
+  maybe this will be supported in the future.
+{% endhighlight %}
