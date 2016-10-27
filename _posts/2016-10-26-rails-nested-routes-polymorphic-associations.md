@@ -106,6 +106,8 @@ class Pathfinder
     @record = record
   end
   def index
+    # we can DRY this code by following user_id / company_id
+    # pattern when deciding with `_path` helper to return.  
     if @params[:user_id].present?
       user_articles_path(@params[:user_id])
     elsif @params[:company_id].present?
@@ -126,7 +128,7 @@ class Pathfinder
 end
 {% endhighlight %}
 
-We can DRY this code by following user_id / company_id pattern when deciding with `_path` helper to return.  Now we can replace our `link_to` helpers in ERB files with these:
+Now we can replace our `link_to` helpers in ERB files with these:
 
 {% highlight ruby %}
 <%= link_to 'Back', Pathfinder.new(params: params, record: @article).index %>

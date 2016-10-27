@@ -8,7 +8,7 @@ As we scale our systems we can break up monolithic applications into more micros
 
 Sometimes instead of building a true microservice architecture where each app is responsible for only one thing we could combine them into more general groups.  
 
-Deploying microservices from shared code base where each one can be scaled / started Separately.
+Deploying microservices from shared code base where each one can be scaled / started separately.
 
 For a blogging platform we might have UI that users use to manage articles.  There is a publishing system that is used to read articles (lots of caching).
 
@@ -22,3 +22,7 @@ My 3 previous posts on microservices.
 http://martinfowler.com/microservices/
 http://www.martinfowler.com/articles/microservices.html
 http://martinfowler.com/tags/microservices.html
+
+
+### Useful links
+* [https://resources.codeship.com/webinars/thank-you-building-apps-with-microservices](https://resources.codeship.com/webinars/thank-you-building-apps-with-microservices)
