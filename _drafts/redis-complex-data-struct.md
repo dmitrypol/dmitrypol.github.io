@@ -1,6 +1,6 @@
 ---
 title: "Storing complex data structures in Redis"
-date: 2016-10-23
+date: 2016-10-27
 categories: redis
 ---
 
@@ -209,7 +209,10 @@ https://www.sitepoint.com/rubys-missing-data-structure/
 #### Binary trees
 
 
+https://www.tutorialspoint.com/data_structures_algorithms/binary_search_tree.htm
 
+
+http://rubyalgorithms.com/binary_search_tree.html
 
 #### Graphs
 

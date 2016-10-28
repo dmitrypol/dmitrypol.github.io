@@ -72,7 +72,7 @@ Sometimes the migrations are so complex that we want to write actual automated t
 {% highlight ruby %}
 # spec/migrations/user_migration_spec.rb
 require 'rails_helper'
-# you need to load migration class
+# load migration class
 require Dir[Rails.root.join('db/migrate/*_user_migration.rb')].first
 describe UserMigration, type: :migration do
   it 'up' do

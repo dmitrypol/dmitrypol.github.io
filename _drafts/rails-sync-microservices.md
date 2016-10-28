@@ -13,3 +13,6 @@ previous posts
 VCR
 discoball
 webmock
+
+https://codewords.recurse.com/issues/five/what-restful-actually-means
+http://martinfowler.com/articles/richardsonMaturityModel.html

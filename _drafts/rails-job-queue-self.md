@@ -12,7 +12,6 @@ https://github.com/steelThread/redmon
 class MyJob < ApplicationJob
   queue_as :low
   self.queue_adapter = :sidekiq
-
   def perform
     # do stuff
   ensure
