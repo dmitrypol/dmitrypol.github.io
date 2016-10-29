@@ -1,7 +1,7 @@
 ---
-title: "Ruby Blocks Procs Lambdas"
-date: 2016-10-26
+title: "Ruby Blocks Procs and Lambdas"
+date: 2016-10-28
 categories:
 ---
 
-Much has been written about these but why not have yet another article.  
+Much has been written about these but I wanted to share some of my experiences where I prefer to use them.  

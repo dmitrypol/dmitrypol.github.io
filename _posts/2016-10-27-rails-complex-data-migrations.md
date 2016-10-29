@@ -91,6 +91,69 @@ end
 
 The same approach should work with data migrations in SQL DBs.  Just treat migrations as Ruby classes and test their methods.  
 
+### Polymorphic relationships
+
+Here are a few simple [polymorphic](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations) models.  
+
+{% highlight ruby %}
+# app/models/user.rb
+class User
+  has_many :articles, as: :author, dependent: :delete
+end
+# app/models/article.rb
+class Article
+  belongs_to :article, polymorphic: true
+end
+{% endhighlight %}
+
+We now need to rename User model to Person.  We can rename the class and DB table but how do we change the article relationships?  Well, as long as the IDs of indvividual person/user records did not change we can do this:
+
+{% highlight ruby %}
+Article.where(author_type: 'User').update_all(author_type: 'Person')
+{% endhighlight %}
+
+### Has And Belongs To Many relationships
+
+With [Mongoid has_and_belongs_to_many](https://docs.mongodb.com/ruby-driver/master/tutorials/6.0.0/mongoid-relations/#has-and-belongs-to-many) we can store child records in an array inside the parent.  
+
+{% highlight ruby %}
+# app/models/user.rb
+class User
+  has_and_belongs_to_many :groups
+end
+# app/models/group.rb
+class Group
+  has_and_belongs_to_many :users
+end
+{% endhighlight %}
+
+It will look like this in the DB:
+
+{% highlight ruby %}
+# User record
+{
+    "_id" : ObjectId("56941557213ae91d96000002"),
+    "name" : "Bob Smith",
+    "group_ids" : [
+        ObjectId("56158d9269702d7a8c00018a")
+    ]
+}
+# Group record
+{
+    "_id" : ObjectId("56158d9269702d7a8c00018a"),
+    "name" : "Soccer group",
+    "user_ids" : [
+        ObjectId("56941557213ae91d96000002")
+    ]
+}
+{% endhighlight %}
+
+Now we need to rename Group to Team.  Here is the migraiton.  
+
+{% highlight ruby %}
+  User.exists(group_ids: true).rename(group_ids: :team_ids)
+{% endhighlight %}
+
 ### Useful links
 
 * [https://robots.thoughtbot.com/data-migrations-in-rails](https://robots.thoughtbot.com/data-migrations-in-rails)
