@@ -1,7 +1,7 @@
 ---
 title: "Rails and static content generators"
 date: 2016-10-27
-categories:
+categories: rails
 ---
 
 Rails CMS https://hackhands.com/9-best-ruby-rails-content-management-systems-cms/

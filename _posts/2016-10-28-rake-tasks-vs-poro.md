@@ -1,7 +1,9 @@
 ---
 title: "Rake tasks vs. Ruby classes"
 date: 2016-10-28
-categories:
+categories: rails
+redirect_from:
+  - /2016/10/28/rake-tasks-vs-poro.html
 ---
 
 When several years ago I started working with [Ruby on Rails](http://rubyonrails.org/) I liked [Rake tasks](https://github.com/ruby/rake). To me they were a great step up from ad hoc bash and SQL scripts.  It was a way to build powerful CLIs to do basis sysadmin tasks, generate ad hoc reports, upload/download files, etc.  

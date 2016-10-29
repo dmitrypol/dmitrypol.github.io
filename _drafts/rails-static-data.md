@@ -1,7 +1,7 @@
 ---
 title: "Rails and static data"
 date: 2016-10-29
-categories:
+categories: rails
 ---
 
 Usually in our Rails application the data is stored in DB.  We use controllers and models to read and write it.  But sometimes that data is so static it does not make sense to put it in DB.  

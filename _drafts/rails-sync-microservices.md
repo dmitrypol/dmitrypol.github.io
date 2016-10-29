@@ -1,7 +1,7 @@
 ---
 title: "Rails synchronous microservices"
 date: 2016-10-26
-categories:
+categories: rails
 ---
 
 Creating microservices with Rails.  Communicate via REST APIs

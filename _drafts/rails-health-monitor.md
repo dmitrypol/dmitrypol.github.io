@@ -1,7 +1,7 @@
 ---
 title: "Rails health monitoring"
 date: 2016-10-21
-categories:
+categories: rails
 ---
 
 Previous post on [/health]({% post_url 2015-02-17-prod-monitor %}).

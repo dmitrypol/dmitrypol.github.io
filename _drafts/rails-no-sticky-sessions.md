@@ -1,7 +1,7 @@
 ---
 title: "Rails session storage"
 date: 2016-09-21
-categories: redis mongo
+categories: rails redis mongo
 ---
 
 When you build your site on a singleton application server thins are very simple.  But then you need to start scaling out (usually better approach than scaling up) and you need to worry about session state management.  

@@ -1,7 +1,7 @@
 ---
 title: "Rails polymorphic relations and eager loading"
 date: 2016-10-27
-categories:
+categories: rails
 ---
 
 This is a follow up on previous post about [nested routes and polymorphic associations]({% post_url 2016-10-26-rails-nested-routes-polymorphic-associations %}).  

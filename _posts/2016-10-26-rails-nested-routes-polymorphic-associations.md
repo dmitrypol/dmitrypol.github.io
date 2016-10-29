@@ -1,7 +1,9 @@
 ---
 title: "Rails nested routes and  polymorphic associations"
 date: 2016-10-26
-categories:
+categories: rails
+redirect_from:
+  - /2016/10/26/rails-nested-routes-polymorphic-associations.html
 ---
 
 Recently at work we had to implement [Rails nested resources](http://guides.rubyonrails.org/routing.html#nested-resources) with a [polymorphic association](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations).  I thought it would create an interesting blog post.  

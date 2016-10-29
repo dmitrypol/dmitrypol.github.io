@@ -1,7 +1,7 @@
 ---
 title: "Rails job queueing self"
 date: 2016-10-25
-categories:
+categories: rails
 ---
 
 http://guides.rubyonrails.org/active_job_basics.html

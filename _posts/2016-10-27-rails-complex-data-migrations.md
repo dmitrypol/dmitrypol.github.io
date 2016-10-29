@@ -1,7 +1,9 @@
 ---
 title: "Rails and complex data migrations"
 date: 2016-10-27
-categories:
+categories: rails
+redirect_from:
+  - /2016/10/27/rails-complex-data-migrations.html
 ---
 
 When working with NoSQL DBs we do not worry about schema changes but we still need to do data migrations.  We have been using [mongoid_rails_migrations](https://github.com/adacosta/mongoid_rails_migrations) for this.

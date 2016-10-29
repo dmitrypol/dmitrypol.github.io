@@ -1,7 +1,7 @@
 ---
 title: "Using Rails with many different databases"
 date: 2016-05-11
-categories: redis mongo mysql elasticsearch
+categories: rails redis mongo mysql elasticsearch
 ---
 
 It is easy to find articles online debating pros and cons of different databases.  Often they have catching titles like "Why you should never use X DB".  And yes, different databases have different strengths and weaknesses.  Choosing a DB that does not fit your long term needs can be a costly decision.
