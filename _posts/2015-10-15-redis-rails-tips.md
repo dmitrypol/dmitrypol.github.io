@@ -1,5 +1,5 @@
 ---
-title:  "Tips & Tricks with Redis and Rails"
+title:  "Tips & tricks with Redis and Rails"
 date: 	2015-10-15
 categories: redis
 ---

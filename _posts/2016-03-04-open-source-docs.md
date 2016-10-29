@@ -1,5 +1,5 @@
 ---
-title:  "Open Source Software and Documentation"
+title:  "Open source software and documentation"
 date: 2016-03-04
 categories:
 ---

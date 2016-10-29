@@ -1,5 +1,5 @@
 ---
-title:  "RailsAdmin Custom Actions"
+title:  "RailsAdmin custom actions"
 date: 	2015-09-10
 categories:
 ---

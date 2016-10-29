@@ -1,5 +1,5 @@
 ---
-title: "Avoiding Single Points of Failure"
+title: "Avoiding single points of failure"
 date: 2015-06-09
 categories: redis
 ---

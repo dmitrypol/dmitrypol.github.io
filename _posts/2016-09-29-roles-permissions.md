@@ -1,5 +1,5 @@
 ---
-title: "Roles and Permissions - switching from CanCanCan to Pundit"
+title: "Roles and permissions - switching from CanCanCan to Pundit"
 date: 2016-09-29
 categories:
 redirect_from:
