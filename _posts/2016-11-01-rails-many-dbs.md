@@ -8,7 +8,7 @@ It is easy to find articles online debating pros and cons of different databases
 
 The question I'd like to ask is why should we choose?  Why can't we use different databases w/in the same application for different purposes?  Obviously it introduces additional complexity into our code and ops infrastructure but it can be a tremendous benefit too.  We can use [MySQL](https://www.mysql.com/) as the main relational database but leverage [Redis](http://redis.io/) for caching and [MongoDB](https://www.mongodb.com/) for advanced data aggregation.
 
-Let's imagine we are building a blogging platform.  We will have UI where users can manage their profile, create articles, etc.  We also need a separate publishing server that can display millions of pages per day.  And we need a service to run various background processes, generate reports, aggregate page views, etc.
+Let's imagine we are building a blogging platform with [Ruby on Rails](http://rubyonrails.org/).  We will have UI where users can manage their profiles, create articles, etc.  We also need a separate publishing server that can display millions of pages per day.  And we need a service to run various background processes, generate reports, aggregate page views, etc.
 
 Disclaimer - this post will cover topics (caching, microservices, background jobs) that I already discussed in preivous articles.  But instead of going into details I want to focus on combining various approaches.
 
@@ -104,9 +104,30 @@ end
 ...
 {% endhighlight %}
 
+We do not need to limit ourselves to just one Redis server.  We could use one for caching, another for background jobs and third for data storage.  We could even implement application level data sharding.
+
+{% highlight ruby %}
+# config/initializers/redis.rb
+REDIS1 = Redis.new(host: 'server1', port: 6379, db: 0)
+REDIS2 = Redis.new(host: 'server2', port: 6379, db: 0)
+...
+# app/services/redis_shard.rb
+class RedisShard
+  def initialize
+  end
+  def perform
+    shard_numer = X # some code here to
+    # => get the Redis connection to the right shard
+    redis = "REDIS#{shard_nubmer}".constantize
+    redis.set ...
+  end
+end
+{% endhighlight %}
+
+
 ### MongoDB
 
-Ability to have flexible schema and aggregate data in one document is a useful tool.  And with Mongo (unlike Redis) we can query by values.  Our `ArticleShowJob` can push data using Mongo Ruby [driver](http://api.mongodb.com/ruby/current/) into Mongo `page_views` collection:
+Ability to have flexible schema and aggregate data in one document is a useful tool.  And with Mongo (unlike Redis) we can query by values.  Our `ArticleShowJob` can push data using Mongo Ruby [driver](http://api.mongodb.com/ruby/current/) into Mongo `page_views` collection (we are NOT using an ORM like Mongoid).
 
 {% highlight ruby %}
 # config/initializers/mongo.rb
@@ -140,13 +161,22 @@ end
 # app/views/articles/stats.html.erb
 <% @page_stats.each do |stat| %>
   <tr>
-    <td><%= stat.first %></td>
-    <td><%= stat.second %></td>
+    <td><%= stat.split(':').first %></td>
+    <td><%= stat.split(':').second %></td>
   </tr>
 <% end %>
 {% endhighlight %}
 
-
 We can aggregate data on which domains are driving our traffic, which IPs users are coming from, etc.  We can create different collections in Mongo for grouping this data by different time periods (daily vs. monthly) and then use Mongo [TTL indexes](https://docs.mongodb.com/v3.2/core/index-ttl/) to purge old records.
 
-Additionally Rails apps can be integrated with other DBs ([Neo4j](https://neo4j.com/), [RethinkDB](https://www.rethinkdb.com/), etc) but I have never done that.  
+Similar as with multiple Redis servers above we could talk to different Mongo servers, databases or collections.
+
+{% highlight ruby %}
+# config/initializers/mongo.rb
+client1 = Mongo::Client.new([ 'server1:27017' ], :database => 'db1')
+COL1 = client1[:collection1]
+client2 = Mongo::Client.new([ 'server2:27017' ], :database => 'db2')
+COL2 = client2[:collection2]
+{% endhighlight %}
+
+I hope the ideas above were a useful overview.  As I said at the beginning of this post, I did not go into the details but focused on general design.  This approach can be used to integrate Rails apps with other DBs ([Neo4j](https://neo4j.com/), [RethinkDB](https://www.rethinkdb.com/), etc).
