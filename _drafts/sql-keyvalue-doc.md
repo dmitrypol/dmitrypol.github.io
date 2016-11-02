@@ -58,7 +58,7 @@ https://www.sitepoint.com/use-json-data-fields-mysql-databases/
 
 ### Custom tables per client
 
-At a previous job we ended building custom solution that created special tables (one for each customer).  They had the columns that those customer's user recoreds needed and were linked to the main `Users` table.  It took a long time to build and maintain.  
+At a previous job we ended building custom solution that created special tables (one for each customer).  They had the columns that those customer's user records needed and were linked to the main `Users` table.  It took a long time to build and maintain.  
 
 ### SQL plus Key Value
 

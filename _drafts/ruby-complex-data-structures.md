@@ -9,6 +9,10 @@ Ruby has built in support for a number of [data structures](https://www.sitepoin
 
 ### Linked List
 
+Single
+Double
+Circular
+
 {% highlight ruby %}
 
 {% endhighlight %}
@@ -29,33 +33,32 @@ Ruby has built in support for a number of [data structures](https://www.sitepoin
 Let's imagine we have this DB / model setup for company employees:
 
 {% highlight ruby %}
-# app/models/employee.rb
+# app/models/user.rb
 class User
   field :name
   belongs_to :manager, class_name: 'User'
   has_many   :reports, class_name: 'User'
-  #
   def org_structure_down
-    reports.map do |rep|
-      [rep] + rep.reports
-    end
+    reports.map do |report|
+      [report.name] << report.org_structure_down
+    end.flatten
   end
-  #
   def org_structure_up
     if manager.present?
-      [manager] + manager.org_structure_up
+      [manager.name] << manager.org_structure_up
     else
-      self
-    end
+      []
+    end.flatten
   end
-  #
   def ceo
     org_structure_up.last
   end
 end
 {% endhighlight %}
 
-It would be logical to use tree to store the company hierarchy.  [Rubytree](https://rubygems.org/gems/rubytree/) is a very mature gem that suits this purpose.  
+The problem is that `org_structure_up` and `org_structure_down` use recursion to bring back arrays of names.  It would be better to use tree to store the company hierarchy.  [Rubytree](https://rubygems.org/gems/rubytree/) is a very mature gem that can be used for this purpose.  
+
+#### Binary tree
 
 
 
