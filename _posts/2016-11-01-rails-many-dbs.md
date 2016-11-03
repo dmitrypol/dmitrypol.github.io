@@ -1,7 +1,9 @@
 ---
-title: "Using Rails with many different databases"
+title: "Rails with different DBs"
 date: 2016-11-01
-categories: rails redis mongo mysql
+categories: rails redis mongo
+redirect_from:
+  - /rails/redis/mongo/mysql/2016/11/01/rails-many-dbs.html
 ---
 
 It is easy to find articles online debating pros and cons of different databases.  Often they have titles like "Why you should never use X DB".  And yes, different databases have different strengths and weaknesses.  Choosing a DB that does not fit the long term needs can be a costly decision.
@@ -56,7 +58,7 @@ config.cache_store = :readthis_store, { expires_in: 1.hour,
 <% end %>
 {% endhighlight %}
 
-That will cache entire page.  We can also implement method level caching:
+That will cache entire page.  We can also implement method level caching (modify Article `belongs_to :user` to have `touch: true` to bust cache):
 
 {% highlight ruby %}
 # app/models/user.rb
@@ -116,14 +118,13 @@ class RedisShard
   def initialize
   end
   def perform
-    shard_numer = X # some code here to
+    shard_numer = X # some code here
     # => get the Redis connection to the right shard
     redis = "REDIS#{shard_nubmer}".constantize
     redis.set ...
   end
 end
 {% endhighlight %}
-
 
 ### MongoDB
 
@@ -142,8 +143,8 @@ end
 {
     "_id" : ObjectId("553fbbc569702d393e030000"),
     "article_id" : 1,
-    "10/31/16" : 1,
-    "11/01/16" : 2,
+    "2016/10/31" : 1,
+    "2016/11/01" : 2,
     ...
 }
 {% endhighlight %}

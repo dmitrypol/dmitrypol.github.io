@@ -8,6 +8,9 @@ redirect_from:
 
 When working with NoSQL DBs we do not worry about schema changes but we still need to do data migrations.  We have been using [mongoid_rails_migrations](https://github.com/adacosta/mongoid_rails_migrations) for this.
 
+* TOC
+{:toc}
+
 Sometimes the migrations are pretty simple.  
 
 {% highlight ruby %}
@@ -20,6 +23,8 @@ class MyMigration < Mongoid::Migration
   end
 end
 {% endhighlight %}
+
+### Private methods
 
 And sometimes they are more complex.  We can have 30+ lines in the `up` method as we are looping through records, validating / transforming the data and then updating / creating other records in our DB.  Why not move that logic into separate private methods in the migration class (it's a Ruby class after all) and call them as needed?  
 
@@ -36,7 +41,7 @@ class AnotherMigration < Mongoid::Migration
       revert_record(record)
     end
   end
-def private
+private
   # need to use self because these class methods
   def self.process_record
     # actual logic here
@@ -49,7 +54,6 @@ def private
   end
 end
 {% endhighlight %}
-
 
 ### Exception handling
 
@@ -153,7 +157,79 @@ It will look like this in the DB:
 Now we need to rename Group to Team.  Here is the migraiton.  
 
 {% highlight ruby %}
-  User.exists(group_ids: true).rename(group_ids: :team_ids)
+User.exists(group_ids: true).rename(group_ids: :team_ids)
+{% endhighlight %}
+
+### Lots of data
+
+Let's imagine a blogging platform.  
+
+{% highlight ruby %}
+class Company
+  has_many :users
+end
+class User
+  belongs_to :company
+  has_many :articles
+end
+class Article
+  belongs_to :user
+  has_many :comments
+end
+class Comment
+  belongs_to :article
+end
+{% endhighlight %}
+
+Now we need to create a relationship between `comment` and `article author`.  
+
+{% highlight ruby %}
+class User
+  has_many :article_comments, class_name: 'Comment', inverse_of: :article_author
+end
+class Comment
+  belongs_to :article_author, class_name: 'User', inverse_of: :article_comments
+end
+{% endhighlight %}
+
+And we need a migration to update records.  But we have millions of comments and thousands of articles.  This will be VERY slow as it will query for each article AND user and then do indvividual updates.  
+
+{% highlight ruby %}
+Comment.all.no_timeout.each do |c|
+  c.update(article_author_id: c.article.user_id)
+end
+{% endhighlight %}
+
+This will be faster because it will [eager load](http://www.rubydoc.info/github/mongoid/mongoid/Mongoid%2FCriteria%3Aincludes) related articles.  But it will require lots of RAM.  
+
+{% highlight ruby %}
+Comment.all.includes(:article).no_timeout.each do |c|
+  c.update(article_author_id: c.article.user_id)
+end
+{% endhighlight %}
+
+This will be even faster because it will do bulk updates for ALL comments for specific article but will still require lots of RAM.
+
+{% highlight ruby %}
+Article.all.includes(:comments).no_timeout.each do |a|
+  a.comments.update_all(article_author_id: a.user_id)
+end
+{% endhighlight %}
+
+This will break up work into smaller chunks for each group of users (by company).  It will require far less RAM.
+
+{% highlight ruby %}
+def self.up
+  Company.all.no_timeout.each do |company|
+    update_comments company
+  end
+end
+def update_comments company
+  user_ids = company.users.pluck(:_id)
+  Article.in(user_id: user_ids).includes(:comments).no_timeout.each do |art|
+    art.comments.update_all(article_author_id: art.user_id)
+  end
+end
 {% endhighlight %}
 
 ### Useful links
