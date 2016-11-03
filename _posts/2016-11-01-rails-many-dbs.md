@@ -1,5 +1,5 @@
 ---
-title: "Rails with different DBs"
+title: "Rails with many different DBs"
 date: 2016-11-01
 categories: rails redis mongo
 redirect_from:

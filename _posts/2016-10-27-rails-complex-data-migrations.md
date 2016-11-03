@@ -221,16 +221,28 @@ This will break up work into smaller chunks for each group of users (by company)
 {% highlight ruby %}
 def self.up
   Company.all.no_timeout.each do |company|
-    update_comments company
+    update_comments company.users.pluck(:_id)
   end
 end
-def update_comments company
-  user_ids = company.users.pluck(:_id)
+def self.update_comments user_ids
   Article.in(user_id: user_ids).includes(:comments).no_timeout.each do |art|
     art.comments.update_all(article_author_id: art.user_id)
   end
 end
 {% endhighlight %}
+
+Alternatively we could batch users.  With ActiveRecord we could use [find_in_batches](http://apidock.com/rails/ActiveRecord/Batches/find_in_batches). For Mongoid use something like this  [gist](https://gist.github.com/justinko/1272234)
+
+{% highlight ruby %}
+def self.up
+  User.find_in_batches(batch_size: 100) do |batch|
+    update_comments batch.pluck(:id)
+  end
+end
+def update_comments user_ids
+end
+{% endhighlight %}
+
 
 ### Useful links
 

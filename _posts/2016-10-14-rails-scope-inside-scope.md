@@ -41,4 +41,16 @@ scope :active,           ->{ where(status: :active)  }
 scope :important_active, ->{ important.active }
 {% endhighlight %}
 
-So that's it.  Short post but I thought it was interesting.  
+We can test scopes like this:
+
+{% highlight ruby %}
+# spec/models/account_spec.rb
+it 'scopes' do
+  account = create(:account)
+  expect(Account.active.count).to eq 0
+  account.update(status: :active)
+  expect(Account.active.count).to eq 1
+end
+{% endhighlight %}
+
+Here is a [link](http://www.justinweiss.com/articles/search-and-filter-rails-models-without-bloating-your-controller/) to a post that inspired me to write this.  So that's it.  Short post but I thought it was interesting.  

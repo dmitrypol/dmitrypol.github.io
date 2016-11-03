@@ -18,7 +18,7 @@ module UserTeam
     validate :user_team_common_validator
   end
   def some_method
-  end 
+  end
 private
   def user_team_common_validator
   end
@@ -33,7 +33,7 @@ class Team
 end
 {% endhighlight %}
 
-There is no reason we need to limit this approach to only models and concerns.  Perhaps there is common logic that we want to include in several jobs.  We could place it in `ApplicationJob` from which other Job classes inherit.  Or we could put it in `app/jobs/concerns/shared_job.job` and include that module in the specific jobs as needed.
+There is no reason we need to limit this approach to only models and controllers.  Perhaps there is common logic that we want to include in several jobs.  We could place it in `ApplicationJob` from which other Job classes inherit.  Or we could put it in `app/jobs/concerns/shared_job.job` and include that module in the specific jobs as needed.
 
 {% highlight ruby %}
 # app/jobs/concerns/shared_job.rb

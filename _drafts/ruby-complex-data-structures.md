@@ -10,7 +10,9 @@ Ruby has built in support for a number of [data structures](https://www.sitepoin
 ### Linked List
 
 Single
+
 Double
+
 Circular
 
 {% highlight ruby %}
@@ -50,13 +52,10 @@ class User
       []
     end.flatten
   end
-  def ceo
-    org_structure_up.last
-  end
 end
 {% endhighlight %}
 
-The problem is that `org_structure_up` and `org_structure_down` use recursion to bring back arrays of names.  It would be better to use tree to store the company hierarchy.  [Rubytree](https://rubygems.org/gems/rubytree/) is a very mature gem that can be used for this purpose.  
+`org_structure_up` and `org_structure_down` use recursion to bring back arrays of names.  It would be better to use [tree](https://www.tutorialspoint.com/data_structures_algorithms/tree_data_structure.htm) to store the company hierarchy.  [Rubytree](https://rubygems.org/gems/rubytree/) is a very mature gem that can be used for this purpose.  
 
 #### Binary tree
 
