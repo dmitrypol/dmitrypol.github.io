@@ -23,6 +23,14 @@ Circular
 
 ### Stack / Queue
 
+https://www.leighhalliday.com/stack-in-ruby-linked-lists
+http://www.thelearningpoint.net/computer-science/basic-data-structures-in-ruby---the-queue
+http://www.thelearningpoint.net/computer-science/basic-data-structures-in-ruby---stack
+https://www.tutorialspoint.com/data_structures_algorithms/stack_algorithm.htm
+
+Stack - undo revision histoiry
+
+Queue - background jobs
 
 {% highlight ruby %}
 
@@ -59,6 +67,10 @@ end
 
 #### Binary tree
 
+http://www.thelearningpoint.net/computer-science/basic-data-structures-in-ruby---binary-search-tre
+https://www.tutorialspoint.com/data_structures_algorithms/binary_search_tree.htm
+https://www.cs.auckland.ac.nz/software/AlgAnim/red_black.html
+http://rubyalgorithms.com/binary_search_tree.html
 
 
 ### Graph
@@ -69,9 +81,13 @@ end
 {% endhighlight %}
 
 
-https://www.sitepoint.com/ruby-interview-questions-linked-lists-and-hash-tables/
 
 
 {% highlight ruby %}
 
 {% endhighlight %}
+
+
+https://www.tutorialspoint.com/ruby/ruby_hashes.htm
+http://rubylearning.com/satishtalim/ruby_arrays.html
+https://www.sitepoint.com/ruby-interview-questions-linked-lists-and-hash-tables/
