@@ -73,3 +73,5 @@ class Service1
   end
 end
 {% endhighlight %}
+
+At the end of the day `concerns` folder simply contains modules.  Jobs, controllers, models are classes and we can just include a module in a class.  
