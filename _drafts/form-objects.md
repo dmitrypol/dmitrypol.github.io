@@ -9,7 +9,7 @@ I recently started using form objects and it took me a while to wrap my head aro
 * TOC
 {:toc}
 
-But I have come to appreciate the flexibility and control you get with form objects.  Let's imagine backend models where User has many Addresses and Phones. 
+But I have come to appreciate the flexibility and control you get with form objects.  Let's imagine backend models where User has many Addresses and Phones.
 
 {% highlight ruby %}
 class User
@@ -38,7 +38,7 @@ But that's not now people prefer to use websites.  People **register** or **crea
 {% highlight ruby %}
 # routes.rb
 resources :profile, only: [:new, :create]
-# 
+#
 class ProfileController < ApplicationController
   def new
     @form = ProfileForm.new  
@@ -55,13 +55,13 @@ end
 # app/forms/profile_form.rb
 class ProfileForm
   include ActiveModel::Model
-  attr_accessor :user_name, :user_email, :address_address1, :address_city, 
+  attr_accessor :user_name, :user_email, :address_address1, :address_city,
     :address_region, :address_zip, :phone_number
   validates :user_name, :user_email, presence: true
   def save
     if valid?
       user = User.where(name: user_name, email: user_email).first_or_create
-      Address.create(user: user, address1: address_address1, city: 
+      Address.create(user: user, address1: address_address1, city:
         address_city, zip: address_zip) if address_address1.present?
       Phone.create(user: user, number: phone_number) if phone_number.present?
     end
@@ -106,3 +106,5 @@ http://culttt.com/2015/11/04/using-form-objects-in-ruby-on-rails/
 https://github.com/apotonick/reform
 
 
+
+https://github.com/timcraft/formeze
