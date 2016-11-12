@@ -14,6 +14,30 @@ Let's envision a system where Users update their records.  Once
 Running daemons on multiple servers but ensuring that only one does the work.  How does Sidekiq runs jobs
 
 
+### Self queueing jobs
+
+http://guides.rubyonrails.org/active_job_basics.html
+
+https://github.com/steelThread/redmon
+
+{% highlight ruby %}
+class MyJob < ApplicationJob
+  queue_as :low
+  self.queue_adapter = :sidekiq
+  def perform
+    # do stuff
+  ensure
+    self.class.set(wait: 30.seconds).perform_later
+  end
+end
+{% endhighlight %}
+
+
+https://github.com/ondrejbartas/sidekiq-cron
+
+https://github.com/mperham/sidekiq/wiki/Scheduled-Jobs
+
+
 {% highlight ruby %}
 
 {% endhighlight %}
