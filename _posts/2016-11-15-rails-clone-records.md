@@ -76,7 +76,7 @@ en:
         title: 'Clone title'
         menu: 'Clone menu'
         breadcrumb: 'Clone breadcrumb'
-# app/views/rails_admin/mail/clone.html.erb
+# app/views/rails_admin/main/clone.html.erb
 <h3><%= "Are you sure you want to clone '#{@object.name}'" %></h3>
 <%= link_to 'Clone', clone_path, method: 'post', class: "btn btn-danger" %>
 <%= link_to 'Cancel', show_path, class: "btn" %>
@@ -130,7 +130,7 @@ RailsAdmin.config do |config|
 end
 # config/locales/en.yml
 ...
-# app/views/rails_admin/mail/bulk_clone.html.erb
+# app/views/rails_admin/main/bulk_clone.html.erb
 ...
 {% endhighlight %}
 

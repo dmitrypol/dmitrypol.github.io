@@ -1,15 +1,20 @@
 ---
-title: "Rails and static data"
+title: "Rails static data and system settings"
 date: 2016-10-29
 categories: rails
 ---
 
-Usually in our Rails application the data is stored in DB.  We use controllers and models to read and write it.  But sometimes that data is so static it does not make sense to put it in DB.  
+Usually in Rails application the data is stored in DB.  We use controllers and models to read and write it.  But sometimes that data is so static it does not make sense to put it in DB.  
 
 You might have several roles (admin, editor, author).  They can be stored as config values in application.rb (or dev.rb, test.rb, prod.rb)
 
 https://github.com/ledermann/rails-settings
 https://github.com/railsconfig/config
+
+### System settings
+
+
+### Static data
 
 
 But sometimes the amount of data is pretty large.  For example, you need to store the list of all zip codes in US.  Why not create `data` folder in root and appropriate subfolder structure in it.  You can put JSON, YML or CSV files.  
@@ -27,6 +32,15 @@ class MyClass
 end
 {% endhighlight %}
 
+
+
+
+### Multiple applications
+
+
+
+Sometimes we need to have certain configuration shared by several applications.  But we want a canonical place to store it so everytime we deploy it gets refreshed.  
+Use Redis 
 
 
 {% highlight ruby %}
