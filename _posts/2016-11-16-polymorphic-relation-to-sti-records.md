@@ -86,4 +86,18 @@ But what about our Article records?  We need to update them too.
   Article.where(author_type: 'Admin').update_all(author_type: 'User')
 {% endhighlight %}
 
-Otherwise we will get `uninitialized constant Admin` when trying to load articles with those relations.  Here is a link to [Rails documentation](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations).  
+Otherwise we will get `uninitialized constant Admin` when trying to load articles with those relations.  
+
+Finally we decided to consolidate Company and User models and no longer use polymorphic relationship to `author` from Article.  With Mongoid we can manually specify IDs during creation so we do not need to change the `author_id`.  Here is the migration:
+
+{% highlight ruby %}
+# create new users for companies
+Company.each do |c| 
+  User.create(_id: c.id, name: c.name, ...)
+end
+# change article relationships
+Article.all.rename(author_id: :user_id)
+Article.all.unset(:author_type)
+{% endhighlight %}
+
+Here is a link to [Rails documentation](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations).  
