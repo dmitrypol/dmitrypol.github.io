@@ -43,7 +43,7 @@ class Comment
 end
 {% endhighlight %}
 
-We cache `comments_count` and use `touch: true` to update Article timestamp when new comment is created/update.  The problem is it busts cached data for ALL Article methods and [view cache](https://signalvnoise.com/posts/3690-the-performance-impact-of-russian-doll-caching) as well.  We might not want that.
+We cache `comments_count` and use `touch: true` to update Article timestamp when new Comment is created/updated/deleted.  The problem is it busts cached data for ALL Article methods and [view cache](https://signalvnoise.com/posts/3690-the-performance-impact-of-russian-doll-caching) as well.  We might not want that.
 
 In such cases instead of `touch: true` we can implement [callbacks](http://api.rubyonrails.org/classes/ActiveRecord/Callbacks.html) on the child record to [delete](http://api.rubyonrails.org/classes/ActiveSupport/Cache/Store.html#method-i-delete) specific cached data for the parent record.
 
