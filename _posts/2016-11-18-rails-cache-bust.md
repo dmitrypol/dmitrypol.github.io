@@ -4,7 +4,7 @@ date: 2016-11-18
 categories: rails redis
 ---
 
-[Rails caching](http://guides.rubyonrails.org/caching_with_rails.html) is a great tool for scaling websites.  We can use different cache stores ([Redis](http://redis.io/) and [Memcached](https://memcached.org/)) being common choices.  
+[Rails caching](http://guides.rubyonrails.org/caching_with_rails.html) is a great tool for scaling websites.  We can use different cache stores ([Redis](http://redis.io/) and [Memcached](https://memcached.org/) being common choices).  
 
 Using [key based cache](https://signalvnoise.com/posts/3113-how-key-based-cache-expiration-works) frees us from writing observers to manually purge the cache.  When record is updated it's [cache_key](http://apidock.com/rails/ActiveRecord/Base/cache_key) changes, new content is cached and old one is eventually purged using TTL.  Here is my previous [post]({% post_url 2016-05-14-redis-rails-more %}) about various uses of caching.  
 

@@ -92,7 +92,7 @@ STATES_PROVINCES = REDIS_SETTINGS.smembers('states_provinces')
 One downside with this approach is that we need to restart the application(s) to force reload of `STATES_PROVINCES` from Redis.  We might want a hybrid option where we can edit data in Redis for live update and separately store canonical data in config file that gets deployed.  We can use `REDIS_SETTINGS.smembers('states_provinces')` in our code as is but that's a little verbose.  
 
 {% highlight ruby %}
-# app/services/redis_settings.rb
+# app/services/red_set.rb
 class RedSet
   def self.states_provinces
     REDIS_SETTINGS.smembers('states_provinces')
