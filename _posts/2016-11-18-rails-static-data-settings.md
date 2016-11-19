@@ -72,21 +72,36 @@ REDIS_SETTINGS = Redis::Namespace.new(:sys_set, redis: redis)
 # config/initializers/system_settings.rb
 sp_data = File.readlines('data/us_states.txt').map {|line| line.strip}
 # remove current cache
-REDIS_SETTINGS.del('states_provinces_data')
+REDIS_SETTINGS.del('states_provinces')
 # cache new data in Redis SET with descriptive key
-REDIS_SETTINGS.sadd('states_provinces_data', sp_data)
-# read it into constant so app retains data if cache is lost
-STATES_PROVINCES = REDIS_SETTINGS.smembers('states_provinces_data')
+REDIS_SETTINGS.sadd('states_provinces', sp_data)
+# read it into constant so data is retained if Redis connection is lost
+STATES_PROVINCES = REDIS_SETTINGS.smembers('states_provinces')
 {% endhighlight %}
 
-Now all we have do do in the other applications is connect to Redis and read data.  
+Now all we have do do in the second application is connect to Redis and read data.  
 
 {% highlight ruby %}
 # config/initializers/redis.rb
 redis = Redis.new(host: 'localhost', port: 6379, db: 0)
 REDIS_SETTINGS = Redis::Namespace.new(:sys_set, redis: redis)
 # config/initializers/system_settings.rb
-STATES_PROVINCES = REDIS_SETTINGS.smembers('states_provinces_data')
+STATES_PROVINCES = REDIS_SETTINGS.smembers('states_provinces')
 {% endhighlight %}
 
+One downside with this approach is that we need to restart the application(s) to force reload of `STATES_PROVINCES` from Redis.  We might want a hybrid option where we can edit data in Redis for live update and separately store canonical data in config file that gets deployed.  We can use `REDIS_SETTINGS.smembers('states_provinces')` in our code as is but that's a little verbose.  
+
+{% highlight ruby %}
+# app/services/redis_settings.rb
+class RedSet
+  def self.states_provinces
+    REDIS_SETTINGS.smembers('states_provinces')
+  end
+end
+{% endhighlight %}
+
+Now we just call `RedSet.states_provinces` from our application(s) and it will fetch data from Redis.  
+
 Depending on the type of data that needs to be cached in Redis we might use different [data types](http://redis.io/topics/data-types).  To store array of US states we used [Redis SET](http://redis.io/topics/data-types#sets) with [SADD](http://redis.io/commands/sadd) and [SMEMBERS](http://redis.io/commands/smembers) commands.  Other data might be better stored in Redis hashes, lists or strings.  
+
+If this approach does not work, there is [redis-settings](https://github.com/fnando/redis-settings) gem.  
