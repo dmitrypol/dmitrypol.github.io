@@ -43,7 +43,7 @@ The problem is it will fail to create second user because there is already a use
 {% highlight ruby %}
 Failure/Error: [0muser2.save([35mvalidate[0m: [1;36mfalse[0m)
 Mongo::Error::OperationFailure:
-  E11000 duplicate key error collection: amplo_test.users
+  E11000 duplicate key error collection: my_db_test.users
   index: _email_1 dup key: { : undefined } (11000)
 {% endhighlight %}
 
