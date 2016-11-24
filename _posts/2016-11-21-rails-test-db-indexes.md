@@ -99,4 +99,10 @@ end
 
 When we run `rake db:mongoid:create_indexes` it will create new index with named `email_1_client_1` vs `email_1` before.  
 
-But what if the name does not change?  We can switch to [background indexes](https://docs.mongodb.com/v3.2/core/index-creation/) with `index({ client: 1,  email: 1 }, { unique: true, background: true })`.  The best way I can think of is to manually edit index in the DB which is a little messy.  In test environment we can just drop the index, collection or entire DB.
+But what if the name does not change?  We can switch to [background indexes](https://docs.mongodb.com/v3.2/core/index-creation/) with `index({ client: 1,  email: 1 }, { unique: true, background: true })`.  The best way I can think of is to manually edit index in the DB which is a little messy.  In test environment we can just drop the index, collection or entire DB.  Otherwise you get this error:
+
+{% highlight ruby %}
+Failure/Error: Rake::Task['db:mongoid:create_indexes'].invoke
+Mongo::Error::OperationFailure:
+  Index with name: email_1_client_1 already exists with different options (85)
+{% endhighlight %}

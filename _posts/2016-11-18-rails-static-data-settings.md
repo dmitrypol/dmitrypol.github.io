@@ -35,12 +35,13 @@ But with time `application.rb` gets bigger and harder to manage.  Why not create
 {% highlight ruby %}
 # config/initializers/system_settings.rb
 CMS_ROLES = [:admin, :editor, :author]
+# app/models/user.rb
 class User
   enumerize :roles, in: CMS_ROLES
 end
 {% endhighlight %}
 
-`CMS_ROLES` is a [constant](http://guides.rubyonrails.org/autoloading_and_reloading_constants.html) so want to give it descriptive name or namespace it.
+`CMS_ROLES` is a [constant](http://guides.rubyonrails.org/autoloading_and_reloading_constants.html) so we want to give it descriptive name or namespace it.
 
 ### Static data
 
