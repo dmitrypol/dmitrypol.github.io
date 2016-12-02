@@ -4,7 +4,7 @@ date: 2016-11-29
 categories:
 ---
 
-In our applications we often have one class call another.  While it's important to test the integration it is very useful to test our objects in isolation.  
+In object oriented programming classes call methods on other classes.  While it's important to test the integration between classes it is very useful to test them in isolation, simulating valid and invalid responses from the dependent objects. 
 
 ### POROs
 
