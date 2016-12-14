@@ -6,6 +6,11 @@ categories: mongo
 
 [Mongoid has_and_belongs_to_many](https://docs.mongodb.com/ruby-driver/master/tutorials/5.1.0/mongoid-relations/#has-and-belongs-to-many) gives us new ways of modeling relationships by not creating mapping tables/collections.  
 
+* TOC
+{:toc}
+
+### Traditional has_and_belongs_to_many
+
 {% highlight ruby %}
 # app/models/user.rb
 class User
@@ -44,7 +49,9 @@ Records are stored in MongoDB like this:
 
 When we delete a user it's `user_id` will be automatically removed from all `role.user_ids` arrays.  And when we delete `role` that `role_id` will be removed from all `user.role_ids`.
 
-But then our roles become HUGE with tens of thousands of users in each role.  We do not want to store all those `user_ids` in `role`.  We can modify `has_and_belongs_to_many` like this to only store `role_ids` in `user` record.
+### inverse_of: nil
+
+But then our our system grows with tens of thousands of users in each role.  We do not want to store all those `user_ids` in `role`.  We can modify `has_and_belongs_to_many` like this to only store `role_ids` in `user` record.
 
 {% highlight ruby %}
 class User
@@ -132,5 +139,42 @@ RSpec.describe Role, type: :model do
     expect(u2.roles).to eq []    
   end
 end
+{% endhighlight %}
 
+### Roles array
+
+Another way we can store this data is to create a simple array on the user record and store roles as strings.  To get users by role we create scopes on User model (`User.role1`, `User.role2`)
+
+{% highlight ruby %}
+# config/application.rb
+config.roles = ['role1', 'role2']
+# app/models/user.rb
+class User
+  field :email
+  field :roles, type: Array
+  enumerize :roles, in: Rails.application.config.roles, multiple: true
+  Rails.application.config.roles.each do |r|
+    scope r, ->{ where(:roles.in => r) }
+  end
+end
+# user record in the DB
+{
+    "_id" : ObjectId("5845ac56f5740c5ddd970433"),
+    "email" : "user1@email.com",
+    "roles" : [
+        'role1',
+        'role2'
+    ],
+}
+{% endhighlight %}
+
+This approach is fine if we have a fairly fixed number of roles.  But what if we want to store something like tags for our users?  The only difference is we do not restrict tags field to specific enumeration and change scope to accept `tags` parameter.  
+
+{% highlight ruby %}
+# app/models/user.rb
+class User
+  field :email
+  field :tags, type: Array
+  scope :by_tags, -> ( tags ) { where(:roles.in => tags) }
+end
 {% endhighlight %}
