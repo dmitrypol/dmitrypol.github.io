@@ -141,6 +141,29 @@ RSpec.describe Role, type: :model do
 end
 {% endhighlight %}
 
+#### counter_cache
+
+What if we want to sort roles by the number of users in each one?  In traditional `belongs_to` relationship we can use [counter_cache](https://docs.mongodb.com/ruby-driver/master/tutorials/6.0.0/mongoid-relations/#the-counter-cache-option).  For `has_and_belongs_to_many` we need to create a custom callback.  
+
+{% highlight ruby %}
+class Role
+  field :users_count, type: Integer
+end
+class User
+  after_save :update_role_users_count
+private
+  def update_role_users_count
+    roles.each do |team|
+      role.update(users_count: role.get_users.count)
+    end
+  end
+end
+{% endhighlight %}
+
+The downside with this approach is it will cause count queries against Users collection for specific roles on each user save.  We can make this approach smarter by checking if roles changed and then incrementing/decrementing `role.users_count`.
+
+Having these custom callbacks can complicate the application (lead to bugs) so I prefer using traditional two sided `has_and_belongs_to_many`.
+
 ### Roles array
 
 Another way we can store this data is to create a simple array on the user record and store roles as strings.  To get users by role we create scopes on User model (`User.role1`, `User.role2`)
