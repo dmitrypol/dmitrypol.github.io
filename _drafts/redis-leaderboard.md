@@ -15,7 +15,7 @@ Here are our requirements:
 * Fundraiser can belong to one or more Leaderboards.
 * Leaderboard has a `metric` which is used to calculate the fundraiser (member) score and that determines the rank.  
 * Store the history of rank changes and display up/down arrows in the UI as part of fundraiser info.
-* Send notifications to donors when fundraisers to which they gave gifts drop by more than X positions in Y minutes (X and Y need to be configurable per leaderboard).  
+* Send alerts to donors when fundraisers to which they gave gifts drop by more than X positions in Y minutes (X and Y need to be configurable per leaderboard).  
 
 #### Core models
 
@@ -36,6 +36,8 @@ class Fundraiser
 end
 class FundLeaderboard
   has_and_belongs_to_many :fundraisers
+  field :rank_drop_alert, type: Integer  # => number of place rank dropped
+  field :rank_drop_alert_interval, type: Integer # => in minutes  
   field :metric, default: 'gifts_sum'
   extend Enumerize
   enumerize :metric, in: ['gifts_sum', 'gifts_count']
@@ -100,7 +102,7 @@ end
   {"fund_id1":"{\"name\":\"fundraiser 1\"}","fund_id2":"{\"name\":\"fundraiser 2\"}"}...}
 {% endhighlight %}
 
-`LeaderboardGet` class will format data for UI presentation.  It will expect a `FundLeaderboard` record.  It also supports pagination and search.  There is a very interesting [RedisSearch](https://github.com/RedisLabsModules/RediSearch) module but we used [mongoid_search](https://github.com/mongoid/mongoid_search) gem.  We first need to query MongoDB to get fundraiser IDs and then hit Redis for leaderboard data.  
+`LeaderboardGet` class will format data for UI presentation.  It will expect a `FundLeaderboard` record.  It also supports pagination and search.  There is a very interesting [RedisSearch](https://github.com/RedisLabsModules/RediSearch) module but we used [mongoid_search](https://github.com/mongoid/mongoid_search) gem.  We first need to query MongoDB to get fundraiser IDs and then hit Redis to get leaderboard data for those members.  `Page` and `page_size` can be passed from controller as parameters.
 
 {% highlight ruby %}
 class LeaderboardGet
@@ -153,7 +155,7 @@ end
 
 #### Rank history
 
-So far we were using the common features present in [Leaderboard](https://github.com/agoragames/leaderboard) gem and we were able to meet the first two requirements of ranking members by different metric scores.  How can store the rank_history changes?  For that we wrote other methods using [RedisObjects](https://github.com/nateware/redis-objects) gem (we could have used Redis API directly).  We created separate Sorted Sets where key = leaderboard member (fund_id), member = leaderboard rank and score = timestamp.  We also update the `member_data` hash with the new attribute `last_rank_change` and set TTL of 1 week for these separate Sorted Sets.  
+So far we were using the common features present in [Leaderboard](https://github.com/agoragames/leaderboard) gem and we were able to meet the first two requirements of ranking members by different metric scores.  How can store the rank_history changes?  For that we wrote other methods utilizing [RedisObjects](https://github.com/nateware/redis-objects) gem (we could have used Redis API directly).  We create separate Sorted Set for each fundraiser where key = leaderboard member (fund_id), member = leaderboard rank and score = timestamp.  We also update the `member_data` hash with the new attribute `last_rank_change` and set TTL of 1 week for these separate Sorted Sets.  
 
 {% highlight ruby %}
 class LeaderboardSet < LeaderboardBase
@@ -201,53 +203,83 @@ private
 end
 {% endhighlight %}
 
-#### Sending notifications
+#### Sending alerts
 
-To send updates we create another class.  
+To send alerts we create another class.  
 
 {% highlight ruby %}
 class LeaderboardSet < LeaderboardBase
   def perform
     @fundraiser.fund_leaderboards.each do |fund_ldbr|
       ...
-      set_rank_history(fund_ldbr.id)
-      LeaderboardSendNotice.new.perform(leaderboard_name, camp_ldbr)
+      LeaderboardSendAlert.new(fund_ldbr).perform
     end
   end
 end
-class LeaderboardSendNotice < LeaderboardBase
-
-  def perform(leaderboard_name, camp_ldbr)
-    return unless camp_ldbr.send_rank_drop_notice?
-    # [{:member=>"58753227036af31fd1447d49"}, {:member=>"58753227036af31fd1447d48"}, {:member=>"58753227036af31fd1447d46"}]
-    # ["58753273036af32043b34df1", "58753273036af32043b34df0", "58753273036af32043b34dee"]
-    all_leaders = @ldbr.all_leaders_from(leaderboard_name, members_only: true).map(&:values).flatten
-    # loop through all rank_history zsets (each campaign) associated with the leaderboard
-    all_leaders.each do |leader|
-      key = ['rank_history', leader].join(':')
+class LeaderboardSendAlert < LeaderboardBase
+  def initialize(fund_ldbr)
+    @fund_ldbr = fund_ldbr
+    super()
+  end
+  def perform
+    all_members = @ldbr.all_members_from(@fund_ldbr.id, members_only: true)
+      .map(&:values).flatten
+    # loop through all rank_history zsets associated with the leaderboard
+    all_members.each do |member|
+      key = ['rank_history', member].join(':')
       zset = Redis::SortedSet.new(key)
-      # => loop throuh members of each (rank_history changes)
-      # => [["3", 1484076110.4511971], ["2", 1484076110.4476256], ["1", 1484076110.4408293]]
+      # => loop through members of each rank_history changes zset
       rank_history = zset.members(with_scores: true).reverse
-      p rank_history
-      # => check time difference in how much this campaign dropped
+      rank_alert = compare_rank_history(rank_history)
+      send_alert(rank_alert, member) if rank_alert
     end
   end
-
 private
-
+  def compare_rank_history rank_history
+    return if rank_history.size == 1
+    # => grab first record and remove it from recordset
+    recent_rank = rank_history.first
+    rank_history.shift
+    rank_history.each do |rh|
+      # => compare rank drop to leaderboard config
+      if recent_rank[0].to_i - rh[0].to_i >= @fun_ldbr.rank_drop_alert
+        # => compare the time difference
+        if recent_rank[1] - rh[1] > @fun_ldbr.rank_drop_alert_interval * 60 # in seconds
+          return rh
+        end
+      end
+    end
+  end
+  def send_alert rank_alert, member
+    rank_drop_position = rank_alert[0]
+    rank_drop_time = rank_alert[1]
+    # => find donors who have gifts to this fundraiser since the time
+    fund = Fundraiser.find(member)
+    donor_ids = fund.gifts.gte(created_at: rank_drop_time).pluck(:id)
+    # send alert
+  end
 end
-
 {% endhighlight %}
 
+#### Scalability
 
+Time complexity of many [Redis Sorted Set](https://redis.io/commands#sorted_set) operations is usually `O(log(N))` so they get slower with more and more members.  One easy way to scale things is to create a simple background to use as a wrapper and call it from `Gift` model callback.  
 
+{% highlight ruby %}
+class UpdateLeaderboardJob < ApplicationJob
+  def perform(fundraiser)
+    LeaderboardSet.new(fundraiser: fundraiser).perform
+  end
+end
+class Gift
+  def update_leaderboard
+    if fundraiser.fund_leaderboard_ids.count > 0
+      UpdateLeaderboardJob.perform_later(fundraiser)
+    end
+  end  
+end
+{% endhighlight %}
 
-
-
-#### Background job
-
-All these calculations can be slow even with Redis's speed.  Time complexity of Sorted Set operations.  
 
 On record change in callback do the leaderboard update via background job.  But we don't want to get into situation where multiple background jobs are queued up.  
 
