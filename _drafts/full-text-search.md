@@ -10,3 +10,5 @@ https://github.com/mauriciozaffari/mongoid_search
 https://en.wikipedia.org/wiki/N-gram
 
 https://github.com/rs-pro/mongoid-elasticsearch
+
+http://redisearch.io/
