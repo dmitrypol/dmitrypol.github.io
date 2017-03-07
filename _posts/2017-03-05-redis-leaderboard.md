@@ -6,7 +6,7 @@ categories: redis
 
 In a previous [post]({% post_url 2016-12-08-rails-leaderboard %}) I discussed using Redis for Leaderboards.  Let's expand on these ideas.  Recently at work we upgraded our fundraiser leaderboard and switched to use Redis as the data store with [leaderboard](https://github.com/agoragames/leaderboard) gem.
 
-But fundraising is not nearly as fun as football.  My young son Alexander is a big fan of Seattle Seahawks so to explain to him what I do at work we built an NFL Leaderboard together.  We made a great team because he knows football and I know coding.
+But fundraising is not nearly as fun as football.  My young son is a big fan of Seattle Seahawks so to explain to him what I do at work we built an NFL Leaderboard together.  We made a great team because he knows football and I know coding.
 
 * TOC
 {:toc}
@@ -276,9 +276,9 @@ class LeaderboardReset
     end
   end
   def delete_all_stats
-  LeaderboardGroup.all.no_timeout.each do |leaderboard_group|
-    delete_stats leaderboard_group
-  end
+    LeaderboardGroup.all.no_timeout.each do |leaderboard_group|
+      delete_stats leaderboard_group
+    end
   end
   def delete_stats leaderboard_group
     NFL_LDBR.delete_leaderboard_named leaderboard_group.id
