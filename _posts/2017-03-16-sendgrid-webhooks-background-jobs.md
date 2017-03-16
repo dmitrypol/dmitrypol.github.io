@@ -10,6 +10,8 @@ Our basic models are:
 
 {% highlight ruby %}
 class Mailing
+  field :subject
+  field :body
   has_many :emails
 end
 class Email
@@ -20,7 +22,7 @@ class Email
 end
 {% endhighlight %}
 
-To keep our controllers light we put the logic to find and appropriately increment the `email` record in a separate class.
+To keep our controllers simple we created a separate class with the logic to find and update the `email` record.
 
 {% highlight ruby %}
 # config/routes.rb
@@ -35,12 +37,12 @@ end
 # app/services/webhook_recorder.rb
 class WebhookRecorder
   def perform(params)
-    # find email record by email_id in the params
+    # find email record by email_id in the params, update stats
   end
 end
 {% endhighlight %}
 
-But with success come inevitable scalability challenges.  Our customers started sending very large mailings (tens or hundreds of thousands of recipients).  Then our servers would receive thousands of notifications in brief amount of time as people were opening and clicking their emails.  This caused very sharp spikes in system load.  
+But with success come inevitable scalability challenges.  Our customers started sending large mailings (tens or hundreds of thousands of recipients).  Then our servers would receive thousands of notifications in brief amount of time as people were opening and clicking their emails.  This caused sharp spikes in system load.  
 
 Solution was to create a background job between controller and the Ruby class.  We use [Sidekiq](http://sidekiq.org/) and [Redis](https://redis.io/) so queuing jobs is lightning fast.  
 
@@ -51,6 +53,7 @@ class SendgridController < ApplicationController
     render nothing: true
   end
 end
+# app/jobs/webhook_recorder_job.rb
 class WebhookRecorderJob < ApplicationJob
   queue_as :low
   def perform(params)
@@ -59,6 +62,8 @@ class WebhookRecorderJob < ApplicationJob
 end
 {% endhighlight %}
 
-Now whenever we have a very large mailing we can see how these jobs queue up but after a few minutes they all process.  And the system load remains much more even.  
+Alternatively we could have moved the code from the `WebhookRecorder` class to methods in `WebhookRecorderJob`.  It's simply a matter of preference whether to keep the job as a small wrapper around the class or whether to put more logic in it.  
 
-Alternatively we could have moved the code from the `WebhookRecorder` class to methods in `WebhookRecorderJob`.  It's simply a matter of preference whether to keep the job as a very small wrapper around the class or whether to put more logic in it.  
+Now whenever we have a large mailing we can see how these jobs queue up but after a few minutes they all process.  And the system load remains much more even.  
+
+The same pattern can be applied to other situations where the system can receive a large influx of inbound messages in a short amount of time and where it is OK to have slight delay between the time the message is received and when it's processed.  
