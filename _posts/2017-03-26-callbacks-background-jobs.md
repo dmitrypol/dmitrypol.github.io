@@ -10,7 +10,7 @@ How can we use background jobs to separate saving the primary record from the se
 
 ### Counter caches
 
-[counter_cache](http://guides.rubyonrails.org/association_basics.html#options-for-has-many-counter-cache) is a common pattern of pre-generating data.  
+First let's look at a really simple example.  [counter_cache](http://guides.rubyonrails.org/association_basics.html#options-for-has-many-counter-cache) is a common pattern of pre-generating data.  
 
 {% highlight ruby %}
 class User
