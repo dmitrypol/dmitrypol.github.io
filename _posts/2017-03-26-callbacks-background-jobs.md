@@ -40,7 +40,7 @@ class User
   has_many :donations
   has_many :emails
 end
-class Campaign
+class Fundraiser
   field :name
   has_many :donations
   has_many :emails
