@@ -1,5 +1,5 @@
 ---
-title: "SendGrid Webhooks and background jobs"
+title: "SendGrid Webhooks and Background Jobs"
 date: 2017-03-16
 categories: redis sidekiq
 ---

@@ -1,5 +1,5 @@
 ---
-title: "Callbacks and Background Jobs"
+title: "Model Callbacks and Background Jobs"
 date: 2017-03-26
 categories: redis
 ---
