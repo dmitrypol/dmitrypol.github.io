@@ -11,7 +11,7 @@ A common pattern is to use Redis as a cache store where the first application re
 
 ### Basic caching
 
-Here is how it can be implemented with [Ruby on Rails](http://guides.rubyonrails.org/caching_with_rails.html)
+Here is how it can be implemented with [Ruby on Rails](http://guides.rubyonrails.org/caching_with_rails.html) but there are similar patterns in other frameworks.
 
 {% highlight ruby %}
 class Article
@@ -27,7 +27,7 @@ class User
 end
 {% endhighlight %}
 
-[cache_key](http://apidock.com/rails/ActiveRecord/Integration/cache_key) is a method that generates unique Redis key like this `user/user_id-user_updated_at_timestamp`.  Specifying `touch: true` on the `Article` relationship will modify `User.updated_at` when articles are created / deleted.  Appending the method name to `cache_key` ensures Redis key uniqueness (what if we cache other methods on the User model).  Here is what data looks like stored in Redis:
+[cache_key](http://apidock.com/rails/ActiveRecord/Integration/cache_key) is a method that generates unique Redis key like this `user/user_id-user_updated_at_timestamp`.  Specifying `touch: true` on the `Article` relationship will modify `User.updated_at` when articles are created / deleted which will force new `cache_key`.  Appending the method name to `cache_key` ensures Redis key uniqueness if we cache other methods on the User model.  Here is what data looks like stored in Redis:
 
 {% highlight ruby %}
 {"db":0,"key":"user/123-1490568353/articles_count","ttl":3559,
@@ -45,7 +45,7 @@ When browsing to a page showing all users and the number of articles they author
 <% end %>
 {% endhighlight %}
 
-In reality this specific task can be accomplished with a well written SQL JOIN but usually the biz logic is more complex.
+In reality this specific task can be better accomplished with a well written SQL JOIN but usually the biz logic is more complex.
 
 ### Pre-generating cache
 
@@ -89,7 +89,7 @@ end
 
 ### Selecting which data to cache
 
-This cached data will be stale until we re-generate it.  We want to run the job frequently (say every 5 minutes) and in the job we specify `force: true`.  But this will keep re-creating the cache for all users.  We need a way to filter out which users have created / deleted articles.  For that we can use `updated_at` timestamp.  If the user has created / deleted an article the Article `touch: true` will change `User updated_at`.  There could be other reasons we want to re-generate the cache so we encapsulate the logic in User a scope.
+This cached data will be stale until we re-generate it.  We want to run the job frequently (say every 5 minutes) and in the job we specify `force: true`.  But this will keep re-creating the cache for all users.  We need a way to filter out which users have created / deleted articles.  For that we can use `updated_at` timestamp.  If the user has created / deleted an article the Article `touch: true` will change `User updated_at`.  There could be other reasons we want to re-generate the cache so we encapsulate the logic in User model scope.
 
 {% highlight ruby %}
 class User
@@ -132,7 +132,7 @@ Alternatively we could use APIs provided by the background job library to check 
 
 The example above with users and articles is way too simple.  Let's imagine we are building the backend system for an online banking app.  Customers use their phones to check the latest transactions on their way to work.  As a result we have a HUGE spike in DB load in the early morning hours (which requires powerful hardware and expensive software license).
 
-What if we could even out that load and push data into cache during the earlier hours when stress on the overall system is lower?  We don't need to push ALL transactions into cache as most people are likely to look at only the first page (say 10 most recent records).  And we don't need to do it for all customers, just the ones that check their accounts frequently (say once a week).  
+What if we could even out that load and push data into cache during the earlier hours when stress on the overall system is lower?  We don't need to push ALL transactions into cache as most people are likely to look at only the first page (say 10 most recent records).  And we don't need to do it for all customers, just the ones that check their accounts frequently (say twice a week).  
 
 {% highlight ruby %}
 class Transaction
@@ -163,27 +163,30 @@ This will load the most recent transactions for all customers.  How do we track 
 {% highlight ruby %}
 class Customer
   include: Redis::Objects
-  counter :num_logins_tmp, expiration: 1.week
-  field :num_logins
+  counter :num_logins, expiration: 1.week
+  field :frequent_logins, type: Boolean
 end
 # data is stored in Redis like this
-{"db":0,"key":"customer:customer1_id:num_logins_tmp","ttl":604799,
+{"db":0,"key":"customer:customer1_id:num_logins","ttl":604799,
   "type":"string","value":"2","size":1}
 {% endhighlight %}
 
-[redis-objects](https://github.com/nateware/redis-objects) creates a key based on model name, record ID and method name.  Every time customer logs in we call `customer.num_logins_tmp.incr`.  But if the customer does not login w/in a week that key will expire using Redis TTL and next time the `num_logins_tmp` counter will start at 1.  Then we create a weekly job to move data to the primary DB.  
+[redis-objects](https://github.com/nateware/redis-objects) creates a Redis key based on model name, record ID and method name.  Every time customer logs in we call `customer.num_logins.incr` which will be very fast.  But if the customer does not login w/in a week that key will expire using Redis TTL and next time the `num_logins` counter will start at 1.  Then we create a job to move the data to the primary DB.  The job might be slow but it will only run once a week.  
 
 {% highlight ruby %}
 class UpdateCustomerLoginsJob < ApplicationJob
   def perform
-    Customer.all.each do |customer|
-      customer.update(num_logins: customer.num_logins_tmp.value)
+    # reset data
+    Customer.update_all(frequent_logins: false)
+    # update with data from Redis, can be optimized separately
+    Customer.all.each do |customer|      
+      customer.update(frequent_logins: true) if customer.num_logins.value >= 2
     end
   end
 end
 # scope to filter customers
 class Customer
-  scope :frequent_logins,  ->{ where(:num_logins.gte => 2) }
+  scope :frequent_logins,  ->{ where(frequent_logins == true) }
 end
 {% endhighlight %}
 
@@ -198,13 +201,3 @@ Approaches described above introduce complexity.  The logic in determining which
 * [https://www.sitepoint.com/rails-model-caching-redis/]([https://www.sitepoint.com/rails-model-caching-redis/)
 * [https://redis.io/topics/lru-cache](https://redis.io/topics/lru-cache)
 * [http://www.infoworld.com/article/3063161/application-development/why-redis-beats-memcached-for-caching.html](http://www.infoworld.com/article/3063161/application-development/why-redis-beats-memcached-for-caching.html)
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
