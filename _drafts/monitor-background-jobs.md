@@ -1,18 +1,39 @@
 ---
-title: "Monitoring background jobs"
-date: 2016-10-31
-categories:
+title: "Monitoring and Scaling Background Jobs"
+date: 2017-04-03
+categories: redis
 ---
 
-One way to scale applications is to take some of the tasks that turn them into background process.  For example, when user registers we can queue a job to send welcome email.  Other examples of such processes can include report generation, data import, etc.  
+Common way to scale applications is to take some of the tasks that turn them into background process.  For example, when user registers we can queue a job to send welcome email.  This way the browser can complete the request w/o waiting for email service API to respond.  Other examples of such processes can include report generation, data import, etc.  
+
+* TOC
+{:toc}
+
+I have written about background jobs for handling [traffic spikes]({% post_url 2017-03-16-sendgrid-webhooks-background-jobs %}), [callbacks]({% post_url 2017-03-26-callbacks-background-jobs %}) and [API integrations]({% post_url 2017-03-31-api-integration-background-jobs %}).  But as we shift tasks to the background we can't just assume that they will successfully complete 100% in timely manner.  
+
+
+### Background jobs backlog
 
 Often we will have a certain backlog of these jobs and that might be OK.  However, having too many jobs backed up is a likely indicator of some kind of problem.  How can we build an intelligent monitoring system that will alert us in advance?  
+
+### Error and retry (or not)
+
+
+### Monitoring
+
+
+### Priority queues
 
 Generally jobs can be grouped into queues of different priority.  We might have really important jobs where even a small backup needs an alert.  Or we can can less important jobs (and sometimes we run lots of them) where it is OK to have thousands of jobs in the queue.  
 
 When it comes to alerting I usually want to know "how important are the jobs", "how many of them are in the queue" and "how long have they been there".  
 
 
-### Delayed Job
+### Dedicated processes per queue
 
-### Sidekiq
+
+
+### Delayed Job vs Sidekiq vs AWS SQS
+
+
+### Links
