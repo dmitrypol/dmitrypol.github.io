@@ -18,9 +18,17 @@ Often we will have a certain backlog of these jobs and that might be OK.  Howeve
 
 ### Error and retry (or not)
 
+idempotent
 
 ### Monitoring
 
+Too many jobs in specific queue
+Jobs have been there for too long
+Specific job has NOT run in a long time
+
+Redis keys and TTL
+
+before_perform callbacks
 
 ### Priority queues
 
