@@ -47,7 +47,7 @@ To add/remove these records we built a simple GUI so our internal users can resp
 
 ### Customer specific configuration for APIs
 
-IP throttling can be used for websites but it is also very common for APIs.  We may have multiple customers using our API and we want to control access for each one.  The configuration examples above apply to entire application so we need something more flexible.  
+IP throttling can be used for websites but it is also very common for APIs.  We may have multiple customers using our API and we want to control access for each one.  The configuration examples above apply to entire application so we need something more flexible.  Full confession - I have not implemented this solution in production so be careful and please share feedback in comments below.
 
 Let's assume that when request hits our servers there is a `customer_id` param.  Let's also assume that we have Free, Pro and Enterprise tiers with the following limits:
 
@@ -75,10 +75,9 @@ We are storing `tier` in both primary DB and in Redis (with `before_save` callba
 {"db":0,"key":"customer:2:tier_redis","ttl":-1,"type":"string","value":"pro"..}
 {% endhighlight %}
 
-Now the `throttle` check can be modified:
+Now the `throttle` check can be modified.  The challenge is that this check occurs in initializer in Rack layer and we need to grab customer_id from request to dynamically determine throttling.
 
 {% highlight ruby %}
-# grab customer_id from request
 tier = REDIS.get("customer:#{customer_id}:tier_redis")
 case tier
 when 'enterprise'
@@ -118,6 +117,8 @@ throttle_hash.each do |key, value|
   end  
 end
 {% endhighlight %}
+
+I am still working on fully implementing this idea so if anyone has suggestions feel free to share them.  
 
 ### Links
 * [http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address](* http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address)
