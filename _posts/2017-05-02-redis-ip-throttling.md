@@ -88,7 +88,8 @@ else  # default for free and unknown
   levels = [{limit: 100, period: 1.hour}]
 end
 levels.each do |level|
-  throttle("req/ip#{level}", limit: level[:limit], period: level:[period]) do |req|
+  throttle("req/ip/#{level}/#{req.params[:customer_id]}",
+    limit: level[:limit], period: level:[period]) do |req|
     req.ip
   end
 end
@@ -112,7 +113,8 @@ This will allow 100 requests per minute, 1K requests per hour and 10 requests pe
 if req.params[:customer_id].present?
   throttle_hash = REDIS.hget("customer:#{req.params[:customer_id]}:throttle_hash")
   throttle_hash.each do |key, value|
-    throttle("req/ip#{key}", limit: value, period: key) do |req|
+    throttle("req/ip/#{key}/#{req.params[:customer_id]}",
+      limit: value, period: key) do |req|
       req.ip
     end  
   end
@@ -127,9 +129,3 @@ end
 * [http://blog.lebrijo.com/rate-limiting-solution-for-a-rails-app/](http://blog.lebrijo.com/rate-limiting-solution-for-a-rails-app/)
 * [https://blog.codinghorror.com/dictionary-attacks-101/](https://blog.codinghorror.com/dictionary-attacks-101/)
 * [https://devcentral.f5.com/articles/implementing-the-exponential-backoff-algorithm-to-thwart-dictionary-attacks](https://devcentral.f5.com/articles/implementing-the-exponential-backoff-algorithm-to-thwart-dictionary-attacks)
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
