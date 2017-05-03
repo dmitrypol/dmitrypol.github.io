@@ -49,11 +49,11 @@ To add/remove these records we built a simple GUI so our internal users can resp
 
 IP throttling can be used for websites but it is also very common for APIs.  We may have multiple customers using our API and we want to control access for each one.  The configuration examples above apply to entire application so we need something more flexible.  
 
-Let's assume that when request hits our servers the customer passes `customer_id` param.  Let's also assume that we have Free, Pro and Enterprise tiers with the following limits:
+Let's assume that when request hits our servers there is a `customer_id` param.  Let's also assume that we have Free, Pro and Enterprise tiers with the following limits:
 
-* Enterprise - 200 requests per minute and 10K requests per hour.
-* Pro - 100 requests per minute and 5K requests per hour.
 * Free - 100 requests per hour.
+* Pro - 100 requests per minute and 5K requests per hour.
+* Enterprise - 200 requests per minute and 10K requests per hour.
 
 We do not want to query our primary DB during the IP check so we will store this data in Redis with the help of [redis-objects](https://github.com/nateware/redis-objects) gem.  
 
@@ -78,7 +78,8 @@ We are storing `tier` in both primary DB and in Redis (with `before_save` callba
 Now the `throttle` check can be modified:
 
 {% highlight ruby %}
-tier = REDIS.get("customer:#{req.params[:customer_id]}:tier_redis")
+# grab customer_id from request
+tier = REDIS.get("customer:#{customer_id}:tier_redis")
 case tier
 when 'enterprise'
   levels = [{limit: 200, period: 1.minute}, {limit: 10000, period: 1.hour}]
@@ -88,8 +89,8 @@ else  # default for free and unknown
   levels = [{limit: 100, period: 1.hour}]
 end
 levels.each do |level|
-  throttle("req/ip/#{level}/#{req.params[:customer_id]}",
-    limit: level[:limit], period: level:[period]) do |req|
+  throttle("req/ip/#{level}/#{customer_id}",
+    limit: level[:limit], period: level[:period]) do |req|
     req.ip
   end
 end
@@ -107,17 +108,14 @@ end
   value: "{60:100, 3600:1000, 86400:10000}"}
 {% endhighlight %}
 
-This will allow 100 requests per minute, 1K requests per hour and 10 requests per day.  Key is `period` (number of seconds) and value is `limit` (max requests).  How we use the hash to configure `throttle`.
+This will allow 100 requests per minute, 1K requests per hour and 10K requests per day.  Key is `period` (number of seconds) and value is `limit` (max requests).  How we use the hash to configure `throttle`.
 
 {% highlight ruby %}
-if req.params[:customer_id].present?
-  throttle_hash = REDIS.hget("customer:#{req.params[:customer_id]}:throttle_hash")
-  throttle_hash.each do |key, value|
-    throttle("req/ip/#{key}/#{req.params[:customer_id]}",
-      limit: value, period: key) do |req|
-      req.ip
-    end  
-  end
+throttle_hash = REDIS.hget("customer:#{customer_id}:throttle_hash")
+throttle_hash.each do |key, value|
+  throttle("req/ip/#{key}/#{customer_id}", limit: value, period: key) do |req|
+    req.ip
+  end  
 end
 {% endhighlight %}
 
