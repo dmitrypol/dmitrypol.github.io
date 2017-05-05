@@ -78,19 +78,25 @@ We are storing `tier` in both primary DB and in Redis (with `before_save` callba
 Now the `throttle` check can be modified.  The challenge is that this check occurs in initializer in Rack layer and we need to grab customer_id from request to dynamically determine throttling.
 
 {% highlight ruby %}
-tier = REDIS.get("customer:#{customer_id}:tier_redis")
-case tier
-when 'enterprise'
-  levels = [{limit: 200, period: 1.minute}, {limit: 10000, period: 1.hour}]
-when 'pro'
-  levels = [{limit: 100, period: 1.minute}, {limit: 5000, period: 1.hour}]
-else  # default for free and unknown
-  levels = [{limit: 100, period: 1.hour}]
-end
-levels.each do |level|
-  throttle("req/ip/#{level}/#{customer_id}",
-    limit: level[:limit], period: level[:period]) do |req|
-    req.ip
+# => each tier has one or more levels
+tiers = [
+  { free: [ {limit: 100, period: 1.hour.to_i} ] },
+  { pro: [
+    {limit: 100, period: 1.minute.to_i},
+    {limit: 5000,  period: 1.hour.to_i}  ] },
+  { enterprise: [
+    {limit: 200, period: 1.minute.to_i},
+    {limit: 10000, period: 1.hour.to_i}  ] },
+  ]
+tiers.each do |tier|
+  tier_name = tier.keys.first
+  tier.values.first.each do |level|
+    throttle("req/ip/#{tier_name}/#{level[:period]}",
+      limit: level[:limit], period: level[:period]) do |req|
+      customer_id = req.params[:customer_id]
+      customer_tier = REDIS.get("customer:#{customer_id}:tier_redis")
+      req.ip if customer_tier == tier_name
+    end
   end
 end
 {% endhighlight %}
@@ -107,21 +113,23 @@ end
   value: "{60:100, 3600:1000, 86400:10000}"}
 {% endhighlight %}
 
-This will allow 100 requests per minute, 1K requests per hour and 10K requests per day.  Key is `period` (number of seconds) and value is `limit` (max requests).  How we use the hash to configure `throttle`.
+This will allow 100 requests per minute, 1K requests per hour and 10K requests per day.  Key is `period` (number of seconds) and value is `limit` (max requests).  We would then use hash to configure `throttle`.
 
 {% highlight ruby %}
-throttle_hash = REDIS.hget("customer:#{customer_id}:throttle_hash")
-throttle_hash.each do |key, value|
-  throttle("req/ip/#{key}/#{customer_id}", limit: value, period: key) do |req|
-    req.ip
-  end  
+# grab all custom configurations
+throttle_hashes = REDIS.hget(...)
+throttle_hashes.each do |throttle_hash|
+  throttle_hash.each do |key, value|
+    # check if this custom logic applies to this unique customer_id
+  end
 end
 {% endhighlight %}
 
-I am still working on fully implementing this idea so if anyone has suggestions feel free to share them.  
+The problem is that we would need to restart the app to pick up these custom configurations.  Honestly I am not sure the custom Hash approach really delivers much value and significantly complicates things.  If anyone has suggestions feel free to share them.  
 
 ### Links
 * [http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address](* http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address)
+* [https://stripe.com/blog/rate-limiters](https://stripe.com/blog/rate-limiters)
 * [https://github.com/dryruby/rack-throttle](https://github.com/dryruby/rack-throttle)
 * [https://github.com/jeremy/rack-ratelimit](https://github.com/jeremy/rack-ratelimit)
 * [http://nginx.org/en/docs/http/ngx_http_limit_req_module.html](http://nginx.org/en/docs/http/ngx_http_limit_req_module.html)
