@@ -13,7 +13,7 @@ The one feature I missed is built in support for searching records by value (not
 
 ### Using client library
 
-As POC we will build an application using Redis as the primary DB using Ruby [Ohm](https://github.com/soveran/ohm) gem.  To keep things simple we will start with only one model `User` with `name` and `email` attributes.  
+As POC we will build an application using Redis as the primary DB with Ruby [Ohm](https://github.com/soveran/ohm) library.  To keep things simple we will start with only one model `User` with `name` and `email` attributes.  
 
 #### Users
 
@@ -40,7 +40,7 @@ Ohm library will also create several [Redis Sets](https://redis.io/topics/data-t
 
 {% highlight ruby %}
 {"db":1,"key":"User:all","ttl":-1,"type":"set","value":["1"],"size":2}
-# in rails c
+# in rails console
 User[1]
 <User:0x00000005e4ef80 @attributes={:name=>"John Smith",
   :email=>"john.smith@gmail.com"}, @memo={}, @id=1>
@@ -138,7 +138,7 @@ Now are are able to create indexes and search for exact match on our records or 
 
 ### RediSearch module
 
-At [RedisConf 2016](http://www.redisconf.com/) they announced support for modules to extend Redis capabilities.  I found [RediSearch](http://redisearch.io/) module to be interesting.  It add support for commands such as `FT.CREATE`, `FT.ADD` and `FT.SEARCH` to build full text search indexes (not just exact match) in Redis and search for those records.  
+At [RedisConf 2016](http://www.redisconf.com/) they announced support for modules to extend Redis capabilities.  I found [RediSearch](http://redisearch.io/) module to be interesting.  It adds commands such as `FT.CREATE`, `FT.ADD` and `FT.SEARCH` to build full text search indexes (not just exact match) in Redis.  Module installation instructions can be found at [http://redisearch.io/Quick_Start/](http://redisearch.io/Quick_Start/)
 
 To simplify development I have been working on [redi_search_rails](https://github.com/dmitrypol/redi_search_rails) gem.  It integrates into application models and provides handy methods like `ft_create` and `ft_search`.  We can install it from [RubyGems](https://rubygems.org/gems/redi_search_rails) or [GitHub](https://github.com/dmitrypol/redi_search_rails).  
 
@@ -181,7 +181,7 @@ Now completely different records are created in Redis.  RediSearch module will c
   "title": "Redis Search"}, ...}
 {% endhighlight %}
 
-RediSearch will also create custom data types.  There will `ft_index`, one for each Index that we create:
+RediSearch will also create custom data types.  There will `ft_index`, one for each Index that we created:
 
 {% highlight ruby %}
 {"db":0,"key":"idx:User*","ttl":-1,"type":"ft_index0",..}
@@ -204,21 +204,26 @@ And multiple keys of `ft_invidx` data type based on different keywords:
 {% endhighlight %}
 
 
-Now we can execute full text search commands.  RediSearch module will use the custom indexes to find appropriate keys and then return data from the Hashes.  
+Now we can execute full text search commands.  RediSearch module will use the custom indexes to find appropriate keys and return search results.
 
 {% highlight ruby %}
 @users = User.ft_search(keyword: 'john')
-[1, "gid://redi-search-demo/User/1", ["name", "john smith", 
-  "email", "john.smith@gmail.com"]] 
+[1, "gid://redi-search-demo/User/1", ["name", "john smith",
+  "email", "john.smith@gmail.com"]]
 @users = User.ft_search_format(keyword: 'john')
-[<OpenStruct id="gid://redi-search-demo/User/1", name="john smith", 
-  email="john.smith@gmail.com">] 
+[<OpenStruct id="gid://redi-search-demo/User/1", name="john smith",
+  email="john.smith@gmail.com">]
 {% endhighlight %}
 
 ### Benchmark(eting) stats
 
-To index 100K users took about 60 seconds.  Results from `User.ft_search` and `User.find(name: 'Jonth Smith') are nearly instanteneous.  
+I started with a simple text file with 10K users with names and email addresses.  On disk file size was about 400KB.  Once loaded into RediSearch it created 22.5K keys and RDB file was 1.7 MB in size.  
 
+I then indexed 1 million users.  The indexing process took about 6 minutes.  It created 1.5 million keys and RDB file was 202MB.  Last I indexed 10 million users which took almost 60 minutes.  There were 12 million keys and RDB file was 1.9GB.  
+
+In all three cases search results via Ruby `User.ft_search(keyword: 'John')` and via redis-cli `FT.SEARCH User john`) were nearly instanteneous.  Tests were performed on a Dell workstation with 16GB RAM.  
+
+RediSearch supports lots of other interesting features such as `FT.SUGADD` and `FT.SUGGET` for  auto-completing suggestions.  I look forward to when it officially moves out of beta and becomes supported by Redis hosting providers.  
 
 ### Links
 * [https://redislabs.com/solutions/use-cases/redis-full-text-search/](https://redislabs.com/solutions/use-cases/redis-full-text-search/)
