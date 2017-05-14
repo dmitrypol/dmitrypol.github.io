@@ -6,7 +6,7 @@ categories: redis
 
 When I first started using [Redis](https://redis.io/) I loved the speed and the powerful data structures.  Over the years I used Redis for data analysis, caching, queuing background jobs and permanent data storage.
 
-The one feature I missed is built in support for searching records by value (not key).  Coming from strong SQL background it was frustrating to be unable to do equivalent of `select first_name, last_name from users where email = ...`.  In this post I will discuss several options on how we can implement search in Redis.  
+The one feature I missed is built in support for searching records by value (not key).  Coming from strong SQL background it was frustrating to be unable to do equivalent of `select first_name, last_name from users where email = ...`.  In this post I will provide high level overview of different approaches on how to implement search in Redis.  
 
 * TOC
 {:toc}
@@ -227,7 +227,7 @@ In all three cases search results via Ruby `User.ft_search(keyword: 'John')` and
 
 As we can see the two approaches are very different.  RediSearch allows us to implement full text search across documents.  The library is under active development by [RedisLabs](https://redislabs.com/) and other contributors.  
 
-RediSearch supports other interesting features such as `FT.SUGADD` and `FT.SUGGET` for  auto-completing suggestions.  I look forward to when it officially moves out of beta and becomes supported by Redis hosting providers.  
+RediSearch supports other interesting features such as indexing numeric values (prices, dates, ...) and `FT.SUGADD` / `FT.SUGGET` for  auto-completing suggestions.  I plan to cover those in a future blog post.  I look forward to when it officially moves out of beta and becomes supported by Redis hosting providers.  
 
 On the other hand [Ohm](https://github.com/soveran/ohm) secondary indexes allow us to do exact match and build relationships between records bringing it close to the ORM like functionality.  It also works with regular Redis w/o requiring installing additonal modules directly on the server.  
 
