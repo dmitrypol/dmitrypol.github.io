@@ -221,9 +221,15 @@ I started with a simple text file with 10K users with names and email addresses.
 
 I then indexed 1 million users.  The indexing process took about 6 minutes.  It created 1.5 million keys and RDB file was 202MB.  Last I indexed 10 million users which took almost 60 minutes.  There were 12 million keys and RDB file was 1.9GB.  
 
-In all three cases search results via Ruby `User.ft_search(keyword: 'John')` and via redis-cli `FT.SEARCH User john`) were nearly instanteneous.  Tests were performed on a Dell workstation with 16GB RAM.  
+In all three cases search results via Ruby `User.ft_search(keyword: 'John')` and via redis-cli `FT.SEARCH User john`) were nearly instanteneous.  Tests were performed on a Dell workstation with 16GB RAM.  Obviously the results will vary widely depending on the types of records indexed.  
 
-RediSearch supports lots of other interesting features such as `FT.SUGADD` and `FT.SUGGET` for  auto-completing suggestions.  I look forward to when it officially moves out of beta and becomes supported by Redis hosting providers.  
+### Conclusion
+
+As we can see the two approaches are very different.  RediSearch allows us to implement full text search across documents.  The library is under active development by [RedisLabs](https://redislabs.com/) and other contributors.  
+
+RediSearch supports other interesting features such as `FT.SUGADD` and `FT.SUGGET` for  auto-completing suggestions.  I look forward to when it officially moves out of beta and becomes supported by Redis hosting providers.  
+
+On the other hand [Ohm](https://github.com/soveran/ohm) secondary indexes allow us to do exact match and build relationships between records bringing it close to the ORM like functionality.  It also works with regular Redis w/o requiring installing additonal modules directly on the server.  
 
 ### Links
 * [https://redislabs.com/solutions/use-cases/redis-full-text-search/](https://redislabs.com/solutions/use-cases/redis-full-text-search/)
