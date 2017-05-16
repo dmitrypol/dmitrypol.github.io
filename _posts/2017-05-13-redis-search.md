@@ -239,8 +239,3 @@ On the other hand [Ohm](https://github.com/soveran/ohm) secondary indexes allow 
 * [http://josephndungu.com/tutorials/fast-autocomplete-search-terms-rails](http://josephndungu.com/tutorials/fast-autocomplete-search-terms-rails)
 * [http://vladigleba.com/blog/2014/05/30/how-to-do-autocomplete-in-rails-using-redis/](http://vladigleba.com/blog/2014/05/30/how-to-do-autocomplete-in-rails-using-redis/)
 * [https://github.com/huacnlee/redis-search](https://github.com/huacnlee/redis-search)
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
