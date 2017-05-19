@@ -4,14 +4,14 @@ date: 2017-05-15
 categories: redis
 ---
 
-In previous [post]({% post_url 2017-05-13-redis-search %}) I wrote about different ways we can search for records in Redis.  In this one I want to do a deep dive on [RediSearch module](http://redisearch.io/).  
+In previous [post]({% post_url 2017-05-13-redis-search %}) I wrote about different ways we can search for records in Redis.  In this article I want to do a deeper dive on [RediSearch module](http://redisearch.io/).  
 
 * TOC
 {:toc}
 
-### Basic configuration
+### Basic options
 
-We will continue using Redis as the primary DB leveraging [Ohm](https://github.com/soveran/ohm) library.  But now we want to build more sophisticated indexes with RediSearch and use `NUMERIC` search.  And we will use [redi_search_rails](https://github.com/dmitrypol/redi_search_rails) library.
+We will use Redis as the primary DB leveraging [Ohm](https://github.com/soveran/ohm) library.  But now we want to build more sophisticated indexes with RediSearch and use `NUMERIC` filter.  And we will continue using [RediSearchRails](https://github.com/dmitrypol/redi_search_rails) library.
 
 {% highlight ruby %}
 # Gemfile
@@ -37,15 +37,16 @@ end
 Generate random seed data:
 
 {% highlight ruby %}
-# repeat X times
-User.create(name: random_name, email: random_email, age: rand(10..50),
-  height: rand(3..6), status: ['pending', 'active', 'disabled'].sample )
+10.times do |i|
+  User.create(name: random_name, email: random_email, age: rand(10..50),
+    height: rand(3..6), status: ['pending', 'active', 'disabled'].sample )
+end
 # create indexes
 User.ft_create
 User.ft_add_all
 {% endhighlight %}
 
-When we look in Redis we see various keys.  There are [Hashes](https://redis.io/topics/data-types#hashes) which contain key / value pairs for name, email, status, age and height.  
+When we look in Redis we see various keys for RediSearch.  There are [Hashes](https://redis.io/topics/data-types#hashes) which contain key / value pairs for name, email, status, age and height.  
 
 {% highlight ruby %}
 {"db":1,"key":"gid://app/User/1","ttl":-1,"type":"hash","value": {
@@ -69,7 +70,7 @@ Separately we have custom data types for indexes:
 {"db":0,"key":"ft:User/smith*","ttl":-1,"type":"ft_invidx",..}
 {% endhighlight %}
 
-Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT.SEARCH User active`.  Similar searches can be done by name or email.  
+Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT.SEARCH User active`.  Similar searches can be done by name or email.  We could search for all users with `gmail` address because RediSearch will index `gmail` as keyword.
 
 {% highlight ruby %}
 [2,
@@ -80,14 +81,27 @@ Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT
 ]
 {% endhighlight %}
 
+RediSearchRails Ruby library also provides additional `ft_search_format` and `ft_search_count` methods (not present in core module).  `ft_search_format` will return data as an array of hashes which is common pattern in ORMs like [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html) or [Mongoid](https://github.com/mongodb/mongoid).  
+
+{% highlight ruby %}
+[
+  {"id": "gid://app/User/1", "name": "Tom", "age": "100", "status": "active", ..},
+  {"id": "gid://app/User/2", "name": "Mary", "age": "50", "status": "active", ..},
+  ...
+]
+{% endhighlight %}
+
+
+### Advanced options
+
 #### Numeric filter
 
-We can use `numeric` indexes to filter search results if we want users of a certain age or height range.
+`numeric` indexes allow us to filter search results if we want users of a certain age or height range.
 
 {% highlight ruby %}
 # redis-cli
 FT.SEARCH User active FILTER age 10 20
-# or via redi_search_rails
+# or via RediSearchRails
 User.ft_search(keyword: 'active', filter: {numeric_field: 'age', min: 10, max: 20})
 [1,
   "gid://app/User/1", ["name", "Tom Jones", "email",
@@ -95,52 +109,45 @@ User.ft_search(keyword: 'active', filter: {numeric_field: 'age', min: 10, max: 2
 ]
 {% endhighlight %}
 
+#### Indexing data already in Redis
 
-### Advanced options
+In our case we are using Redis both as primary DB and for RediSearch indexes.  The core attributes (name, email, ...) are stored as Hashes in Ohm records and then created separately by RediSearch.  We can use `FT.ADDHASH` to index existing hashes and avoid creating duplicates.  
+
+{% highlight ruby %}
+# we could create the Hash via direct Redis API call
+user = Redis.new.hmset("gid://app/User/5", "name", "Bob", "email", "foo@bar.com",
+ "age", "100", "status", "active")
+# or via ORM
+user = User.new(name: 'Bob', email: 'foo@bar.com', age: '100', status: 'active')
+# now we pass GlobalID as the key to existing Redis hash
+User.ft_addhash(redis_key: user.to_global_id.to_s)
+# ft_search works the same
+User.ft_search(keyword: 'bob')
+  [1, "user1", ["name", "Bob", "age", "100", ...]]
+{% endhighlight %}
 
 #### Pagination
 
-But what if we have thousands of records match our search criteria?  We do not want to return all results at once.  
+What if we have thousands of records that match our search criteria?  We do not want to return all results at once.  RediSearch supports `LIMIT offset num` (default offset is 0 and num is 10).  We can easily get the total number of results and request them in batches.
 
 {% highlight ruby %}
-
+num_records = User.ft_search_count(keyword: 'bob')
+(0..num_records).step(5) do |n|
+  User.ft_search_format(keyword: 'Tom', offset: 0 + n, num: n)    
+end
 {% endhighlight %}
-
-#### Indexing existing keys
-
-In our case we are using Redis both as primary DB and for RediSearch indexes.  The core attributes are stored in Hashes in both Ohm fields and in RediSearch indexes.  
-
-{% highlight ruby %}
-FT.ADDHASH
-
-{% endhighlight %}
-
-
-
 
 ### Auto complete
 
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-### Links
-
-
-
+RediSearch module also has `FT.SUGADD`, `FT.SUGGET`, `FT.SUGDEL` and `FT.SUGLEN`.  Using these commands we can build an autocomplete feature to search for users by names or other attributes.  These keys are completely separate from the other indexes.  RediSearchRails library builds a Redis key by combining model name with attribute (`User:name`).  
 
 {% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-{% highlight ruby %}
-
+User.new(name: 'Bob')
+User.ft_suggadd(attribute: 'name', value: 'Bob')
+User.ft_sugget(attribute: 'name', prefix: 'b')
+# ["Bob"]
+# data in Redis
+{"db":0,"key":"User:name*","ttl":-1,"type":"trietype0",..}
 {% endhighlight %}
 
 
