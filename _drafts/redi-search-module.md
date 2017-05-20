@@ -9,7 +9,7 @@ In previous [post]({% post_url 2017-05-13-redis-search %}) I wrote about differe
 * TOC
 {:toc}
 
-### Basic options
+### Basic search
 
 We will use Redis as the primary DB leveraging [Ohm](https://github.com/soveran/ohm) library.  But now we want to build more sophisticated indexes with RediSearch and use `NUMERIC` filter.  And we will continue using [RediSearchRails](https://github.com/dmitrypol/redi_search_rails) library.
 
@@ -17,10 +17,9 @@ We will use Redis as the primary DB leveraging [Ohm](https://github.com/soveran/
 # Gemfile
 gem 'redi_search_rails'
 # config/initializers/ohm.rb
-Ohm.redis = Redic.new("redis://127.0.0.1:6379/1")
+Ohm.redis = Redic.new("redis://127.0.0.1:6379/0")
 # config/initializers/redi_search_rails.rb
-# put core data and RediSearch indexes in different Redis DBs, easier to view
-REDI_SEARCH = Redis.new(db: 0)
+REDI_SEARCH = Redis.new(host: 'localhost', post: 6379, db: 0)
 # app/models/user.rb
 class User < Ohm::Model
   attribute :name
@@ -46,10 +45,10 @@ User.ft_create
 User.ft_add_all
 {% endhighlight %}
 
-When we look in Redis we see various keys for RediSearch.  There are [Hashes](https://redis.io/topics/data-types#hashes) which contain key / value pairs for name, email, status, age and height.  
+When we look in Redis we see various keys for RediSearch.  There are [Hashes](https://redis.io/topics/data-types#hashes) which contain key / value pairs for name, email, status, age and height.  RediSearchRails uses [GlobalID](https://github.com/rails/globalid) to create unique key.
 
 {% highlight ruby %}
-{"db":1,"key":"gid://app/User/1","ttl":-1,"type":"hash","value": {
+{"db":0,"key":"gid://app/User/1","ttl":-1,"type":"hash","value": {
   "name": "John Smith",
   "email": "john.smith@gmail.com",
   "status": "pending",
@@ -74,16 +73,17 @@ Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT
 
 {% highlight ruby %}
 [2,
-  "gid://app/User/1", ["name", "Wade Mayert", "email",
+  "gid://app/User/1", ["name", "Stacy Mayert", "email",
   "norma@lakinmohr.info", "status", "active", "age", "31", "height", "5"],
   "gid://app/User/3", ["name", "Ernie Feest", "email",
   "danielle@dooley.co", "status", "active", "age", "14", "height", "4"]
 ]
 {% endhighlight %}
 
-RediSearchRails Ruby library also provides additional `ft_search_format` and `ft_search_count` methods (not present in core module).  `ft_search_format` will return data as an array of hashes which is common pattern in ORMs like [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html) or [Mongoid](https://github.com/mongodb/mongoid).  
+RediSearchRails library also provides additional `ft_add_all`, `ft_del_all`, `ft_search_format` and `ft_search_count` methods (not present in RediSearch module).  `ft_search_format` will return data as an array of hashes which is common pattern in ORMs like [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html) or [Mongoid](https://github.com/mongodb/mongoid).  
 
 {% highlight ruby %}
+User.ft_search_format(keyword: 'active')
 [
   {"id": "gid://app/User/1", "name": "Tom", "age": "100", "status": "active", ..},
   {"id": "gid://app/User/2", "name": "Mary", "age": "50", "status": "active", ..},
@@ -105,7 +105,7 @@ FT.SEARCH User active FILTER age 10 20
 User.ft_search(keyword: 'active', filter: {numeric_field: 'age', min: 10, max: 20})
 [1,
   "gid://app/User/1", ["name", "Tom Jones", "email",
-  "foo@bar.com", "status", "active", "age", "15", "height", "4"],
+  "tom@gmail.com", "status", "active", "age", "15", "height", "4"],
 ]
 {% endhighlight %}
 
@@ -142,15 +142,17 @@ end
 RediSearch module also has `FT.SUGADD`, `FT.SUGGET`, `FT.SUGDEL` and `FT.SUGLEN`.  Using these commands we can build an autocomplete feature to search for users by names or other attributes.  These keys are completely separate from the other indexes.  RediSearchRails library builds a Redis key by combining model name with attribute (`User:name`).  
 
 {% highlight ruby %}
-User.new(name: 'Bob')
-User.ft_suggadd(attribute: 'name', value: 'Bob')
-User.ft_sugget(attribute: 'name', prefix: 'b')
-# ["Bob"]
+user1 = User.new(name: 'Mary')
+user2 = User.new(name: 'Maya')
+User.ft_sugadd(record: user1, attribute: 'name')
+User.ft_sugadd(record: user2, attribute: 'name')
+User.ft_sugget(attribute: 'name', prefix: 'm')
+["Mary", "Maya"]
 # data in Redis
 {"db":0,"key":"User:name*","ttl":-1,"type":"trietype0",..}
 {% endhighlight %}
 
-
+In addition to methods supported by RediSearch module RediSearchRails library adds `ft_sugadd_all` and `ft_sugdel_all`.  They accept attribute name (`User.ft_sugadd_all(attribute: 'name')`) and will loop through all records adding/deleting strings to auto-complete dictionaries for that attribute.  This can be useful when we have a table with specific records and we want to build auto-complete search on specific attribute.
 
 {% highlight ruby %}
 
