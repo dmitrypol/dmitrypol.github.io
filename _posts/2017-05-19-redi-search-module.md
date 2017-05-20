@@ -1,6 +1,6 @@
 ---
 title: "RediSearch Module"
-date: 2017-05-15
+date: 2017-05-19
 categories: redis
 ---
 
@@ -11,7 +11,7 @@ In previous [post]({% post_url 2017-05-13-redis-search %}) I wrote about differe
 
 ### Basic search
 
-We will use Redis as the primary DB leveraging [Ohm](https://github.com/soveran/ohm) library.  But now we want to build more sophisticated indexes with RediSearch and use `NUMERIC` filter.  And we will continue using [RediSearchRails](https://github.com/dmitrypol/redi_search_rails) library.
+We will use Redis as the primary DB leveraging [Ohm](https://github.com/soveran/ohm) library.  But now we want to build more sophisticated indexes with RediSearch, use `NUMERIC` filter and other advanced options.  And we will continue using [RediSearchRails](https://github.com/dmitrypol/redi_search_rails) library.
 
 {% highlight ruby %}
 # Gemfile
@@ -69,7 +69,7 @@ Separately we have custom data types for indexes:
 {"db":0,"key":"ft:User/smith*","ttl":-1,"type":"ft_invidx",..}
 {% endhighlight %}
 
-Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT.SEARCH User active`.  Similar searches can be done by name or email.  We could search for all users with `gmail` address because RediSearch will index `gmail` as keyword.
+Now we can run `User.ft_search(keyword: 'active')` or in redis-cli do `FT.SEARCH User active`.  Similar searches can be done by name or email.  We could search for all users with `gmail` address because RediSearch will index `gmail` as keyword.
 
 {% highlight ruby %}
 [2,
@@ -80,7 +80,7 @@ Now we can run `User.ft_search(keyword: 'active')` or in redis-cli we can do `FT
 ]
 {% endhighlight %}
 
-RediSearchRails library also provides additional `ft_add_all`, `ft_del_all`, `ft_search_format` and `ft_search_count` methods (not present in RediSearch module).  `ft_search_format` will return data as an array of hashes which is common pattern in ORMs like [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html) or [Mongoid](https://github.com/mongodb/mongoid).  
+[RediSearchRails](https://github.com/dmitrypol/redi_search_rails) library also provides additional `ft_add_all`, `ft_del_all`, `ft_search_format` and `ft_search_count` methods (not present in RediSearch module).  `ft_search_format` will return data as an array of hashes which is common pattern in ORMs like [ActiveRecord](http://guides.rubyonrails.org/active_record_basics.html) or [Mongoid](https://github.com/mongodb/mongoid).  
 
 {% highlight ruby %}
 User.ft_search_format(keyword: 'active')
@@ -139,7 +139,7 @@ end
 
 ### Auto complete
 
-RediSearch module also has `FT.SUGADD`, `FT.SUGGET`, `FT.SUGDEL` and `FT.SUGLEN`.  Using these commands we can build an autocomplete feature to search for users by names or other attributes.  These keys are completely separate from the other indexes.  RediSearchRails library builds a Redis key by combining model name with attribute (`User:name`).  
+RediSearch module also has `FT.SUGADD`, `FT.SUGGET`, `FT.SUGDEL` and `FT.SUGLEN` methods.  Using these commands we can build an autocomplete indexes to search for users by specific attributes.  These Redis keys are completely separate from the other indexes.  RediSearchRails library creates a Redis key by combining model name with attribute (`User:name`).  
 
 {% highlight ruby %}
 user1 = User.new(name: 'Mary')
@@ -153,6 +153,11 @@ User.ft_sugget(attribute: 'name', prefix: 'm')
 {% endhighlight %}
 
 In addition to methods supported by RediSearch module RediSearchRails library adds `ft_sugadd_all` and `ft_sugdel_all`.  They accept attribute name (`User.ft_sugadd_all(attribute: 'name')`) and will loop through all records adding/deleting strings to auto-complete dictionaries for that attribute.  This can be useful when we have a table with specific records and we want to build auto-complete search on specific attribute.
+
+### Conclusion
+
+There are many other advanced options in RediSearch module.  For example, we can use GEO filters, stem keywords and do much more advanced querying.  I am working on adding support for these to RediSearchRails library.  I also want to add extra features to my library such as custom sopwords configuration and ability to specify minimum keyword length to index.  
+
 
 {% highlight ruby %}
 
