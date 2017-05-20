@@ -8,6 +8,8 @@ When I first started using [Redis](https://redis.io/) I loved the speed and the 
 
 The one feature I missed is built in support for searching records by value (not key).  Coming from strong SQL background it was frustrating to be unable to do equivalent of `select first_name, last_name from users where email = ...`.  In this post I will provide high level overview of different approaches on how to implement search in Redis.  
 
+Read the next post on [RediSearch module]({% post_url 2017-05-19-redi-search-module %}).
+
 * TOC
 {:toc}
 
@@ -239,3 +241,4 @@ On the other hand [Ohm](https://github.com/soveran/ohm) secondary indexes allow 
 * [http://josephndungu.com/tutorials/fast-autocomplete-search-terms-rails](http://josephndungu.com/tutorials/fast-autocomplete-search-terms-rails)
 * [http://vladigleba.com/blog/2014/05/30/how-to-do-autocomplete-in-rails-using-redis/](http://vladigleba.com/blog/2014/05/30/how-to-do-autocomplete-in-rails-using-redis/)
 * [https://github.com/huacnlee/redis-search](https://github.com/huacnlee/redis-search)
+
