@@ -1,10 +1,10 @@
 ---
 title: "Monitoring and Scaling Background Jobs"
-date: 2017-04-03
+date: 2017-05-26
 categories: redis
 ---
 
-Common way to scale applications is to take some of the tasks that turn them into background process.  For example, when user registers we can queue a job to send welcome email.  This way the browser can complete the request w/o waiting for email service API to respond.  Other examples of such processes can include report generation, data import, etc.  
+Common way to scale applications is to take some of the tasks and change them into background process.  For example, when user registers we can queue a job to send welcome email.  This way the browser can complete the request w/o waiting for email service API to respond.  Other examples of such processes can include report generation, data import, etc.  
 
 * TOC
 {:toc}
