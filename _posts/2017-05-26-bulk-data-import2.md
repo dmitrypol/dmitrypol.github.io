@@ -45,16 +45,16 @@ class QueueRecordImportJob < ApplicationJob
     # check counter using file_object_key as Redis key
     row_counter = REDIS.incr(file_object_key)
     CSV.foreach(file, headers: true).with_index do |row, row_num|
-      # skip rows already processed
       next if row_num < row_counter
       RecordImportJob.perform_later(row: row)
-      # remove Redis counter if last row
-      REDIS.del file_object_key if row_counter == file.readlines.size
+      if row_counter == file.readlines.size
+        REDIS.del file_object_key
+        S3_CLIENT.delete_object(bucket: S3_BUCKET, key: file_object_key)
+      end
     end    
   end
 end
 {% endhighlight %}
-
 
 But `QueueRecordImportJob` does not actually import the records.  It simply calls `RecordImportJob.perform_later` passing each row.  This speeds the `QueueRecordImportJob` and now we can have multiple Sidekiq workers processing individual records via `RecordImportJob`.
 

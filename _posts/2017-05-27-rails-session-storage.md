@@ -39,7 +39,7 @@ Redis will purge the data after one day with [TTL](https://redis.io/commands/ttl
 
 ### Mongo
 
-We have been using that approach for a couple of years with [mongo_session_store-rails4](https://rubygems.org/gems/mongo_session_store-rails4) gem.  
+We have been using this approach for a couple of years with [mongo_session_store-rails4](https://rubygems.org/gems/mongo_session_store-rails4) gem.  
 
 {% highlight ruby %}
 # config/initializers/session_store.rb
