@@ -29,7 +29,7 @@ Here we have an API that recevies HTTP requests with 2 params `phone_from` and `
 # app/controllers/phone_controller.rb
 class PhoneController < ApplicationController
   def create
-    PhoneTracker.new(phone_from: params[:phone_from], 
+    PhoneTracker.new(phone_from: params[:phone_from],
       phone_to: params[:phone_to]).perform
   end
 end
@@ -70,7 +70,7 @@ end
 {"db":0,"key":"1556211668","ttl":-1,"type":"string","value":"5","size":1}
 {% endhighlight %}
 
-### Reballancing data after adding / removing nodes
+### Rebalancing data after adding / removing nodes
 
 What if later we need to add more Redis servers (going from 4 to 6)?  We can change our code to `% 6` but we also need to move some of the records from the current 4 Redis servers to the new ones?  Full confession - I have not implemented this in real production system, these are just general thoughts.  
 
@@ -82,12 +82,15 @@ class RedisReshard
       # this will grab ALL keys which is NOT what we want to do in real life
       keys = redis.keys("*")
       keys.each do |key|
-        # check if key needs to be moved to new shard 
+        # check if key needs to be moved to new shard
         new_shard = key % 6
         if shard != new_shard
           new_redis = "REDIS#{new_shard}".constantize
           value = redis.get(key)
-          new_redis.set(key, value)
+          # check if data is present in the new shard already
+          new_value = new_redis.get(key)
+          new_redis.set(key, value + new_value)
+          # remove data from old shard
           redis.del(key)
         end
       end
