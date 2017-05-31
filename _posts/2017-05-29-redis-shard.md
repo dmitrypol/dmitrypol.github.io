@@ -90,7 +90,7 @@ class RedisReshard
           # check if data is present in the new shard already
           new_value = new_redis.get(key)
           new_redis.set(key, value + new_value)
-          # remove data from old shard
+          # remove data from the old shard
           redis.del(key)
         end
       end
@@ -99,7 +99,7 @@ class RedisReshard
 end
 {% endhighlight %}
 
-The challenge is to run this on a real production system while data is actively used.  Can't say I am looking forward to trying this for real if I ever have to ;-).  
+The challenge is to run this on a real production system while data is actively used.  Can't say I am looking forward to trying this for real if I ever have to ;-).  Read the links below for better ideas on paritioning and clustering.  
 
 ### Links
 

@@ -4,9 +4,9 @@ date: 2017-05-30
 categories: 
 ---
 
-Sometimes there is a technology which we love right away until we really use it in depth and then we start encountering it's limitations.  When I first used [MongoDB](https://www.mongodb.com/) with [Mongoid ORM](https://github.com/mongodb/mongoid) I loved the flexible schema and ability to declare fields right in my model classes (no need for schema migrations).  But now after using Mongo for a number of years on different projects I really miss some traditional SQL things (like JOINs and transactions).
+Sometimes there is a technology which we love right away until we really use it in depth and then we start encountering it's limitations.  When I first used [MongoDB](https://www.mongodb.com/) with [Mongoid ORM](https://github.com/mongodb/mongoid) I loved the flexible schema and ability to declare fields right in my model classes (no need for schema migrations).  But now after using Mongo for a number of years on different projects I really miss some traditional SQL features (like JOINs and transactions).
 
-I recently used [RethinkDB](https://www.rethinkdb.com/) on several small projects.  I feel that with RethinkDB the experience was the opposite.  I have not used it enough to see the benefits (compare to MongoDB) but I already hit a number of limitations.  Not in the DB itself but in the ecosystem around it.  
+I recently used [RethinkDB](https://www.rethinkdb.com/) on several small projects.  I feel that with RethinkDB the experience was the opposite.  I have not used it enough to see the benefits (compare to MongoDB) but I already hit a number of limitations.  Not in the DB itself but in the ecosystem around it.  I can't help but contrast that to [Redis](https://redis.io/) which has a fanstastic ecosystem.  
 
 * TOC
 {:toc}
