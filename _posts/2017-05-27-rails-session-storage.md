@@ -4,7 +4,7 @@ date: 2017-05-27
 categories: rails redis mongo
 ---
 
-When we build applications on a singleton server things are very simple.  But then we need to start scaling out (usually better approach than scaling up) and we need to worry about session state management.  Here is a great [article by Justin Weiss](http://www.justinweiss.com/articles/how-rails-sessions-work/) on Rails sessions.
+When we build applications on a singleton server things are very simple.  But then we need to start scaling out (usually better approach than scaling up) and we need to worry about session state management.  Here is a great [article by Justin Weiss](http://www.justinweiss.com/articles/how-rails-sessions-work/) and [video of his talk](https://www.youtube.com/watch?v=mqUbnZIY3OQ) on Rails sessions.
 
 * TOC
 {:toc}
@@ -25,7 +25,7 @@ config.redis_host = 'localhost'
 # config/initializers/session_store.rb
 AppName::Application.config.session_store :redis_store, {
   servers: [
-    { host: Rails.application.config.redis_host, 
+    { host: Rails.application.config.redis_host,
     port: 6379, db: 0, namespace: "session" },
   ],
   expire_after: 1.day
@@ -44,7 +44,7 @@ We have been using this approach for a couple of years with [mongo_session_store
 {% highlight ruby %}
 # config/initializers/session_store.rb
 Rails.application.config.session_store :mongoid_store
-MongoSessionStore.collection_name = "sessions" 
+MongoSessionStore.collection_name = "sessions"
 {% endhighlight %}
 
 Documents in Mongo will have **ID** (`zzv-ATGWb5lG-w7AwwI438pXHtk`) and **DATA** (`#<BSON::Binary:0x00000008468ce8>`).  We can also modify the default model class to add [TTL indexes](https://docs.mongodb.com/manual/core/index-ttl/) which will purge old records.  
@@ -65,7 +65,7 @@ end
 We need to follow instructions on [activerecord-session_store](https://github.com/rails/activerecord-session_store) to install the gem and created SQL table where data will be stored.  
 
 {% highlight ruby %}
-Rails.application.config.session_store :active_record_store, 
+Rails.application.config.session_store :active_record_store,
   :key => '_my_app_session'
 {% endhighlight %}
 

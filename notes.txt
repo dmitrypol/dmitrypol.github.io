@@ -8,3 +8,50 @@ updating child cache when parent recored is updated (child inherits properties f
 https://scotch.io/tutorials/getting-started-with-jekyll-plus-a-free-bootstrap-3-starter-theme
 
 https://milanaryal.com/2015/writing-on-github-pages-and-jekyll-using-markdown/
+
+
+
+
+
+
+API
+authentication
+https://www.sitepoint.com/authenticate-your-rails-api-with-jwt-from-scratch/
+https://www.pluralsight.com/guides/ruby-ruby-on-rails/token-based-authentication-with-ruby-on-rails-5-api
+https://thesocietea.org/2015/04/building-a-json-api-with-rails-part-3-authentication-strategies/
+https://blog.joshsoftware.com/2014/05/08/implementing-rails-apis-like-a-professional/
+
+https://www.codeschool.com/blog/2014/02/03/token-based-authentication-rails/
+http://railscasts.com/episodes/352-securing-an-api?autoplay=true
+
+curl http://localhost:3000/v2/users -H 'Authorization: Token token="123"'
+
+
+versioning
+https://www.bignerdranch.com/blog/adding-versions-rails-api/
+https://github.com/bploetz/versionist
+https://github.com/bwillis/versioncake
+
+general API doc page
+UI to test requests
+reporting API
+throttling
+
+
+Notes from RedisConf
+merkl tree
+bloom filter
+radix tree
+streams data structure
+listpack / ziplist
+hot keys in Redis
+netflix dynomite
+
+msgpack
+modules overview
+redis distributed lock for 2 phase commit in microservices talking to different DBs
+redis cache as materialized view over many dbs or tables
+redisconf basketball ticket counters
+redis state machine
+jobs to do bulk updates on primary DB, keep IDs in set
+redis and single table inheritance, store other attributes in Redis https://www.youtube.com/watch?v=dH6VYRMRQFw
