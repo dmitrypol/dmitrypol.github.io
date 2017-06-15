@@ -29,7 +29,7 @@ Here is a more complex polymorphic relationship.
 
 {% highlight ruby %}
 class Article
-  belongs_to :author, polymorphic: true	
+  belongs_to :author, polymorphic: true
   field :body
 end
 class User
@@ -92,12 +92,22 @@ Finally we decided to consolidate Company and User models and no longer use poly
 
 {% highlight ruby %}
 # create new users for companies
-Company.each do |c| 
+Company.each do |c|
   User.create(_id: c.id, name: c.name, ...)
 end
 # change article relationships
 Article.all.rename(author_id: :user_id)
 Article.all.unset(:author_type)
+{% endhighlight %}
+
+If we were not able to manually specify `User.id` to be the same as `Company.id` we would need to this:
+
+{% highlight ruby %}
+Company.each do |c|
+  user = User.create(_id: c.id, name: c.name, ...)
+  c.articles.update_all(author_id: user.id)
+end
+# change article relationships
 {% endhighlight %}
 
 Here is a link to [Rails documentation](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations).  

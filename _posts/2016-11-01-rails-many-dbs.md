@@ -12,7 +12,7 @@ The question I'd like to ask is why should we choose?  Why can't we use differen
 
 Let's imagine we are building a blogging platform with [Ruby on Rails](http://rubyonrails.org/).  We will have UI where users can manage their profiles, create articles, etc.  We also need a separate publishing server that can display millions of pages per day.  And we need a service to run various background processes, generate reports, aggregate page views, etc.
 
-Disclaimer - this post will cover topics (caching, microservices, background jobs) that I already discussed in preivous articles.  But instead of going into details I want to focus on combining various approaches.
+Disclaimer - this post will cover topics (caching, microservices, background jobs) that I already discussed in previous articles.  But instead of going into details I want to focus on combining various approaches.
 
 * TOC
 {:toc}

@@ -1,6 +1,6 @@
 ---
 title: "Storing complex data structures in Redis"
-date: 2017-05-28
+date: 2017-06-14
 categories: redis
 ---
 
