@@ -1,6 +1,6 @@
 ---
 title: "Ruby and complex data structures"
-date: 2017-06-14
+date: 2017-06-21
 categories:
 ---
 

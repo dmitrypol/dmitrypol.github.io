@@ -1,6 +1,6 @@
 ---
 title: "Storing complex data structures in Redis"
-date: 2017-06-14
+date: 2017-06-21
 categories: redis
 ---
 
@@ -19,6 +19,10 @@ I will use examples in [Ruby on Rails](http://rubyonrails.org/).  First, let's c
 # config/initializers/redis.rb
 REDIS = Redis.new(host: 'localhost', port: 6379, db: 0, driver: :hiredis)
 {% endhighlight %}
+
+### Strings
+
+Strings are stored as they are.  We can do basic GET and SET commands.  They will be stored in individual keys.  Alternatively they could be stored in Redis Lists with `lpush`.
 
 ### Hashes
 
@@ -166,89 +170,4 @@ val1 = REDIS.spop('set1')
 
 We can see [here](http://redis.io/commands#set) how to do powerful operations with by adding/removing items from different Sets.  
 
-
-
-### Sorted Sets
-
-
-We can do interesting things with [Sorted Sets](http://redis.io/commands#sorted_set).  
-
-
-
-### Ranges
-
-https://www.tutorialspoint.com/ruby/ruby_ranges.htm
-
-One option is to convert range to array and then save it to Redis.  But that will require more memory.  
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-Another choice is to store the first element of the range and the last one.  We return those and let application handle it.  The problem is that we might need to loop through the items in the range and what if our process is restarted during that?  
-
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-### Linked lists
-
-https://www.tutorialspoint.com/data_structures_algorithms/linked_list_algorithms.htm
-
-https://www.sitepoint.com/rubys-missing-data-structure/
-
-
-
-[Redis Lists](http://redis.io/topics/data-types#lists)
-
-
-
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-
-### Binary trees
-
-
-https://www.tutorialspoint.com/data_structures_algorithms/binary_search_tree.htm
-
-
-http://rubyalgorithms.com/binary_search_tree.html
-
-
-
-### Graphs
-
-https://www.tutorialspoint.com/data_structures_algorithms/graph_data_structure.htm
-
-https://github.com/agoragames/amico
-
-
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-
-https://www.sitepoint.com/ruby-interview-questions-linked-lists-and-hash-tables/
-https://rob-bell.net/2009/06/a-beginners-guide-to-big-o-notation/
-
-https://github.com/nateware/redis-objects
-
-http://jimneath.org/2011/03/24/using-redis-with-ruby-on-rails.html#redis_data_types
+In a future post I will go into other data structures such as Sorted Sets, Ranges, Linged Lists and Graphs.  
