@@ -170,4 +170,4 @@ val1 = REDIS.spop('set1')
 
 We can see [here](http://redis.io/commands#set) how to do powerful operations with by adding/removing items from different Sets.  
 
-In a future post I will go into other data structures such as Sorted Sets, Ranges, Linged Lists and Graphs.  
+In a future post I will go into other data structures such as Sorted Sets, Ranges, Trees and Graphs.  
