@@ -23,7 +23,7 @@ defaults:
     values:
       layout: "post"
 
-gems:
+plugins:
   - jekyll-sitemap
   - jekyll-seo-tag
   # - jekyll-lunr-js-search
