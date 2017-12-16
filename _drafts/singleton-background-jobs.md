@@ -11,3 +11,5 @@ Set to 0 in test to expire right away
 Run separate parts (methods) of background jobs in time window
 
 https://github.com/mhenrixon/sidekiq-unique-jobs
+
+https://github.com/nickelser/activejob-traffic_control

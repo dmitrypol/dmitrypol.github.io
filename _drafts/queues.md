@@ -4,7 +4,7 @@ date: 2017-10-31
 categories: redis rabbitmq sqs
 ---
 
-Queues can be useful tool to scale applications or integrate complex systems.  Here is a basic use case.  User registers on a website and we need to send a welcome email.  We record data in the User table and separately call email service provider (Sendgrid, Mailchimp, AWS SES).  Sending email via background process will be faster UX plus we can retry in case of failure.  
+Queues can be useful tool to scale applications or integrate complex systems.  Here is a basic use case.  User registers and we need to send a welcome email.  We record data in the User table and separately call email service provider such as Sendgrid.  Sending email via background process will be faster UX plus we can retry in case of failure.  
 
 * TOC
 {:toc}
@@ -110,7 +110,7 @@ Hashes are used for various statistics ([sidekiq-statistic gem](https://github.c
   "2017-10-31:MyJob:passed": 35,
   "2017-10-31:MyJob:last_job_status": "passed",
   "2017-10-31:MyJob:last_time": "2017-10-31 18:35:12 UTC",
-  "2017-10-31:MyJob:queue": "dmitry1",
+  "2017-10-31:MyJob:queue": "my_queue",
   "2017-10-31:MyJob:average_time": 0.005952380952380952,
   "2017-10-31:MyJob:min_time": 0,
   "2017-10-31:MyJob:max_time": 0.028,
@@ -154,15 +154,20 @@ And to store recurring jobs with [sidekiq-cron](https://github.com/ondrejbartas/
 
 Sidekiq/Redis also supports multiple queues (which can be given different weights).  To prioritize jobs w/in a queue we can use Sorted Set to store jobs.  http://charlesnagy.info/it/python/priority-queue-in-redis-aka-zpop
 
+https://github.com/nickelser/activejob-traffic_control
+
+https://github.com/chaps-io/gush
+
+
 Sidekiq has a great GUI to view the jobs.  We can also access Redis data structures directly and build our own UI.  
 
 Hosting Redis does introduce more complexity to our infrastructure.  Fortunately there are many reliable and affordable hosting services (AWS ElastiCache, RedisCloud).  We can implement Redis with [Multi-AZ failover](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/AutoFailover.html) (important if we are using Redis to store other data)
 
-Another thing to be cautious of is running out of Redis RAM.  Often Redis is used for variety of purposes and we do not want to [evict important jobs](https://redis.io/topics/lru-cache) because too much RAM is used for caching.  Queueing 1 million jobs used up about 1 GB of RAM (this will vary on how many params are queued with the job).
+Another thing to be cautious of is running out of Redis RAM.  Often Redis is used for variety of purposes and we do not want to [evict important jobs](https://redis.io/topics/lru-cache) because too much RAM is used for caching.  Queueing 1 million jobs used up about 1 GB of RAM (this will vary on how many params are passed to the job).
 
 ### AWS SQS
 
-[AWS SQS](https://aws.amazon.com/sqs/faqs/) takes care of .  [AWS SDK](http://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/SQS.html) offers low level access but [shoryuken](https://github.com/phstc/shoryuken) is a higher level integration (shoryuken author acknowledges sidekiq).  
+[AWS SQS](https://aws.amazon.com/sqs/faqs/) takes care of managing our queues.  [AWS SDK](http://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/SQS.html) offers low level access but [shoryuken](https://github.com/phstc/shoryuken) is a higher level integration (shoryuken author acknowledges sidekiq as inspiration).  
 
 We need to make sure the queues are created in SQS otherwise we get `shoryuken-3.1.12/lib/shoryuken/queue.rb:72:in `rescue in set_name_and_url': The specified queue default does not exist. (Aws::SQS::Errors::NonExistentQueue)`.  
 
@@ -181,21 +186,11 @@ http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-de
 Hosting - easy to setup and cheap (pay for what you use) but obviously only available on AWS.   
 Other limits to be aware of http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/limits-messages.html
 
-One interesting possibility is to use two queue backends w/in the same application.  Perhaps we really like Sidekiq and it works for most of our needs.  But some of our jobs need to run millions of times a day and we do not want to pay for a large Redis instance.  We simply install and configure both sidekiq and shoryuken.
-
-{% highlight ruby %}
-config.active_job.queue_adapter = :sidekiq
-#
-class MyJob < ApplicationJob
-  self.queue_adapter = :shoryuken
-end
-{% endhighlight %}
-
-
+SQS is a great choice when we need to run LOTS of jobs or when we do not care about more advanced options such as scheduling.
 
 ### RabbitMQ
 
-[RabbitMQ](http://www.rabbitmq.com/) offers other interesting features.  [bunny](https://github.com/ruby-amqp/bunny) allows to create producers and consumers directly but [sneakers](https://github.com/jondot/sneakers) is a higher level integration (gem author acknowledges sidekiq as inspiration).  
+[RabbitMQ](http://www.rabbitmq.com/) offers other interesting features.  [bunny](https://github.com/ruby-amqp/bunny) allows to create producers and consumers directly but [sneakers](https://github.com/jondot/sneakers) is a higher level integration (gem author also acknowledges sidekiq).  
 
 {% highlight ruby %}
 
@@ -211,7 +206,7 @@ permissions
 Delaying jobs is not supported with Rails and RabbitMQ. https://medium.com/@dongwookkoo/delayed-feature-for-rails-activejob-and-sneakers-318ffbc668fb
 
 {% highlight ruby %}
-rails r "OneJob.set(wait: 1.minute).perform_later"
+rails r "MyJob.set(wait: 1.minute).perform_later"
 Running via Spring preloader in process 67928
 .../activejob-5.1.4/lib/active_job/queue_adapters/sneakers_adapter.rb:31:in `enqueue_at': This queueing backend does not support scheduling jobs. To see what features are supported go to http://api.rubyonrails.org/classes/ActiveJob/QueueAdapters.html (NotImplementedError)
 {% endhighlight %}
@@ -233,6 +228,26 @@ Hosting for RabbitMQ offers fewer choices than Redis and is more expensive.  [Co
 
 So which queue technology should we use?  There is no easy answer and it really depends on our needs.  Personally I really like the abstraction provided by Active Job (even though it does not support all features provided by some queue backends).  It makes it easier to structure jobs in a standard way and when needed switch between queues.  If I were building a simple system I would start with DelaydJob.  Then I would upgrade to Sidekiq (especially if I were already using Redis).  Then investigate SQS for very large scale and RabbitMQ for complex workflows.  
 
+One interesting possibility is to use two queue backends w/in the same application.  Perhaps we really like Sidekiq and it works for most of our needs.  But some of our jobs need to run millions of times a day and we do not want to pay for a large Redis instance.  We simply install and configure both `sidekiq` and `shoryuken`.
+
+{% highlight ruby %}
+config.active_job.queue_adapter = :sidekiq
+#
+class MyJob < ApplicationJob
+  self.queue_adapter = :shoryuken
+end
+{% endhighlight %}
+
+Another option is to use Redis as datastore for throttling or workflow and use RabbitMQ to run our jobs on multiple servers.  
+
+{% highlight ruby %}
+config.active_job.queue_adapter = :sneakers
+#
+class MyJob < ApplicationJob
+  concurrency 5
+  # will use Redis for https://github.com/nickelser/activejob-traffic_control
+end
+{% endhighlight %}
 
 ### Links
 
