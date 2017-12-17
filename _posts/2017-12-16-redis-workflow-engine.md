@@ -76,6 +76,62 @@ class ImportWorkflow < Gush::Workflow
 end
 {% endhighlight %}
 
+### Redis data storage
+
+If the number of jobs in our workflow were static we could have reused the same flow by calling `flow.start!` using the same ID.  But we would need to store that ID somewhere and if Redis data were deleted the ID would be useless.  So it is best to re-create the workflow every time.  Each workflow and job has a separate key in Redis.  Gush serializes everything as JSON and stores it as Redis strings.  Each job contains reference to workflow.  
+
+{% highlight ruby %}
+{
+  "name": "ImportCsvRowJob-64c62ac3-c78a-4e0a-a894-5a3160b2d6a7",
+  "klass": "ImportCsvRowJob",
+  "incoming": [],
+  "outgoing": [
+    "GenReportJob-bd1cc66e-e5d9-46cd-b981-42957aab38d0"
+  ],
+  "finished_at": 1513476818,
+  "enqueued_at": 1513476786,
+  "started_at": 1513476818,
+  "failed_at": null,
+  "params": ["..."],
+  "workflow_id": "898c2c76-cc1c-4e5e-bd53-a8895dfeb8c0",
+  "output_payload": null
+}
+{% endhighlight %}
+
+But each workflow record contains the list of ALL jobs in that workflow so it will get pretty big.  It also slows things down as the imports grow to thousands of records and `ImportWorkflow` redis key needs to be serialized on each job completion.  In a few perf tests I did it got slow past a few hundreds jobs and not practical past a few thousand.  So I do not recommend this approach for something like importing records.
+
+{% highlight ruby %}
+{
+  "name": "ImportWorkflow",
+  "id": "898c2c76-cc1c-4e5e-bd53-a8895dfeb8c0",
+  "arguments": [],
+  "total": 1001,
+  "finished": 0,
+  "klass": "ImportWorkflow",
+  "jobs": [
+    {
+      "name": "ImportCsvRowJob-8fc01ccb-8c64-4a7a-a00c-cc62c47ac079",
+      "klass": "ImportCsvRowJob",
+      "incoming": [],
+      "outgoing": [
+        "GenReportJob-bd1cc66e-e5d9-46cd-b981-42957aab38d0"
+      ],
+      "finished_at": null,
+      "enqueued_at": null,
+      "started_at": null,
+      "failed_at": null,
+      "params": ["..."],
+      "workflow_id": "898c2c76-cc1c-4e5e-bd53-a8895dfeb8c0",
+      "output_payload": null
+    },
+    {
+      "name": "ImportCsvRowJob-94dfb81f-17b4-40fe-9a3e-1124c4e004ae",
+      "klass": "ImportCsvRowJob",
+      ...
+    },    
+    ...
+{% endhighlight %}
+
 ### Scheduling
 
 Now we want to schedule this workflow for regular execution.  Gush does not provide scheduling functionality so we will create a wrapper job to manage the entire process and kick it off it using something like [sidekiq-cron](https://github.com/ondrejbartas/sidekiq-cron).  This job can contain additional logic to query DB, start other workflows, etc.  It can also be used to cleanup Redis data created by previous workflows.  
@@ -125,29 +181,6 @@ private
     return false
   end
 end
-{% endhighlight %}
-
-### Redis data storage
-
-If the number of jobs in our workflow was static we could have reused the same flow by calling `flow.start!` using the same ID.  But we would need to store that ID somewhere and if Redis data were deleted the ID would be useless.  So it is best to re-create the workflow every time.  Each workflow and job has a separate key in Redis.  Gush serializes everything as JSON and stores it as Redis strings.  
-
-{% highlight ruby %}
-{
-  "key": "gush.workflows.WORKFLOW_ID",
-  "type": "string",
-  "value": "{\"name\":\"ImportWorkflow\",\"id\":\"...\",\"arguments\":[],\"klass\":\"ImportWorkflow\",\"jobs\":[...],..}",
-}
-{
-  "key": "gush.jobs.WORKFLOW_ID.GenReportJob-JOB_ID",
-  "type": "string",
-  "value": "{\"name\":\"GenReportJob-JOB_ID\",\"klass\":\"GenReportJob\",\"incoming\":[\"ImportCsvJob\",\"ImportXmlJob\"],\"workflow_id\":\"WORKFLOW_ID\"...}",
-}
-{
-  "key": "gush.jobs.WORKFLOW_ID.ImportXmlJob-JOB_ID",
-  "type": "string",
-  "value": "{\"name\":\"ImportXmlJob-JOB_ID\",\"klass\":\"ImportXmlJob\",\"outgoing\":[\"GenReportJob-JOB_ID\"],\"workflow_id\":\"WORKFLOW_ID\",...}",
-}
-...
 {% endhighlight %}
 
 ### Alternative queues
