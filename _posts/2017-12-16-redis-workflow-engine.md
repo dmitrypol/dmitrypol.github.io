@@ -51,22 +51,22 @@ end
 What if our CSV imports grow very large?  Downloading a file and processing many thousands of records is slow.  We can break it up into one job to download the data and then separate jobs to process each row (which will run in parallel).  To keep things simple we will always save the file to the same location.  
 
 {% highlight ruby %}
-class CsvDownloadJob < Gush::Job
+class DownloadCsvJob < Gush::Job
   def perform
     # save to S3 or other shared location
   end
 end
-class CsvImportRowJob < Gush::Job
+class ImportCsvRowJob < Gush::Job
 end
 {% endhighlight %}
 
-How do we know when ALL `CsvImportRowJob` complete so we can run `GenReportJob`?  We change our workflow.  
+How do we know when ALL `ImportCsvRowJob` complete so we can run `GenReportJob`?  We change our workflow.  
 
 {% highlight ruby %}
 class ImportWorkflow < Gush::Workflow
   def configure
     run ImportXmlJob
-    run CsvDownloadJob
+    run DownloadCsvJob
     csv_jobs = CSV.foreach("path/to/data.csv").map do |row|
       run ImportCsvRowJob, params: row, after: DownloadCsvJob
     end
