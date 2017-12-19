@@ -9,7 +9,7 @@ When we need to scale applications Redis can be a great tool.  Slow tasks such a
 * TOC
 {:toc}
 
-But sometimes we do.  What if we are working on an application that periodically runs data import processes.  Data comes in from various sources in different formats.  We build several classes (using [Ruby on Rails ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html)) to appropriately handle the imports.  Then we generate report summarizing the data.
+But sometimes we do.  What if we are working on an application that periodically runs data import processes?  Data comes in from various sources in different formats.  We build several classes (using [Ruby on Rails ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html)) to appropriately handle the imports.  Then we generate report summarizing the data.
 
 {% highlight ruby %}
 class ImportCsvJob < ApplicationJob
