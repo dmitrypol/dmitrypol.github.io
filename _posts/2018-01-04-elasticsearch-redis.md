@@ -1,6 +1,6 @@
 ---
 title: "ElasticSearch and Redis"
-date: 2017-12-25
+date: 2018-01-04
 categories: elastic redis
 ---
 
@@ -15,7 +15,7 @@ Redis has speed and powerful data structures.  It can almost function as an exte
 
 ### Search for products
 
-We are building a website for a nationwide coffee shop chain.  The first requirement is enabling users to search for various products.  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
+We are building a website for a nationwide shop chain.  The first requirement is enabling users to search for various products (in our case coffee brands).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
 
 {% highlight ruby %}
 # app/models/
@@ -52,7 +52,7 @@ class ProductSearch
 end
 {% endhighlight %}
 
-The downside is that any changes to products will take up to an hour to appear in cached search results.  We can build a callback so when a record is updated in primary DB it not only updates the index but also flushes cache.  To keep things simple we will delete all Redis keys matching `ProductSearch:perform:*` pattern but this needs to be improved for scaling.    
+The downside is that any changes to products will take up to an hour to appear in cached search results.  We can build a callback so when a record is updated in primary DB it not only updates the index but also flushes cache.  To keep things simple we will delete all Redis keys matching `ProductSearch:perform:*` pattern but this needs to be improved for scaling.  To be honest this caching technique might be more trouble than it's worth.  
 
 {% highlight ruby %}
 class Product < ApplicationRecord
@@ -76,7 +76,7 @@ Another important feature is enabling users to find stores by zipcode.  Both Red
 
 {% highlight ruby %}
 CSV.foreach("data/zip_lon_lat.csv", headers: true) do |row|
-  REDIS.geoadd 'zip_lon_lat', row['lon'].to_f, row['LAT'].to_f, row['ZIP'].to_s
+  REDIS.geoadd 'zip_lon_lat', row['LON'].to_f, row['LAT'].to_f, row['ZIP'].to_s
 end
 # data in Redis
 {"db":0,"key":"zip_lon_lat","ttl":-1,"type":"zset","value":[
@@ -229,11 +229,11 @@ Now we can do `StoreLocator.new(zipcode: 98174, query: 'kowboy').perform` to fin
 
 ### Autocomplete
 
-This problem can be solved with both ElasticSearch and Redis.  
+This problem can also be solved with both ElasticSearch and Redis.  
 
 #### Redis
 
-To keep data in-sync between primary DB and Redis autocomplete keys we will implement a separate class and leverage it from model callbacks.  We will begin our keys with the first 2 letters of each term and not store the full term string.  We will also be using Sorted Set scores to give higher weight to more common terms.  We can add / remove all keys by running `AutocompleteRedis.new.add_all('product', 'name')` (or `remove_all`).
+To keep data in-sync between primary DB and Redis autocomplete keys we will implement a separate class and leverage it from model callbacks.  We will begin our keys with the first 2 letters of each term and store up to last latter.  We will also be using Sorted Set scores to give higher weight to more common terms.  
 
 {% highlight ruby %}
 # app/models/
@@ -281,7 +281,7 @@ private
 end
 {% endhighlight %}
 
-Data in Redis will be stored in multiple sorted sets.  
+We can add / remove all keys by running `AutocompleteRedis.new.add_all('product', 'name')` (or `remove_all`).  Data in Redis will be stored in multiple sorted sets.  
 
 {% highlight ruby %}
 {"db":0,"key":"autocomplete:am","ttl":-1,"type":"zset","value":
@@ -333,12 +333,11 @@ class AutocompleteIndex < Chewy::Index
 end
 {% endhighlight %}
 
-Now `AutocompleteIndex.query(match: {name: 'a'})` returns `American Cowboy`, `American Select` AND `Red America` products.  ElasticSearch is able to use the second word in the product name to match against.  
-
-### Stopwords
-
+Now `AutocompleteIndex.query(match: {name: 'am'})` returns `American Cowboy`, `American Select` AND `Red America` products.  ElasticSearch is able to use the second word in the product name to match against.  
 
 ### ETL
+
+Until now we were moving data between primary DB and Redis or ElasticSearch.  Now we will ETL data between Redis and ElasticSearch.  
 
 #### Redis to ElasticSearch
 
@@ -363,7 +362,7 @@ class StoreLocator
 end
 {% endhighlight %}
 
-Data in Redis will be stored like this:
+This will be very fast and data in Redis will be stored like this:
 
 {% highlight ruby %}
 {"db":0,"key":"ldbr:zipcode_searched","ttl":-1,"type":"zset",
@@ -375,7 +374,7 @@ Data in Redis will be stored like this:
   "type":"string","value":"11"...}
 {% endhighlight %}
 
-But our internal business users do not want to look at raw data in JSON.  Our choice is writing custom dashboard or pulling data into ElasticSearch and leveraging Kibana.  Once it's in ElasticSearch we can also combine it with other data sources.  We will use [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) library directly since this data does not related to our appli models.  
+But our internal business users do not want to look at raw data.  Our choice is writing custom dashboard or pulling data into ElasticSearch and leveraging Kibana.  Once it's in ElasticSearch we can also combine it with other data sources.  We will use [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) library directly since this data does not related to our application models.  
 
 {% highlight ruby %}
 ES_CLIENT = Elasticsearch::Client.new
@@ -408,40 +407,91 @@ private
 end
 {% endhighlight %}
 
-We are specifying our aggregation metrics (zipcode, hour_of_day, day_of_week) as the ID of ElasticSearch document.
+We are specifying our aggregation metrics (zipcode, hour_of_day, day_of_week) as the ID of ElasticSearch document.  
 
 #### ElasticSearch to Redis
 
-In our ElasticSearch cluster we have captured data from logs that contain IP and UserAgent.  Combination of IP and UserAgent is often used to fairly uniquely identify users.  Our next business requirement is to implement functionality where our website displays slightly different UI to users that we believe have visited our site before.  
+In our ElasticSearch cluster we have captured data from logs that contain IP and UserAgent.  Combination of IP and UserAgent can be used to fairly uniquely identify users.  Our next business requirement is to implement functionality where our website displays slightly different UI to users that we believe have visited our site before.  
+
+Now we will leverage Logstash with various plugins as our ETL pipeline.  We will be using [elasticsearch input plugin](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-elasticsearch.html), [redis output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html) and [ruby filter plugin](https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html) to transform the data into format expected by ActiveJob background job framework and pushing it straight into a Redis List data structure.  
+
+{% highlight ruby %}
+input {
+  elasticsearch {
+    hosts => "localhost"
+    index => "logs"
+  }
+}
+filter {
+  ruby {
+    code => "
+      event.set('jid', SecureRandom.hex(12))
+      event.set('created_at', Time.now.to_f)
+      event.set('enqueued_at', Time.now.to_f)
+      event.set('class', 'ActiveJob::QueueAdapters::SidekiqAdapter::JobWrapper')
+      event.set('wrapped', 'UniqVisJob')
+      event.set('queue', 'low')
+      args = [{
+        'job_class' => 'UniqVisJob',
+        'job_id' => SecureRandom.uuid,
+        'provider_job_id' => 'null',
+        'queue_name' => 'low',
+        'priority' => 'null',
+        'arguments' => [ event.get('client_ip'), event.get('user_agent') ],
+        'executions' => 0,
+        'locale' => 'en'
+      }]
+      event.set('args', args)
+      "
+    add_field => {
+      "retry" => true
+    }
+    remove_field => [ "@version", "@timestamp", 'client_ip', 'user_agent' ]
+  }
+}
+output {
+  redis {
+    data_type => "list"
+    key => "queue:low"
+    db => 0
+  }
+}
+{% endhighlight %}
+
+Now we create a very simple job ran via Sidekiq that will hash IP & UA and also set Redis keys to expire in a week.  
+
+{% highlight ruby %}
+class UniqVisJob < ApplicationJob
+  queue_as :low
+  def perform ip, ua
+    key = "uniq_vis:" + Digest::MurmurHash1.hexdigest("#{ip}:#{ua}")
+    REDIS.setex key, 3600*24*7, 1
+  end
+end
+{% endhighlight %}
+
+Data in Redis will look like this
+
+{% highlight ruby %}
+{"db":0,"key":"uniq_vis:cbfb868b","ttl":..,"type":"string","value":"1","size":1}
+{"db":0,"key":"uniq_vis:b68ef58c","ttl":..,"type":"string","value":"1","size":1}
+{% endhighlight %}
+
+Read here on manually creating [messages for Sidekiq](https://github.com/mperham/sidekiq/wiki/FAQ#how-do-i-push-a-job-to-sidekiq-without-ruby) and using [Ruby in Logstash](https://fabianlee.org/2017/04/24/elk-using-ruby-in-logstash-filters/)
+
+In future posts I will cover other technologies such as [RediSearch module](http://redisearch.io/) and [ElasticSearch Kibana dashboard](https://www.elastic.co/products/kibana).  
+
+### Links
+
+* https://dev.maxmind.com/geoip/geoip2/geolite2/
+* https://github.com/yhirose/maxminddb
+* https://code.tutsplus.com/tutorials/geospatial-search-in-rails-using-elasticsearch--cms-22921
+* https://github.com/etehtsea/oxblood - supports GEO* commands
+* https://cristian.regolo.cc/2015/07/07/introducing-the-geo-api-in-redis.html
+* https://www.elastic.co/blog/found-fuzzy-search
+* https://github.com/sethherr/soulheart - library for autocomplete
+* https://stackoverflow.com/questions/29572654/how-to-view-redis-data-inside-rails-application-using-soulmate
 
 {% highlight ruby %}
 
 {% endhighlight %}
-
-
-### Kibana dashboard
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-https://dev.maxmind.com/geoip/geoip2/geolite2/
-https://github.com/yhirose/maxminddb
-
-https://code.tutsplus.com/tutorials/geospatial-search-in-rails-using-elasticsearch--cms-22921
-https://github.com/etehtsea/oxblood supports GEO* commands
-https://cristian.regolo.cc/2015/07/07/introducing-the-geo-api-in-redis.html
-
-https://www.elastic.co/blog/found-fuzzy-search
-
-https://github.com/sethherr/soulheart
-https://stackoverflow.com/questions/29572654/how-to-view-redis-data-inside-rails-application-using-soulmate
-http://josephndungu.com/tutorials/fast-autocomplete-search-terms-rails
