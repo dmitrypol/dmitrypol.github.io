@@ -15,7 +15,7 @@ Redis has speed and powerful data structures.  It can almost function as an exte
 
 ### Search for products
 
-We are building a website for a nationwide shop chain.  The first requirement is enabling users to search for various products (in our case coffee brands).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
+We are building a website for a nationwide chain of stores.  The first requirement is enabling users to search for various products (in our case coffee brands).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
 
 {% highlight ruby %}
 # app/models/
@@ -59,7 +59,7 @@ class Product < ApplicationRecord
   after_save :flush_search_cache
 private
   def flush_search_cache
-    cache_keys = REDIS.keys 'ProductSearch:perform:*'
+    cache_keys = REDIS_CLIENT.keys 'ProductSearch:perform:*'
     cache_keys.each do |key|
       Rails.cache.delete key
       # or force regeneration with Rails.cache.fetch(key, force: true)
@@ -76,7 +76,7 @@ Another important feature is enabling users to find stores by zipcode.  Both Red
 
 {% highlight ruby %}
 CSV.foreach("data/zip_lon_lat.csv", headers: true) do |row|
-  REDIS.geoadd 'zip_lon_lat', row['LON'].to_f, row['LAT'].to_f, row['ZIP'].to_s
+  REDIS_CLIENT.geoadd 'zip_lon_lat', row['LON'].to_f, row['LAT'].to_f, row['ZIP'].to_s
 end
 # data in Redis
 {"db":0,"key":"zip_lon_lat","ttl":-1,"type":"zset","value":[
@@ -95,7 +95,7 @@ class StoreLocator
     @distance = 5
   end
   def perform
-    zipcodes = REDIS.georadiusbymember('zip_lon_lat', @zipcode, @distance, 'mi')
+    zipcodes = REDIS_CLIENT.georadiusbymember('zip_lon_lat', @zipcode, @distance, 'mi')
     Store.where(zipcode: zipcodes)
   end
 end
@@ -120,7 +120,7 @@ class Store < ApplicationRecord
     }
   end
   def lon_lat
-    REDIS.geopos('zip_lon_lat', @zipcode).first
+    REDIS_CLIENT.geopos('zip_lon_lat', @zipcode).first
   end
 end
 {% endhighlight %}
@@ -130,7 +130,7 @@ We run `Store.reindex`, verify that data shows up in ElasticSearch and modify `S
 {% highlight ruby %}
 class StoreLocator
   def perform
-    lon_lat = REDIS.geopos('zip_lon_lat', @zipcode).try(:first)
+    lon_lat = REDIS_CLIENT.geopos('zip_lon_lat', @zipcode).try(:first)
     lat = lon_lat.try(:second)
     lon = lon_lat.try(:first)
     Store.search("*",
@@ -209,7 +209,7 @@ class StoreLocator
     @zipcode = zipcode
     @query = query
     @distance = 5
-    lon_lat = REDIS.geopos('zip_lon_lat', @zipcode).first
+    lon_lat = REDIS_CLIENT.geopos('zip_lon_lat', @zipcode).first
     @lat = lon_lat.try(:second)
     @lon = lon_lat.try(:first)    
   end
@@ -247,7 +247,7 @@ class Autocomplete
     @namespace = 'autocomplete'
   end
   def search prefix:, num: 10
-    REDIS.zrevrange "#{@namespace}:#{prefix.try(:downcase)}", 0, num - 1
+    REDIS_CLIENT.zrevrange "#{@namespace}:#{prefix.try(:downcase)}", 0, num - 1
   end
   def add_all klass, method
     klass.titleize.constantize.all.each do |object|
@@ -272,9 +272,9 @@ private
     1.upto(term.length - 2) do |i|
       prefix = first_letter + term[1, i]
       if type == 'add'
-        REDIS.incrby("#{@namespace}:#{prefix}", 1, term)
+        REDIS_CLIENT.incrby("#{@namespace}:#{prefix}", 1, term)
       elsif type == 'remove'
-        REDIS.zrem("#{@namespace}:#{prefix}", term)
+        REDIS_CLIENT.zrem("#{@namespace}:#{prefix}", term)
       end
     end
   end
@@ -333,7 +333,7 @@ class AutocompleteIndex < Chewy::Index
 end
 {% endhighlight %}
 
-Now `AutocompleteIndex.query(match: {name: 'am'})` returns `American Cowboy`, `American Select` AND `Red America` products.  ElasticSearch is able to use the second word in the product name to match against.  
+Now `AutocompleteIndex.query(match: {name: 'am'})` returns `American Cowboy`, `American Select` AND `Old America` products.  ElasticSearch is able to use the second word in the product name to match against.  
 
 ### ETL
 
@@ -465,7 +465,7 @@ class UniqVisJob < ApplicationJob
   queue_as :low
   def perform ip, ua
     key = "uniq_vis:" + Digest::MurmurHash1.hexdigest("#{ip}:#{ua}")
-    REDIS.setex key, 3600*24*7, 1
+    REDIS_CLIENT.setex key, 3600*24*7, 1
   end
 end
 {% endhighlight %}
@@ -491,7 +491,3 @@ In future posts I will cover other technologies such as [RediSearch module](http
 * https://www.elastic.co/blog/found-fuzzy-search
 * https://github.com/sethherr/soulheart - library for autocomplete
 * https://stackoverflow.com/questions/29572654/how-to-view-redis-data-inside-rails-application-using-soulmate
-
-{% highlight ruby %}
-
-{% endhighlight %}
