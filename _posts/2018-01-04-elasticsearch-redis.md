@@ -15,7 +15,7 @@ Redis has speed and powerful data structures.  It can almost function as an exte
 
 ### Search for products
 
-We are building a website for a nationwide chain of stores.  The first requirement is enabling users to search for various products (in our case coffee brands).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
+We are building a website for a nationwide chain of stores.  The first requirement is enabling users to search for various products (in our case coffee brands which were generated using randomly).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
 
 {% highlight ruby %}
 # app/models/

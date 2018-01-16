@@ -27,65 +27,41 @@ resource "aws_sns_topic" "worker" {
   name = "worker"
 }
 # sqs
-resource "aws_sqs_queue" "web1" {
-  name  = "web1"
+resource "aws_sqs_queue" "web" {
+  count = 2
+  name  = "web${count.index}"
 }
-resource "aws_sqs_queue" "web2" {
-  name  = "web2"
+resource "aws_sqs_queue" "worker" {
+  count = 2
+  name  = "worker${count.index}"
 }
-resource "aws_sqs_queue" "worker1" {
-  name  = "worker1"
-}
-resource "aws_sqs_queue" "worker2" {
-  name  = "worker2"
-}
-# subsciptions
-resource "aws_sns_topic_subscription" "all-web1" {
+# subscriptions
+resource "aws_sns_topic_subscription" "all-web" {
+  count                  = 2
   protocol               = "sqs"
   topic_arn              = "${aws_sns_topic.all.arn}"
-  endpoint               = "${aws_sqs_queue.web1.arn}"
+  endpoint               = "${aws_sqs_queue.web.*.arn[count.index]}"
   endpoint_auto_confirms = true
 }
-resource "aws_sns_topic_subscription" "all-web2" {
+resource "aws_sns_topic_subscription" "all-worker" {
+  count                  = 2
   protocol               = "sqs"
   topic_arn              = "${aws_sns_topic.all.arn}"
-  endpoint               = "${aws_sqs_queue.web2.arn}"
+  endpoint               = "${aws_sqs_queue.worker.*.arn[count.index]}"
   endpoint_auto_confirms = true
 }
-resource "aws_sns_topic_subscription" "all-worker1" {
-  protocol               = "sqs"
-  topic_arn              = "${aws_sns_topic.all.arn}"
-  endpoint               = "${aws_sqs_queue.worker1.arn}"
-  endpoint_auto_confirms = true
-}
-resource "aws_sns_topic_subscription" "all-worker2" {
-  protocol               = "sqs"
-  topic_arn              = "${aws_sns_topic.all.arn}"
-  endpoint               = "${aws_sqs_queue.worker2.arn}"
-  endpoint_auto_confirms = true
-}
-resource "aws_sns_topic_subscription" "web1" {
+resource "aws_sns_topic_subscription" "web" {
+  count                  = 2
   protocol               = "sqs"
   topic_arn              = "${aws_sns_topic.web.arn}"
-  endpoint               = "${aws_sqs_queue.web1.arn}"
+  endpoint               = "${aws_sqs_queue.web.*.arn[count.index]}"
   endpoint_auto_confirms = true
 }
-resource "aws_sns_topic_subscription" "web2" {
-  protocol               = "sqs"
-  topic_arn              = "${aws_sns_topic.web.arn}"
-  endpoint               = "${aws_sqs_queue.web2.arn}"
-  endpoint_auto_confirms = true
-}
-resource "aws_sns_topic_subscription" "worker1" {
+resource "aws_sns_topic_subscription" "worker" {
+  count                  = 2
   protocol               = "sqs"
   topic_arn              = "${aws_sns_topic.worker.arn}"
-  endpoint               = "${aws_sqs_queue.worker1.arn}"
-  endpoint_auto_confirms = true
-}
-resource "aws_sns_topic_subscription" "worker2" {
-  protocol               = "sqs"
-  topic_arn              = "${aws_sns_topic.worker.arn}"
-  endpoint               = "${aws_sqs_queue.worker2.arn}"
+  endpoint               = "${aws_sqs_queue.worker.*.arn[count.index]}"
   endpoint_auto_confirms = true
 }
 {% endhighlight %}

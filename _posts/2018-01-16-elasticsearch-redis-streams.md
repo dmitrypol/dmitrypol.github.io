@@ -1,19 +1,19 @@
 ---
 title: "ElasticSearch and Redis streams"
-date: 2018-01-09
+date: 2018-01-16
 categories: elastic redis
 ---
 
-Redis Lists can be used as queues for jobs to move data from primary data store to ElasticSearch.  What if we have time-series data that needs to stay in Redis to be used by our application AND be copied to ElasticSearch?  
+Redis Lists can be used as queues for jobs to move data from primary data store to ElasticSearch.  What if we have time-series data that needs to stay in Redis AND be copied to ElasticSearch?  
 
-In previous [post]({% post_url 2018-01-04-elasticsearch-redis %}) we built a website for a nationwide retail chain.   We used Lists as queues but also had Redis SortedSets to record which zipcodes were searched and how often.  Separately we had counters (using Redis Strings) of when searches occurred by `day_of_week` and `hour_of_day`.  Our new requirement is to keep track of the exact time of each search and it's parameters (zipcode and product/query).  This will help our biz users to determine which products to stock in different stores.  
+In previous [post]({% post_url 2018-01-04-elasticsearch-redis %}) we built a Ruby on Rails website for a nationwide retail chain.   We used Redis Lists as queues to ETL data to ElasticSearch.   We had Redis SortedSets to record which zipcodes were searched and how often.   And we had counters (using Redis Strings) of when searches occurred by `day_of_week` and `hour_of_day`.  Our new requirement is to keep track of the exact time of each search and it's parameters (zipcode and product/query).  This will help our biz users to determine which products to stock in different stores.  
 
 * TOC
 {:toc}
 
 ### Redis Streams
 
-This search data is usually recorded in our application logs as part of the GET request.  We could leverage [Logstash](https://www.elastic.co/products/logstash) to simply push data into ElasticSearch.  But we will now use [Streams](http://antirez.com/news/114) to record this data in Redis.  Streams are a new Redis data structure that is still in beta but should be released in 4.0.x timeframe.  
+This search data is usually recorded in our application logs as part of the GET request.  We could leverage [Logstash](https://www.elastic.co/products/logstash) to process it into ElasticSearch.  But we will now use [Streams](http://antirez.com/news/114) to record data in Redis first.  Streams are a new Redis data structure that should be released in 4.0.x timeframe.  
 
 {% highlight ruby %}
 class StoreLocator
@@ -34,9 +34,10 @@ private
 end
 {% endhighlight %}
 
-We are using the new `xadd` command which will create a new Redis stream and add an item to it with key/value pairs (zip and query).  Keys are based on timestamps to create one per day, just like we rotate logs.  Data in Redis will look like this:
+We are using the new `xadd` command which creates a new Redis stream and add an item to it with key/value pairs (zip and query).  Keys are based on timestamps to create one per day, just like we rotate logs.  Data in Redis looks like this:
 
 {% highlight ruby %}
+# launch redis-cli
 xrange search_log:2018-01-08 - +
 1) 1) 1515465841276-0
    2) 1) "zip"
@@ -55,7 +56,7 @@ xrange search_log:2018-01-08 - +
 
 ### ETL to ElasticSearch
 
-Since the amount of data is quite large we decided to only keep the last 7 days of searches in Redis and move the older records to ElasticSearch.  Streams have flexible schema with different fields which fits well into ElasticSearch indexes.  
+Since the amount of data is quite large we will keep the last 7 days of searches in Redis and move the older records to ElasticSearch.  Streams have flexible schema with different fields which fits well into ElasticSearch indexes.  
 
 #### xrange
 
@@ -97,7 +98,7 @@ class RedisElasticStreamConsumer
   def perform
     while true
       key = "search_log:#{Time.now.strftime("%Y-%m-%d")}"
-      data = REDIS.xread('BLOCK', 5000, 'STREAMS', key, '$')
+      data = REDIS_CLIENT.xread('BLOCK', 5000, 'STREAMS', key, '$')
       # => [["search_log:2018-01-07-21-35", [["1515389726944-0", ["zip", "98178", "query", "Red Select"]]]]]
       hash = Hash[data.first.second.first.second.each_slice(2).to_a]
       # => {"zip"=>"98178", "query"=>"Red Select"}
@@ -113,49 +114,41 @@ The challenge with this approach is that Redis will be able to record items in s
 
 ### Using the data
 
-To access data we can encapsulate the logic for choosing Redis vs ElasticSearch as our data source in separate class.  
+To access data we can encapsulate the logic for choosing Redis vs ElasticSearch as our data source in a separate class.  
 
 {% highlight ruby %}
-
+class SearchDataSelector
+  def initialize date:
+    @date = date
+  end
+  def perform
+    elasticsearch if @date > Date.today - 7.days
+    redis_streams
+  end
+private
+  def redis_streams
+    REDIS_CLIENT.xrange(@date, ...)
+  end
+  def elasticsearch
+    ES_CLIENT.search(index: @date, ...)
+  end
+end
 {% endhighlight %}
 
-Separately we can use [ElasticSearch Kibana](https://www.elastic.co/products/kibana) to build interesting visualizations.  Logstash mentioned above has  input/output plugins for accessing data in Redis.  Currently they only support lists and channels but hopefully soon they will integrate with streams.  
+We would need to modify this code to work with date range that requires data from both Redis and ElasticSearch.  Separately we can use [ElasticSearch Kibana](https://www.elastic.co/products/kibana) to build interesting visualizations on data in ElasticSearch.  Logstash mentioned above has input/output plugins for accessing data in Redis.  Currently they only support lists and channels but hopefully soon they will integrate with streams.  
 
-### Other commands
+### Other Streams commands
 
 #### xlen
 
+`xlen search_log:2018-01-08` will the number of items in stream.  We could loop through the date stamped keys to build a table in UI showing date and number of searches.  
 
 #### maxlen
 
-Capped streams
-
-xadd stream_name numeric_id key value
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
+We also can create capped streams with `REDIS.xadd('last_1000_searches', 'maxlen', '~', 1000, '*', 'zip', zip, 'query', query)`.  `~` improves performance by allowing Redis to keep approximately last 1000 items.  This way we can enable our biz users to view the most recent searches.  
 
 ### Links
 * https://brandur.org/redis-streams
 * https://hackernoon.com/introduction-to-redis-streams-133f1c375cd3
 * https://github.com/redis/redis-rcp/blob/master/RCP11.md
 * https://gist.github.com/antirez/68e67f3251d10f026861be2d0fe0d2f4
-
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
-
-
-
-Use Redis as queue for jobs to update ElasticSearch.  Or application does LPUSH into Redis list and Logstash picks it up to move to ElasticSearch.  In previous post I gave example of using Logstash to LPUSH a message into Redis in ActiveJob format for processing via Sidekiq.  
-
-
-Online game?  NFL leaderboard?  BART / Lightrail to track trips and charge $.  
