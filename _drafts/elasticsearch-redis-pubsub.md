@@ -1,6 +1,6 @@
 ---
 title: "Elasticsearch and Redis Pub/Sub"
-date: 2018-01-16
+date: 2018-02-05
 categories: elastic redis
 ---
 
@@ -34,8 +34,15 @@ We will be leveraging the same example of Ruby on Rails website for national ret
 * https://gist.github.com/pietern/348262
 * https://www.elastic.co/guide/en/logstash/current/plugins-inputs-redis.html
 * https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html
+* http://redis.io/topics/pubsub
+* https://github.com/krisleech/wisper
 
 
 {% highlight ruby %}
+{"key":"1516129966278-0", "type":"hash","value":{"zipcode":"31643", "query": "python"} }
+
+Idx:search_log,  type: ft_index0
+ft:search_log/31643, type: ft_invidx
+ft:search_log/python,  type: ft_invidx
 
 {% endhighlight %}
