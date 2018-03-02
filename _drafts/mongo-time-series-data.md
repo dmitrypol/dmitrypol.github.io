@@ -136,6 +136,14 @@ ArchiveEvents.new.run
 
 Mongo also supports [TTL indexes](https://docs.mongodb.com/manual/core/index-ttl/) where DB itself deletes documents older than a certain date.  It is much more resource intensive to go through a collection deleting individual documents than to simple drop the entire collection since we know that ALL documents in that collection are too old.  
 
+#### Logging
+
+Our archive script needs to log into so we can later investigate if problems occur.  
+
+
+#### Monitoring
+
+
 ### Data restore (if necessary)
 
 One problem with this approach is that we need to restore data we will need to run `mongorestore` on EACH daily collection.  To simplify that we can do run additional weekly process to archive all collections for that week.
