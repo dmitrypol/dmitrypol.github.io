@@ -10,6 +10,11 @@ Design 1
 
 API - queue - processor - data store
 
+RailsAPI
+ElasticBeanstalk
+terraform
+shoryuken
+
 
 Design 2
 
