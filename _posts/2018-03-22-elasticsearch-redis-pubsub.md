@@ -4,7 +4,7 @@ date: 2018-03-22
 categories: elastic redis
 ---
 
-In previous posts we discussed integration between [ElasticSearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-04-elasticsearch-redis %}) to work with time series data.  Now we will explore [Redis Pub/Sub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
+In previous posts we discussed integration between [ElasticSearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-16-elasticsearch-redis-streams %}) to work with time series data.  Now we will explore [Redis Pub/Sub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
 
 Why would we use Redis Pub/Sub vs sending data directly to ElasticSearch?  One advantage is that multiple clients could be listening to our channel.  We also might not want to create a direct integration between our application and ElasticSearch.  
 

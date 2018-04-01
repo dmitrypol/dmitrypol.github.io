@@ -64,7 +64,7 @@ end
 
 ### Sharing data across multiple applications
 
-Config values migth need to be shared by several applications running on separate servers.  But we do not want to store the same data files in multiple applications because they can get out of sync.  We want a canonical source that gets refreshed everytime we deploy the main app.  We could use [Redis](http://redis.io/) as a shared cache storage.  
+Config values might need to be shared by several applications running on separate servers.  But we do not want to store the same data files in multiple applications because they can get out of sync.  We want a canonical source that gets refreshed everytime we deploy the main app.  We could use [Redis](http://redis.io/) as a shared cache storage.  
 
 {% highlight ruby %}
 # config/initializers/redis.rb

@@ -1,6 +1,6 @@
 ---
 title: "Processing time series data"
-date: 2018-03-24
+date: 2018-03-27
 categories: aws elastic terraform
 ---
 
@@ -13,9 +13,7 @@ Modern software systems collect LOTS of time series data.  It could be an analyt
 
 We will build an API that will receive inbound messages and put them in a queue.  Then workers running on different servers will grab these messages from the queue, process them and store data in MongoDB.  Since are working with time series data we will create daily collections for these events.  Separating API servers from workers servers will help us to properly scale them.    
 
-We will be using AWS ElasticBeanstalk with SQS.  Our code will be Ruby on Rails API with Shoryuken library for integration with SQS.  
-
-Here is a sample request that will be receiving `/events?client_id=123&interaction_type=click&foo=bar`
+We will be using AWS ElasticBeanstalk with SQS.  Our code will be Ruby on Rails API with Shoryuken library for integration with SQS.  Here is a sample request that will be receiving `/events?client_id=abc123&event_type=click&foo=bar`
 
 High level Terraform config file to build AWS infrastructure (Terraform and ElasticBeanstalk are not the primary focus of this article).
 
@@ -23,38 +21,45 @@ High level Terraform config file to build AWS infrastructure (Terraform and Elas
 provider "aws" {
   region = "us-east-1"
 }
-resource "aws_elastic_beanstalk_application" "api" {
+resource "aws_elastic_beanstalk_application" "events" {
   name = "events"
 }
-resource "aws_elastic_beanstalk_environment" "api-webserver" {
+resource "aws_elastic_beanstalk_environment" "events-webserver" {
   name                = "WebServer"
-  application         = "${aws_elastic_beanstalk_application.api.name}"
+  application         = "${aws_elastic_beanstalk_application.events.name}"
   solution_stack_name = "64bit Amazon Linux 2017.09 v2.7.1 running Ruby 2.5 (Puma)"
   tier                = "WebServer"
 }
-resource "aws_elastic_beanstalk_environment" "api-worker" {
+resource "aws_elastic_beanstalk_environment" "events-worker" {
   name                = "Worker"
-  application         = "${aws_elastic_beanstalk_application.api.name}"
+  application         = "${aws_elastic_beanstalk_application.events.name}"
   solution_stack_name = "64bit Amazon Linux 2017.09 v2.7.1 running Ruby 2.5 (Puma)"
   tier                = "Worker"
 }
 {% endhighlight %}
 
-Rails API controllers
+We will specifically use Rails API which is faster than full Rails app.  Code in controllers should be as light as possible.  We could add simple validations to ensure that the necessary parameters are passed in before we put item on the queue.  
 
 {% highlight ruby %}
 # config/routes.rb
-get 'events/create' # usually it's POST but we will use GET
+get 'events', to: 'events#create'
 # app/controllers/
 class EventsController < ApplicationController
   def create
-    EventJob.perform_later params
-    render plain: ''
+    params[:timestamp] = Time.now
+    EventJob.perform_later(params) if validate_params
+    render status: :created
+  end
+private
+  def validate_params
+    return false unless params[:client_id].present?
+    ...
+    return true
   end
 end
 {% endhighlight %}
 
-Job to process events
+Job to process events and push them into MongoDB.  We will be using timestamp that is passed in with each job to ensure proper date attribution if there is a delay in data processing.  
 
 {% highlight ruby %}
 # config/initializers/mongo.rb
@@ -63,8 +68,8 @@ MONGO_DB = Mongo::Database.new(MONGO_CLIENT, 'events')
 # app/jobs/
 class EventJob < ApplicationJob
   queue_as :low
-  def perform(*args)
-    collection = "events:#{Time.now.strftime("%Y-%m-%d")}"
+  def perform(params)
+    collection = "events:#{params[:timestamp].strftime("%Y-%m-%d")}"
     doc = { validate and transform here }
     MONGO_DB[collection].insert_one(doc)
   end
@@ -84,11 +89,11 @@ Shoryuken.configure_server do |config|
   # config here
 end
 # config/shoryuken.yml
-concurrency: 5
+concurrency: 25
 pidfile: tmp/pids/shoryuken.pid
 logfile: log/shoryuken.log
 queues:
-  - [high, 2]
+  - [high, 3]
   - [default, 2]
   - [low, 1]
 {% endhighlight %}
@@ -97,27 +102,34 @@ Data in Mongo
 
 {% highlight ruby %}
 {
-    "_id" : ObjectId("5a497a00d2a93e49c8a01909"),
-    "common_attributes" : {
-        "app_id" : "292120af-c860-42fb-a9a3-622cc97cf72f",
-        "app_bundle_id" : "microsite",
-        "app" : "tmobile",
-        "app_version" : "newsplus",
-        "sdk_version" : "METRICS 0.9",
-        "device_model" : "browser",
-        "os_version" : "Mozilla/5.0 (Linux; Android 6.0.1; SM-G550T Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.84 Mobile Safari/537.36",
-        "metric_source" : "METRICS 0.9",
-        "platform" : "Android"
-    },
+  "_id" : ObjectId("5a497a00d2a93e49c8a01909"),
+  "params" : {
+      "client_id" : "abc123",
+      "event_type" : "click",
+      "foo" : "bar",
+      "ip" : "55.108.213.2",
+      "os_version" : "Mozilla/5.0 (Linux; Android 6.0.1; SM-G550T Build/MMB29K)...",
+      ...
+  },
+  {
+    "_id" : ObjectId("5a6babf6a6b37e593953a0b4"),
+    "params" : {
+        "client_id" : "xyz456",
+        "event_type" : "scroll",
+        ...
+    }
+  },
+  ...  
 }
 {% endhighlight %}
 
-Once data is in our DB we can write additional code to create rollup summaries and eventually delete the detailed records.  
+Once data is in our DB we can write additional code to create rollup summaries and eventually delete the detailed records.
+
+There are several pros and cons with this approach.  We MUST keep our API servers running at all times otherwise we will loose data.  But we can stop the workers and messages will simply pile up in SQS.  With SQS we pay per use so if we are running billions of messages this could become expensive.  To start with we can build this as one application but scale API vs workers separately.  When the app becomes bigger we can separate it into several microsites.  
 
 ### ELB - S3 logs - Logstash - ElasticSearch
 
-Instead of building an API and a queue we can take server logs and extract parameters from them.  We will setup a frontend Nginx web servers (also using ElasticBeanstalk for autoscaling).  The ELB for our application will publish logs to S3 bucket every 5 minutes.  From there log files will be picked up by Logstash and processed into ElasticSearch.  
-
+Instead of building an API and a queue we can take server logs and extract parameters from them.  We will setup a frontend Nginx web servers to simply load the 1x1 pixel (there will be no code on these servers).  ELB will publish logs to S3 bucket every 5 minutes.  From there log files will be picked up by Logstash and processed into ElasticSearch.  Then we will build our reports, implement rollup indexes and snapshot data to different S3 bucket (backup and archiving).
 
 Terraform config.  
 

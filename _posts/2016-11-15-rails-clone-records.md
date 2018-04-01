@@ -4,7 +4,7 @@ date: 2016-11-15
 categories:
 ---
 
-Sometimes we need to enable our users to clone their records instead of creatign new ones from scratch (huge time saver).  Let's imagine a system where users have many accounts.  
+Sometimes we need to enable our users to clone their records instead of creating new ones from scratch (huge time saver).  Let's imagine a system where users have many accounts.  
 
 {% highlight ruby %}
 # app/models/user.rb
@@ -109,7 +109,7 @@ module RailsAdmin
               @objects = list_entries(@model_config, :get)
               @objects.each do |object|
                 object.clone_record
-              end 
+              end
               flash[:success] = "#{@model_config.label} successfully cloned."
               redirect_to back_or_index
             end
