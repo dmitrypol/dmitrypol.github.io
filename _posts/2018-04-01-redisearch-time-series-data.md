@@ -6,7 +6,7 @@ categories: redis
 
 In previous [post]({% post_url 2018-01-16-elasticsearch-redis-streams %}) we explored integration between Redis and ElasticSearch for time series data.  Now we will take deeper dive into how to search for time series data w/in Redis with RediSearch module.  
 
-We will be using the same POC app for nationwide retail chain built using Ruby on Rails framework.  We want to search various user interactions on the website such as which zipcode are people coming from and which products are they looking for.  
+We will be using the same POC app for nationwide retail chain built using Ruby on Rails framework.  We want to search for various user interactions on the website such as which zipcodes users are coming from and what products are they looking for.  
 
 A common approach for time series data is to create periodic (usually daily) indexes.  Then we can run regular process where older indexes are removed (or moved to different data store) and we only keep the last X days of data in the primary Redis DB.  
 
@@ -32,7 +32,7 @@ class RediSearchClient
     REDI_SEARCH.call('FT.CREATE', get_index, 'SCHEMA', 'zipcode', 'TEXT',
       'product', 'TEXT')
   end
-  def add id: , zipcode: , tag:
+  def add id: , zipcode: , product:
     create
     REDI_SEARCH.call('FT.ADD', get_index, id, '1.0', 'FIELDS',
       'zipcode', zipcode, 'product', product)
@@ -136,11 +136,3 @@ The big downside of this approach is the necessity of making multiple Redis call
 * http://redisearch.io/
 * https://github.com/danni-m/redis-timeseries
 * https://redis.io/commands/ttl
-
-
-
-
-
-{% highlight ruby %}
-
-{% endhighlight %}
