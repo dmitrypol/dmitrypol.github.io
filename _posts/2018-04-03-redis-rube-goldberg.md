@@ -56,6 +56,9 @@ def string input
   Rails.logger.info __method__
   REDIS.set @uuid, input
 end
+# data in Redis
+{"key":"444c337c-04fc-41f8-8a2e-92b05e347ca7","ttl":-1,"type":"string",
+  "value":"input string",...}
 {% endhighlight %}
 
 ### List
@@ -69,6 +72,9 @@ def list
   REDIS.del @uuid
   REDIS.lpush @uuid, data
 end
+# data in Redis
+{"key":"444c337c-04fc-41f8-8a2e-92b05e347ca7","ttl":-1,"type":"list",
+  "value":["input string"],...}
 {% endhighlight %}
 
 ### Hash
@@ -82,6 +88,9 @@ def hash
   REDIS.del @uuid
   REDIS.hset @uuid, 'data', data
 end
+# data in Redis
+{"key":"444c337c-04fc-41f8-8a2e-92b05e347ca7","ttl":-1,"type":"hash",
+  "value":{"data":"input string"},...}
 {% endhighlight %}
 
 ### Set
@@ -95,6 +104,9 @@ def set
   REDIS.del @uuid
   REDIS.sadd @uuid, data
 end
+# data in Redis
+{"key":"444c337c-04fc-41f8-8a2e-92b05e347ca7","ttl":-1,"type":"set",
+  "value":["input string"],...}
 {% endhighlight %}
 
 ### Sorted Set
@@ -108,9 +120,12 @@ def sorted_set
   REDIS.del @uuid
   REDIS.zadd @uuid, Time.now.to_i, data
 end
+# data in Redis
+{"key":"444c337c-04fc-41f8-8a2e-92b05e347ca7","ttl":-1,"type":"zset",
+  "value":[["input string",1522815643.0]],...}
 {% endhighlight %}
 
-And we modify the main `perform` method to get data out of Redis with `zrange` command.  
+In the `output` method we get data out of Redis with `zrange` command and finally write it to a log file.  
 
 {% highlight ruby %}
 def output
@@ -121,7 +136,7 @@ def output
 end
 {% endhighlight %}
 
-Obviously this is a crazy exercise but it does illustrate a point of how can we store different data in Redis.  
+Obviously this is a crazy exercise but it does illustrate a point of how can we store data in Redis data structures.   And now for something more fun here are [YouTube videos](https://www.youtube.com/results?search_query=rube+goldberg+machine) of real Rube Goldberg machines.  
 
 ### Links
 * https://en.wikipedia.org/wiki/Rube_Goldberg_machine
