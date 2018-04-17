@@ -4,7 +4,7 @@ date: 2018-04-16
 categories: aws elastic terraform
 ---
 
-Modern software systems can collect LOTS of time series data.  It could be an analytics platform tracking user interactions or it could be IoT system receiving measurements from sensors.  How do we process this data in timely and cost effective way?  We will explore different options below.  
+Modern software systems can collect LOTS of time series data.  It could be an analytics platform tracking user interactions or it could be IoT system receiving measurements from sensors.  How do we process this data in timely and cost effective way?  We will explore two different approaches below.  
 
 * TOC
 {:toc}
@@ -124,17 +124,17 @@ Data in Mongo will look like this:
 
 Once data is in Mongo DB we can write additional code to create summaries and eventually delete the detailed records.
 
-There are several pros and cons with this approach.  We MUST keep our API servers running at all times otherwise we will loose data.  But we can stop the workers and messages will simply pile up in SQS.  With SQS we pay per use so if we are running billions of messages this could become expensive.  To start with we can build this as one application but scale frontend API servers vs worker servers separately.  When the app becomes bigger we can separate it into microservices.  
+There are several pros and cons with this approach.  We MUST keep our API servers running at all times otherwise we will loose data.  But we can stop the workers and messages will simply pile up in SQS.  With SQS we pay per use so if we are running billions of messages this could become expensive.  To start with we can build this as one application and later separate it into microservices.  
 
 ### ELB - S3 logs - Logstash - ElasticSearch
 
-Alternative approach is to take server logs and extract parameters from them.  We will setup a frontend Nginx web servers to simply load the 1x1 pixel.  AWS ELB will publish logs to S3 bucket every 5 minutes.  From there logs will be picked up by Logstash and processed into ElasticSearch.  Then we will build our reports, implement rollup indexes and snapshot data to a different S3 bucket (backup and archiving).
+Alternative approach is to take server logs and extract parameters from them.  We will setup frontend Nginx web servers to simply load the 1x1 pixel.  AWS ELB will publish logs to S3 bucket every 5 minutes.  From there logs will be picked up by Logstash and processed into ElasticSearch.  Then we will build our reports, implement rollup indexes and snapshot data to a different S3 bucket (backup and archiving).
 
 Sample line from ELB log file:
 
 {% highlight ruby %}
 2018-04-10T03:55:57.940787Z ELB_NAME 75.67.169.50:60708 10.0.1.42:80 0.000021
-0.000303 0.000014 200 200 0 68 "GET https://website.com:443/api?cid=123&aid=abc&...
+0.000303 0.000014 200 200 0 68 "GET https://website.com:443/events?cid=123&aid=abc&...
 HTTP/1.1" "Mozilla/5.0 (Linux; Android 7.0; SM-T580 Build/NRD90M; wv)
 AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/65.0.3325.109 Safari/537.36 [Pinterest/Android]"
 ECDHE-RSA-AES128-GCM-SHA256 TLSv1.2
@@ -148,7 +148,7 @@ We will start with Logstash S3 input plugin:
 # /etc/logstash/conf.d/s3_elastic.conf
 input {
   s3 {
-    aws_credentials_file => ".../aws_credentials_file.yml"
+    aws_credentials_file => "./aws_credentials_file.yml"
     bucket               => "my-elb-logs"
     prefix               => "subfolder/path/here"
   }
@@ -195,7 +195,7 @@ filter {
     code =>  "params = event.get('params')
               event.cancel if params.nil?
               params_parsed = CGI::parse(params)
-              [‘cid’, aid].each do |p|
+              ['cid', 'aid'].each do |p|
                 value = params_parsed[p].first
                 event.set(p, value)
               end
@@ -218,7 +218,7 @@ def filter(event)
   params = event.get('params')
   return [] if params.nil?
   params_parsed = CGI::parse(params)
-   [‘cid’, ‘aid’].each do |p|
+  ['cid', 'aid'].each do |p|
     value = params_parsed[p].first
     event.set(p, value)
   end
@@ -227,7 +227,7 @@ end
 test 'valid test' do
   in_event do { 'params' => '?cid=123&aid=abc' } end
   expect('params') do |events|
-    events.first.get('cid')  == '123'
+    events.first.get('cid') == '123'
     events.first.get('aid') == 'abc'
   end
 end
@@ -285,6 +285,7 @@ describe MyClass do
   end
   it 'invalid?' do
     ['?', nil, ''].each do |param|
+      ...
       test = MyClass.new(@event).perform
       expect(test).to eq []
     end
@@ -295,7 +296,7 @@ end
 
 If we need to load external Ruby gems we cannot do it directly.  One workaround is to install another Logstash plugin which uses that specific gem.  For example, if we need to access Redis from our Ruby code we can install either Logstash Redis input or output plugins and then call `Redis.new` in the class.
 
-We also can build a full blown Logstash plugin (Ruby gem) which gives us the greatest amount of flexibility but that is more work.  
+Next step is to build a full blown Logstash plugin (Ruby gem) which gives us the greatest amount of flexibility but that is beyond the scope of this post.  
 
 ### Links
 * https://www.terraform.io/docs/providers/aws/r/elastic_beanstalk_environment.html
