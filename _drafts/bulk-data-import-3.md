@@ -1,6 +1,6 @@
 ---
 title: "Bulk data import - part 3"
-date: 2017-12-16
+date: 2017-04-18
 categories: redis
 ---
 
@@ -8,7 +8,7 @@ In previous posts [here]({% post_url 2017-05-26-bulk-data-import2 %}) and [here]
 
 We still want to break up large file into small tasks (one per row or few rows) to make the import faster and more reliable.  And we need to keep track of how many records in the batch imported successfully (or not) to send results to the user.  
 
-Instead of using callbacks and have one job queue others we will implement the process using [gush](https://github.com/chaps-io/gush) library (still use [Ruby on Rails ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html)).  We will save the file to S3 in our controller code and pass that ID to our workflow.  
+Instead of using callbacks and have one job queue others we will implement the process using Ruby gush library Ruby on Rails ActiveJob.  We will save the file to S3 in our controller code and pass that ID to our workflow.  
 
 {% highlight ruby %}
 # app/controllers/
@@ -147,3 +147,8 @@ But each workflow record contains the list of ALL jobs in that workflow so it wi
 {% endhighlight %}
 
 It will also slow down as serializing such large JSON strings in our application code takes time.  Serializing complex workflows gives us lots of flexibility but it costs.  
+
+
+### Links
+* https://github.com/chaps-io/gush
+* http://guides.rubyonrails.org/active_job_basics.html
