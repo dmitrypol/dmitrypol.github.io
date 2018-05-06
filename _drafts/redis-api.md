@@ -1,15 +1,17 @@
 ---
 title: "Redis for APIs"
-date: 2016-07-26
+date: 2018-04-23
 categories: redis
 ---
 
-Redis make a great backend store for APIs.  Usually you need to respond very quickly
+Several years ago I was part of a team where we built reporting API for our customers.  Unlike traditional APIs which respond quickly we had to build an asynchronous Reporting API.  Unfortunately we did not use Redis on that project but if we did here is how it could have helped us.  
 
+Client would make a request and we would respond with a ID.  We would then kick off a background job to generate the report.  Client would make a secondary request in X minutes with that ID and we would respond with either the content of the report or a message that data was not ready yet.  Report data for that ID would be available for download for 24 hours after which we deleted it.  Client would then need to make a separate request with same parameters to re-generate the data if needed.  
 
-### Asynchronous Reporting API.
+* TOC
+{:toc}
 
-Several years ago I worked on a project where we built reporting API for our customers.  Unlike traditional APIs which respond quickly we had to build an asynchronous Reporting API.  Client would make a request and we would respond with a ID.  We would then kick off a background job to generate the report.  Client would make a secondary request in X minutes with that ID and we would respond with either the content of the report or a message that data was not ready yet.  Report data for that ID would be available for download for 24 hours after which we deleted it.  Client would then need to make a separate request with same parameters to re-generate the data if needed.  
+### API
 
 #### Generating reports
 
@@ -26,7 +28,7 @@ IDs of available reports are stored as Redis keys with TTL of 24 hours.
 Report data is stored on S3 in JSON format.  Use S3 delete policy to purge actual files (separate from report IDs stored in Redis).
 
 
-#### Client code
+### Client code
 
 Sample app for reporting API client.  It uses Sidekiq scheduled job to pick up report.  If message is "data is not ready" then it retries.  Maximum number of request to download report
 
