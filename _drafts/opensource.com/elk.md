@@ -5,7 +5,9 @@ Building data processing pipeline using ELK stack and Ruby
 
 Application logs often contain valuable data.  How can we extract it in timely and cost effective way?  As a sample app we will discuss a multi-tenant system where we host multiple sites via subdomains.  URLs in log files contain the paths (/api, /search, etc) and params (?foo=bar&...).  
 
-We will split data by customer and date into separate Elasticsearch indexes and build reports that show which URL paths are accessed.  This is a common pattern when dealing with time series data.   
+If we do not want to use ELK we can build a different data processing pipeline with API to receive messages, put them in a queue and then workers to process the data.  I outlined this approach [here](http://dmitrypol.github.io/aws/elastic/terraform/2018/04/16/processing-time-series-data.html) comparing it to ELK.  
+
+In our ELK solution we will split data by customer and date into separate Elasticsearch indexes and build reports that show which URL paths are accessed.  This is a common pattern when dealing with time series data.   
 
 To keep things simple we will use load balancer logs which contain the same information as web server logs but are centralized.  We will configure our AWS load balancer to publish logs to S3 bucket every 5 minutes.  From there logs will be picked up by Logstash and processed into Elasticsearch.  
 
