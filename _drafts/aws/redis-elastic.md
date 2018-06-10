@@ -107,3 +107,8 @@ def slow_method event
   end
 end
 ```
+
+### Redis output
+
+Use Ruby code to read/write data from Redis.  No Logstash output.  
+Fast way to aggregate high level summary stats in Redis.  Just using Logstash input and filter.  
