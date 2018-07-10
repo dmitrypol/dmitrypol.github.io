@@ -14,7 +14,7 @@ For the primary database I chose Mongo.  Using array fields enabled me to store 
 
 Redis can be configured to snapshot data to local RDB file and read from it on restart.  I setup ad server to work with local Redis using [Redis-rb](https://github.com/redis/redis-rb).  I stored the ads in Redis DB 0.  Keyword (dentist) was a key and list of account_ids was a [Redis Set](http://redis.io/topics/data-types#sets).  Separately I stored account_ids as key and [Redis Hash](http://redis.io/topics/data-types#hashes) with title, body, etc.
 
-To keep the data in sync between Mongo and Redis I created a daemon with [daemons](http://daemons.rubyforge.org/).  It would check Mongo if something changed (keywords, account budgets, etc).  It would then start reading and transforming the data into Redis DB 1.  Once compelte it would use [Redis Pipelining](http://redis.io/topics/pipelining) to flush DB 0 and transfer data from DB 1 to DB 0.  This decreased any potential downtimes to fractions of a second.  I wanted to make the process smarter so it only transferred the data that changed but did not get a chance to.
+To keep the data in sync between Mongo and Redis I created a daemon with [daemons](https://rubygems.org/gems/daemons/).  It would check Mongo if something changed (keywords, account budgets, etc).  It would then start reading and transforming the data into Redis DB 1.  Once compelte it would use [Redis Pipelining](http://redis.io/topics/pipelining) to flush DB 0 and transfer data from DB 1 to DB 0.  This decreased any potential downtimes to fractions of a second.  I wanted to make the process smarter so it only transferred the data that changed but did not get a chance to.
 
 When click occurred I recorded it in Redis and quickly redirected the user.  Then the daemon would update appropriate Mongo record.  I also recorded how often which keywords were requested and aggregated reports in Mongo.  Redis speed is great but having Mongo rich document structure enabled me to build better UI and reporting capabilities.
 
@@ -23,4 +23,3 @@ This design allowed each ad server to function independently enabling us to scal
 I also implemented other features such as [keyword stemming](https://en.wikipedia.org/wiki/Stemming), created custom list of [stop words](https://en.wikipedia.org/wiki/Stop_words), etc.  And I had other ideas such as setting servers on separate US coasts (fairly straightfowrard with [AWS Route 53](https://aws.amazon.com/route53/)).
 
 The above post if not quite 100% what I built as I changed a few things to keep certain details confidential and make basic concepts easier to understand.
-

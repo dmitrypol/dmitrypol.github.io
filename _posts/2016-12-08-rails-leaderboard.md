@@ -253,7 +253,7 @@ As expected method calls is the slowest. It took ~ 1.5 seconds to load page with
 
 Pre-generated data was fast at ~70 ms since it was only 1 query.  
 
-Redis leaderboard was also fast at ~70 ms and 0 queries against primary DB as all data was grabbed from Redis.  Load times for Redis leaderboard remain constant we load more and more records.  
+Redis leaderboard was also fast at ~70 ms and 0 queries against primary DB as all data was grabbed from Redis.  Load times for Redis leaderboard remain constant as we load more and more records.  
 
 So which approach is better?  That depends on a number of various, including how volatile is the data.  Redis leaderboard does introduce complexity but it will be faster.  Plus we might not want to persist data in our main DB.  
 

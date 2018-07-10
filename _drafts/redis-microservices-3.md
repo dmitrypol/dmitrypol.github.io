@@ -9,7 +9,7 @@ categories: redis
 {:toc}
 
 
-### Pub/Sub for integration instead of queues.  
+### PubSub for integration instead of queues.  
 
 Sending messages to multiple destination
 

@@ -207,7 +207,7 @@ method_name
 
 Let's imagine an app where users can view weather data for specific zipcodes.  Obviously you are going to call 3rd party API to get the data.  In your MVP you can call on every user request but with more traffic this will become slow and $ expensive.  You could create an hourly background job to fetch weather data for all zipcodes, parse JSON and load it into your DB.
 
-Or you could implement 1 line caching solution (which also costs less because it will only fetch data users actually need).  In this case we have no user ID or timestamp so the cache key is based on class, method and parameter.  We will need to expire it using default Redis TTL.
+Or you could implement 1 line caching solution (which also will cost less $ because it will only fetch data users actually need).  In this case we have no user ID or timestamp so the cache key is based on class, method and parameter.  We will need to expire it using default Redis TTL.
 
 {% highlight ruby %}
 class WeatherServiceObject

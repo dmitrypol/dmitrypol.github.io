@@ -4,7 +4,7 @@ date: 2015-05-14
 categories: redis
 ---
 
-All applications need to do certain background tasks such as sending daily emails, generating reports or downloading data.  Rails 4.2 provides a really good framework with [ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html) which also has a [backport](https://github.com/ankane/activejob_backport) to previous Rails versions.
+Many applications need to do certain background tasks such as sending daily emails, generating reports or downloading data.  Rails 4.2 provides a really good framework with [ActiveJob](http://edgeguides.rubyonrails.org/active_job_basics.html) which also has a [backport](https://github.com/ankane/activejob_backport) to previous Rails versions.
 
 Even without ActiveJob you can easily create app/workers and run them via cron or better yet [DelayedJob](https://github.com/collectiveidea/delayed_job) [Resque](https://github.com/resque/resque) or [Sidekiq](https://github.com/mperham/sidekiq).  You can treat these files as PORO and write automated tests.  But with time these workers get bigger as you are putting more and more business logic in them (like which emails should be sent to which users).  Soon you are dealing with 100+ lines classes with multiple methods.
 

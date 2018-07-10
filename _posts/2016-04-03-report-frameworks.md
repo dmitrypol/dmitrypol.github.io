@@ -221,13 +221,14 @@ Then we schedule a nightly job.  To keep things simple users receive daily repor
 
 {% highlight ruby %}
 # app/jobs/user_report_job.rb
-class create UserReportJob < ActiveJob::Base/my_mailer/report.html.erb
+class UserReportJob < ActiveJob::Base
   def perform()
     # query user_reports to determine reports need to be sent out to whom
     # pass appropriate date range filters to report service objects
   end
 end
 {% endhighlight %}
+
 I like using [sidekiq-cron](https://github.com/ondrejbartas/sidekiq-cron) to schedule the jobs but there are alternatives.
 
 #### Format

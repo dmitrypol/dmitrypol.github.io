@@ -86,5 +86,4 @@ Which approach should we use depends on our needs.  If we are already using Redi
 
 * [http://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions](http://stackoverflow.com/questions/10494431/sticky-and-non-sticky-sessions)
 * [http://stackoverflow.com/questions/1553645/pros-and-cons-of-sticky-session-session-affinity-load-blancing-strategy](http://stackoverflow.com/questions/1553645/pros-and-cons-of-sticky-session-session-affinity-load-blancing-strategy)
-* [https://www.safaribooksonline.com/library/view/rails-cookbook/0596527314/ch04s15.html](https://www.safaribooksonline.com/library/view/rails-cookbook/0596527314/ch04s15.html)
 * [http://guides.rubyonrails.org/security.html](http://guides.rubyonrails.org/security.html)

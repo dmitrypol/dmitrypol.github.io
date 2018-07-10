@@ -54,7 +54,6 @@ end
 Both approaches have their place.  I still use Rake for various server configuration and system maintenance tasks (for example, uploading config files to production servers).  But when it comes to complex business logic I put that in Ruby service objects.  
 
 ### Useful links
-* [http://jasonseifer.com/2010/04/06/rake-tutorial](http://jasonseifer.com/2010/04/06/rake-tutorial)
 * [https://www.sitepoint.com/rake-automate-things/](https://www.sitepoint.com/rake-automate-things/)
 * [http://martinfowler.com/articles/rake.html](http://martinfowler.com/articles/rake.html)
 * [https://robots.thoughtbot.com/test-rake-tasks-like-a-boss](https://robots.thoughtbot.com/test-rake-tasks-like-a-boss)

@@ -198,6 +198,6 @@ Approaches described above introduce complexity.  The logic in determining which
 
 ### Links
 
-* [https://www.sitepoint.com/rails-model-caching-redis/]([https://www.sitepoint.com/rails-model-caching-redis/)
+* [https://www.sitepoint.com/rails-model-caching-redis/](https://www.sitepoint.com/rails-model-caching-redis/)
 * [https://redis.io/topics/lru-cache](https://redis.io/topics/lru-cache)
 * [http://www.infoworld.com/article/3063161/application-development/why-redis-beats-memcached-for-caching.html](http://www.infoworld.com/article/3063161/application-development/why-redis-beats-memcached-for-caching.html)

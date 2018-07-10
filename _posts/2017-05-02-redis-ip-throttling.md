@@ -128,11 +128,10 @@ end
 The problem is that we would need to restart the app to pick up these custom configurations.  Honestly I am not sure the custom Hash approach really delivers much value and significantly complicates things.  If anyone has suggestions feel free to share them.  
 
 ### Links
-* [http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address](* http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address)
+* [http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address]( http://stackoverflow.com/questions/34774086/how-do-i-rate-limit-page-requests-by-ip-address)
 * [https://stripe.com/blog/rate-limiters](https://stripe.com/blog/rate-limiters)
 * [https://github.com/dryruby/rack-throttle](https://github.com/dryruby/rack-throttle)
 * [https://github.com/jeremy/rack-ratelimit](https://github.com/jeremy/rack-ratelimit)
 * [http://nginx.org/en/docs/http/ngx_http_limit_req_module.html](http://nginx.org/en/docs/http/ngx_http_limit_req_module.html)
-* [http://blog.lebrijo.com/rate-limiting-solution-for-a-rails-app/](http://blog.lebrijo.com/rate-limiting-solution-for-a-rails-app/)
 * [https://blog.codinghorror.com/dictionary-attacks-101/](https://blog.codinghorror.com/dictionary-attacks-101/)
 * [https://devcentral.f5.com/articles/implementing-the-exponential-backoff-algorithm-to-thwart-dictionary-attacks](https://devcentral.f5.com/articles/implementing-the-exponential-backoff-algorithm-to-thwart-dictionary-attacks)

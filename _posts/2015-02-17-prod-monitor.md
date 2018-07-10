@@ -26,7 +26,7 @@ Services like [Site24x7](https://www.site24x7.com/), [UptimeRobot](https://uptim
 
 #### Internal monitoring
 
-Separately I want an "internal probe".  Some kind of software package I install with my application that sends detailed data to the "mothership".  I can login to their console and see if particular types of request are taking too long.  This is also great for ongoing performance analysis.  Services such as [NewRelic](https://newrelic.com/), [Skylight](https://www.skylight.io/) and [Passenger Union Station](https://www.unionstationapp.com/) fall into this category.  It would be great to get alerts if parts of my application have been running too slow for too long.
+Separately I want an "internal probe".  Some kind of software package I install with my application that sends detailed data to the "mothership".  I can login to their console and see if particular types of request are taking too long.  This is also great for ongoing performance analysis.  Services such as [NewRelic](https://newrelic.com/) and [Skylight](https://www.skylight.io/) fall into this category.  It would be great to get alerts if parts of my application have been running too slow for too long.
 
 The problem is none of the tools I tried seem to offer end to end functionality like this.  [PageDuty](https://www.pagerduty.com/) is really good at escalating requests but they can't do outbound checks.  They can receive inbound messages so you have to combine it with another services like UptimeRobot which will send emails to PagerDuty.  Kind of a pain.
 

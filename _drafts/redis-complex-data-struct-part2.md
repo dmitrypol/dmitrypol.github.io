@@ -11,8 +11,7 @@ In previous [post]({% post_url 2017-06-21-redis-complex-data-struct %}) I wrote 
 
 ### Sorted Sets
 
-We can work with [Sorted Sets](http://redis.io/commands#sorted_set) since Redis already supports them.  
-One caveat is that in Redis each member has a separate score while in Ruby the member element itself is used to determine ranking.  We need to loop through our Ruby Sorted Set and specify scores based on member value.  
+We can work with [Sorted Sets](http://redis.io/commands#sorted_set) since Redis already supports them.  One caveat is that in Redis each member has a separate score while in Ruby the member element itself is used to determine ranking.  We need to loop through our Ruby Sorted Set and specify scores based on member value.  
 
 {% highlight ruby %}
 zset1 = SortedSet.new([2, 1, 5, 6, 4, 5, 3, 3, 3])

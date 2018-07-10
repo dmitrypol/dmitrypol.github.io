@@ -30,4 +30,4 @@ Here is how I solved this problem on a few recent projects.  Warning - this will
 * It's unlikely but regular users could accidentally stumble on your stg1.yourdomain.com URL and login.  You could whitelist your office IP address in the firewall for accessing stg URLs.
 * This approach also does not work for environments like [Heroku](https://www.heroku.com/) or [AWS Elastic Beanstalk](https://aws.amazon.com/elasticbeanstalk/).
 
-Overall this approach has served as well but we have to be careful.  If your dev team is small each developer can deploy to specific stg server frequently and do appropriate verification there.
+Overall this approach has served us well but we have to be careful.  If your dev team is small each developer can deploy to specific stg server frequently and do appropriate verification there.

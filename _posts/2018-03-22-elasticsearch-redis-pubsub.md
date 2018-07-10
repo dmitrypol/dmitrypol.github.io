@@ -4,9 +4,9 @@ date: 2018-03-22
 categories: elastic redis
 ---
 
-In previous posts we discussed integration between [ElasticSearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-16-elasticsearch-redis-streams %}) to work with time series data.  Now we will explore [Redis Pub/Sub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
+In previous posts we discussed integration between [ElasticSearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-16-elasticsearch-redis-streams %}) to work with time series data.  Now we will explore [Redis PubSub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
 
-Why would we use Redis Pub/Sub vs sending data directly to ElasticSearch?  One advantage is that multiple clients could be listening to our channel.  We also might not want to create a direct integration between our application and ElasticSearch.  
+Why would we use Redis PubSub vs sending data directly to ElasticSearch?  One advantage is that multiple clients could be listening to our channel.  We also might not want to create a direct integration between our application and ElasticSearch.  
 
 * TOC
 {:toc}
@@ -110,7 +110,7 @@ filter {
 
 ### Alternatives to PubSub
 
-One issue with using PubSub is that if Logstash is temporarily not running then it will never receive the messages sent to the channel.  To solve that we can use Redis List instead of Pub/Sub.  Data will remain in Redis and Logstash will process when it comes back online.   
+One issue with using PubSub is that if Logstash is temporarily not running then it will never receive the messages sent to the channel.  To solve that we can use Redis List instead of PubSub.  Data will remain in Redis and Logstash will process when it comes back online.   
 
 {% highlight ruby %}
 # in our application
