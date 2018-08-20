@@ -4,16 +4,14 @@ date: 2018-08-19
 categories: redis
 ---
 
-comScore uses combination of IP and UserAgent to calculate monthly unique visitors and determine website ranking.  One of the first projects where I used Redis many years ago required using this methodology and make split second decision in our code whether a particular visitor was new or not.  
+On a recent project we had to develop a process to  de-dupe events from our web log files as we were processing them through a data pipeline.  We decided to use a hash of IP & UserAgent combination to "uniquely" identify users responsible for the events and temporarily stored data in Redis.  
 
 * TOC
 {:toc}
 
 ### Storing hash of IP & UserAgent are separate Redis keys
 
-On a recent project we had to do something very similar to de-dupe events from our log files as were processing them through a data pipeline.  We used a combination of IP & UserAgent to "uniquely" identify events and stored data in Redis for 15 minutes.  
-
-Here is a sample Python code implementing this logic.  It generates "random" IPs and UserAgents, hashes the combination and checks if it exists in Redis as a separate key.  If the key exits, it returns False (dupe).  Otherwise it creates a key (with 15 minutes TTL), increments a **new_event** counter and returns True (new event).  To force "dupe" events we defined a small array of UserAgents and limited IP ranges.
+Here is a sample Python code implementing this logic.  It generates "random" IPs and UserAgents, hashes the combination and checks if it exists in Redis as a separate key.  If the key exits, it returns False (dupe).  Otherwise it creates a key (with 900 seconds TTL per our time window requirements), increments a **new_event** counter and returns True (new event).  To force "dupe" events this code uses a small array of UserAgents and limited IP ranges.
 
 {% highlight python %}
 import redis
@@ -42,7 +40,7 @@ def main():
 main()
 {% endhighlight %}
 
-This solution worked but the more data we were processing the more memory it required.  We started researching alternatives.  
+This solution worked but the more data we were processing the more RAM it required.  We wanted a more memory efficient alternative.  
 
 ### HyperLogLog
 
@@ -50,7 +48,7 @@ Redis HyperLogLog is probabilistic data structure which gives approximate number
 
 Redis HyperLogLog can count up to 2^64 items and in honor of Philippe Flajolet the commands begin with PF.
 
-To determine if this was a new event or not we checked the count of HLL data structure, added the event and checked the count again.  Notice that we are using a separate Redis connection client (**r_hll**) pointed at different Redis DB (1 vs 0) from previous example.  
+To determine if this was a new event or not we checked the count of HLL data structure, added the event and checked the count again.  Notice that we are using a separate Redis connection client (**r_hll**) pointed at different Redis DB (1 vs 0).  
 
 {% highlight python %}
 import redis
@@ -80,13 +78,13 @@ def main():
 main()
 {% endhighlight %}
 
-The problem with this approach is that in a multi-threaded environment there is very high likelihood of another thread (or process) added a different item to our HLL and therefore changing the count.  We needed to guarantee that nothing will happen between the 3 operations.  And we could not use `MULTI/EXEC` because we need to store the count somewhere.  
+The problem with this approach is that in a multi-threaded environment there is very high likelihood of another thread (or process) added a different item to our HLL and therefore changing the count.  We needed to guarantee that nothing will happen between the three operations (pfcount, pfadd, pfcount).  And we could not use `MULTI/EXEC` because we need to store the count somewhere.  
 
 #### Lua script
 
-Redis will execute Lua script atomically (everything else will be blocked while a script is running so make sure the scripts are not slow).  Lua scripts will also enable us to make only one Redis call per event (vs 3).
+Redis will execute Lua script atomically (everything else will be blocked while the script is running so it must be fast).  Lua scripts will also help us to make only one Redis API call per event (vs 3) which will be faster.
 
-Lua script will accept counter and uniq_hash as params (in a real world applications counters are likely to be time-series, such as daily).  The script will encapsulate pfcount / pfadd logic and return true or false.  
+Lua script will accept counter and uniq_hash as params (in a real world applications counters are likely to be time-series, such as daily).  The script will encapsulate pfcount / pfadd / pfcount logic and return true or false.  
 
 {% highlight lua %}
 local counter = ARGV[1]
@@ -101,7 +99,7 @@ else
 end
 {% endhighlight %}
 
-Now we will load Lua script from our Python code with `script_load` command and then execute `evalsha` passing in the arguments.  
+We will load Lua script from our Python code with `script_load` command and then execute `evalsha` passing in the arguments.  
 
 {% highlight python %}
 import redis
@@ -131,7 +129,7 @@ Now we are saving $ on memory and still achieving 99%+ accuracy.
 
 ### ReBloom module
 
-Bloom filters are a data structure that is designed to tell us with reasonable degree of certainty whether this is a new event or not.  Redis does not support them natively but a there is a ReBloom module that enables that functionality.  
+Bloom Filter is probabilistic data structure designed to tell us with reasonable degree of certainty whether this is a new event or not.  Redis does not support them natively but a there is a ReBloom module that enables that functionality.  
 
 In this Python code we first reserve a Bloom Filter for 10,000 entries with error rate of 1 in 1000.  The more accurate we want this to be the more memory and CPU will be required.  When we execute `BF.ADD` the response comes back as 0 if it's not a new item and 1 if it is new.  
 
@@ -165,7 +163,7 @@ main()
 
 ### Combined Pyton code
 
-Now we can created a `new_event.py` script combining the approaches.  
+Now we create a `new_event.py` script combining the approaches.  
 
 {% highlight python %}
 import redis
@@ -250,8 +248,10 @@ After running the code we can launch **redis-cli** and compare results.  Note - 
 
 Memory usage varied widely.  Storing 1 million unique IP & UserAgent combinations took almost 100MB with separate keys vs ~ 1MB as HyperLogLog.  Bloom Filter provisioned for 1 million items used about 3MB.  
 
+Which approach is best depends on the situation.  Leveraging ReBloom module requires either hosting provider that supports it or full control of the server where Redis is running.  Using separate keys gives the most granularity in expiring data after a time window but used the most RAM.  HyperLogLog can be done with a standard Redis but Lua scripts introduce slightly more complexity.  
+
 ### Links
-* https://github.com/RedisLabsModules/rebloom
-* https://www.redisgreen.net/blog/intro-to-lua-for-redis-programmers/
-* https://www.comscore.com/Insights/Rankings
 * https://redis-py.readthedocs.io/en/latest/index.html
+* HyperLogLog - http://antirez.com/news/75
+* https://www.redisgreen.net/blog/intro-to-lua-for-redis-programmers/
+* https://github.com/RedisLabsModules/rebloom
