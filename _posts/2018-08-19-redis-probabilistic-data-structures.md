@@ -9,7 +9,7 @@ On a recent project we had to develop a process to  de-dupe events from our web 
 * TOC
 {:toc}
 
-### Storing hash of IP & UserAgent are separate Redis keys
+### Storing hash of IP & UserAgent as separate Redis keys
 
 Here is a sample Python code implementing this logic.  It generates "random" IPs and UserAgents, hashes the combination and checks if it exists in Redis as a separate key.  If the key exits, it returns False (dupe).  Otherwise it creates a key (with 900 seconds TTL per our time window requirements), increments a **new_event** counter and returns True (new event).  To force "dupe" events this code uses a small array of UserAgents and limited IP ranges.
 
@@ -18,7 +18,7 @@ import redis
 import random
 import hashlib
 counter = 'new_event'
-user_agents = ['Firefix', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
+user_agents = ['Firefox', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
 ttl = 900
 size = 10000
 r_many_keys = redis.Redis(db=0)
@@ -55,7 +55,7 @@ import redis
 import random
 import hashlib
 counter = 'new_event'
-user_agents = ['Firefix', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
+user_agents = ['Firefox', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
 ttl = 900
 size = 10000
 r_hll = redis.Redis(db=1)
@@ -82,7 +82,7 @@ The problem with this approach is that in a multi-threaded environment there is 
 
 #### Lua script
 
-Redis will execute Lua script atomically (everything else will be blocked while the script is running so it must be fast).  Lua scripts will also help us to make only one Redis API call per event (vs 3) which will be faster.
+Redis will execute Lua script atomically (everything else will be blocked while the script is running so it must be fast).  This approach also makes only one Redis API call per event (vs three) which will be faster.
 
 Lua script will accept counter and uniq_hash as params (in a real world applications counters are likely to be time-series, such as daily).  The script will encapsulate pfcount / pfadd / pfcount logic and return true or false.  
 
@@ -106,7 +106,7 @@ import redis
 import random
 import hashlib
 counter = 'new_event'
-user_agents = ['Firefix', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
+user_agents = ['Firefox', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
 ttl = 900
 size = 10000
 r_hll_lua = redis.Redis(db=2)
@@ -138,7 +138,7 @@ import redis
 import random
 import hashlib
 counter = 'new_event'
-user_agents = ['Firefix', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
+user_agents = ['Firefox', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
 ttl = 900
 size = 10000
 r_rebloom = redis.Redis(db=3)
@@ -171,7 +171,7 @@ import random
 import hashlib
 
 counter = 'new_event'
-user_agents = ['Firefix', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
+user_agents = ['Firefox', 'Chrome', 'IE', 'Edge', 'Safari', 'Opera']
 ttl = 900
 size = 10000
 
