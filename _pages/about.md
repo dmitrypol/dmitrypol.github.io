@@ -4,7 +4,7 @@ title: About
 permalink: /about/
 ---
 
-After many years of reading great blog posts written by other developers (and using their ideas to get stuff done) I decided it was about time to contribute back and share some of my thoughts and experiences.  Not all of these posts are going to be great but all feedback is welcomed.
+  After many years of reading great blog posts written by other developers (and using their ideas to get stuff done) I decided it was about time to contribute back and share some of my thoughts and experiences.  Not all of these posts are going to be great but all feedback is welcomed.  I will try to post regularly but sometimes good ideas do not come on schedule.  
 
 #### Other blogs that I read:
 * [https://aws.amazon.com/blogs/aws/](https://aws.amazon.com/blogs/aws/)
