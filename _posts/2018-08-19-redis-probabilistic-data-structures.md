@@ -4,7 +4,7 @@ date: 2018-08-19
 categories: redis
 ---
 
-On a recent project we had to develop a process to  de-dupe events from our web log files as we were processing them through a data pipeline.  We decided to use a hash of IP & UserAgent combination to "uniquely" identify users responsible for the events and temporarily stored data in Redis.  
+On a previous project we had to develop a process to  de-dupe events from our web log files as we were processing them through a data pipeline.  We decided to use a hash of IP & UserAgent combination to "uniquely" identify users responsible for the events and temporarily stored data in Redis.  
 
 * TOC
 {:toc}
