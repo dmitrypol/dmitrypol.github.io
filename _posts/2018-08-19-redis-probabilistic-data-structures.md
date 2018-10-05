@@ -37,7 +37,8 @@ def main():
         uniq_req = user_agent + '-' + ip
         uniq_hash = hashlib.md5(uniq_req.encode()).hexdigest()
         many_keys(uniq_hash)
-main()
+if __name__== "__main__":
+    main()
 {% endhighlight %}
 
 This solution worked but the more data we were processing the more RAM it required.  We wanted a more memory efficient alternative.  
@@ -75,7 +76,8 @@ def main():
         uniq_req = user_agent + '-' + ip
         uniq_hash = hashlib.md5(uniq_req.encode()).hexdigest()
         hll(uniq_hash)
-main()
+if __name__== "__main__":
+    main()
 {% endhighlight %}
 
 The problem with this approach is that in a multi-threaded environment there is very high likelihood of another thread (or process) added a different item to our HLL and therefore changing the count.  We needed to guarantee that nothing will happen between the three operations (pfcount, pfadd, pfcount).  And we could not use `MULTI/EXEC` because we need to store the count somewhere.  
@@ -122,7 +124,8 @@ def main():
         uniq_req = user_agent + '-' + ip
         uniq_hash = hashlib.md5(uniq_req.encode()).hexdigest()
         hll_lua(uniq_hash)
-main()
+if __name__== "__main__":
+    main()
 {% endhighlight %}
 
 Now we are saving $ on memory and still achieving 99%+ accuracy.  
@@ -158,10 +161,11 @@ def main():
         uniq_req = user_agent + '-' + ip
         uniq_hash = hashlib.md5(uniq_req.encode()).hexdigest()
         rebloom(uniq_hash)
-main()
+if __name__== "__main__":
+    main()
 {% endhighlight %}
 
-### Combined Pyton code
+### Combined Python code
 
 Now we create a `new_event.py` script combining the approaches.  
 
@@ -226,7 +230,8 @@ def main():
         hll_lua(uniq_hash)
         rebloom(uniq_hash)
 
-main()
+if __name__== "__main__":
+    main()
 {% endhighlight %}
 
 After running the code we can launch **redis-cli** and compare results.  Note - results may vary depending on how the random IPs and UserAgents are generated.  
