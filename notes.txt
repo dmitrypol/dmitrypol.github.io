@@ -55,3 +55,12 @@ redisconf basketball ticket counters
 redis state machine
 jobs to do bulk updates on primary DB, keep IDs in set
 redis and single table inheritance, store other attributes in Redis https://www.youtube.com/watch?v=dH6VYRMRQFw
+
+
+
+* https://github.com/hashicorp/terraform/issues/2661
+* https://github.com/adammck/terraform-inventory
+* https://github.com/radekg/terraform-provisioner-ansible
+* https://alex.dzyoba.com/blog/terraform-ansible/
+* https://registry.terraform.io/modules/radekg/ansible/provisioner/2.0.1
+* https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
