@@ -14,6 +14,8 @@ Sampe app with Users and Articles
 
 User acricles_count method
 
+Rate limiter
+
 
 ### Queue
 
@@ -28,5 +30,7 @@ Likes - use Redis Set to store user IDs
 
 Leaderboard - which articles have the most likes
 
-
 ### Links
+
+
+walrus project

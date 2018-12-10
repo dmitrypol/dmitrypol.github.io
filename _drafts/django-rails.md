@@ -18,14 +18,29 @@ categories: python ruby
 ### One app or project with many apps
 
 
-
-### Celery or ActiveJob
-
-
 ### Code generators
 
 
 ### Static assets
 
 
+### belongs_to and has_many
+
+
+### Authentication, Authorization and Admin interface
+
+
+### Celery or ActiveJob
+
+
+#### GlobalID for passing objects
+
+
+#### Email deliver_later
+
+
+### signals or callbacks
+
+
 ### Links
+* https://bernardopires.com/2014/03/rails-vs-django-an-in-depth-technical-comparison/
