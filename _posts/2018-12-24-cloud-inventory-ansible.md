@@ -4,7 +4,7 @@ date: 2018-12-24
 categories: ansbile terraform
 ---
 
-Ansible is a useful tool for provisioning infrastructure (instaling software, modifying config files).  Ususaly Ansible expects an inventory file which specifies servers and their IP addresses.  The challenge is that in the cloud they can change frequently.  
+Ansible is a useful tool for provisioning infrastructure (instaling software, modifying config files).  Usualy Ansible expects an inventory file which specifies servers and their IP addresses.  The challenge is that in the cloud they can change frequently.  
 
 One option is to use a product like Ansible Tower which maintains a database of the inventory it manages.  Instead we will expore how to query cloud provider APIs and detetermine the current state of our infrastructure. 
 
