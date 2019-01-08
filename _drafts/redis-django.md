@@ -1,6 +1,6 @@
 ---
 title: "Scaling Python Django application with Redis"
-date: 2018-10-01
+date: 2019-01-08
 categories: redis python
 ---
 
@@ -32,5 +32,5 @@ Leaderboard - which articles have the most likes
 
 ### Links
 
-
-walrus project
+* https://github.com/coleifer/walrus
+* https://github.com/niwinz/django-redis
