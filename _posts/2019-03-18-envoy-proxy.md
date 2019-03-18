@@ -4,14 +4,14 @@ date: 2019-03-18
 categories: redis
 ---
 
-In a previous [article]({% post_url 2019-02-25-1000-node-redis-cluster %}) we explored using Redis Cluster.  Now we will discuss using Envoy Proxy to scale our Redis infrastructure.  This article assumes that the reader is familiar with Redis and Docker Compose.  
+In the previous [article]({% post_url 2019-02-25-1000-node-redis-cluster %}) we explored using Redis Cluster.  Now we will discuss using Envoy Proxy to scale our Redis infrastructure.  This article assumes that the reader is familiar with Redis and Docker Compose.  
 
 * TOC
 {:toc}
 
 ## Introduction
 
-Redis can be leveraged for many purposes to help scale our applications.  It can help with caching, background job queuing, access throttling, features flags, and so on.  Some of the challenges with Redis are that it is mostly single-threaded and all data has to fit into RAM.  We could use replicas for reads or setup multiple Redis servers for different purposes (one for cache, another for job queue, ...) and use different connection strings.  
+Redis can be leveraged for many purposes to help scale our applications.  It can help with caching, background job queuing, access throttling, features flags, and so on.  Some of the challenges with Redis are that it is mostly single-threaded and all data has to fit into RAM.  We could use replicas for reads or setup multiple Redis servers for different purposes (one for cache, another for job queue, ...) and use separate connection strings.  
 
 But what if we needed a VERY large cache to store rapidly changing data?  For example, a game like Pokémon where we keep track of user's physical lon/lat locations.  We need a lot of RAM to store the individual Redis keys.  Using TTL to purge stale keys can tax our CPU.  
 
@@ -65,7 +65,6 @@ static_resources:
     lb_policy: MAGLEV
     load_assignment:
       cluster_name: redis_cluster
-      endpoints:
       endpoints:
       - lb_endpoints:
         {% for i in range(1, num_redis_hosts+1) %}
@@ -160,15 +159,15 @@ services:
 
 We will run it with `docker-compose up --build -d --scale redis=3`.  It will bring up 5 containers (1 worker, 1 Envoy Proxy and 3 Redis).  
 
-We can browse to `http://localhost:8001/stats?usedonly&filter=redis.egress_redis.command` to see useful stats on how much data is flowing through the proxy.  We can also see how any keys are stored in each Redis instance with `docker exec -it envoy_redis_1 redis-cli dbsize` command.  
+We can browse to `http://localhost:8001/stats?usedonly&filter=redis.egress_redis.command` to see useful stats on how much data is flowing through the proxy.  We can also see how many keys are stored in each Redis instance with `docker exec -it envoy_redis_1 redis-cli dbsize` command.  
 
 ## Pros / cons
 
 Unlike Redis Cluster the nodes behind the proxy are completely unaware of each other.  If we need to increase or decrease their number there is no easy way to move the data around.  We can set `num_redis_hosts` in `envoy.py` to 4 and recreate `envoy.yaml` with 4 endpoints.  Running `docker-compose up --build -d --scale redis=4` will launch new `envoy_redis_4` and recreate `envoy_proxy_1` (as the `envoy.yaml` changed).  However if we check the number of keys on each Redis node we will see that the 4th node has a lot fewer.  In our case the keys will expire in 60 seconds but if we try to read them in the meantime we will not find some of them on the node that the proxy thinks they should be on.  
 
-Currently Envoy Proxy recommends using MAGLEV lb_policy based on Google's load ballancer.  With fixed table size of 65537 and 3 Redis servers behind proxy each host will hold about 21,845 hashes.  If we scale out to 4 Redis servers then each host will have about 16384 hashes.  MAGLEV is faster than RING_HASH (ketama) but less stable (more keys are routed to new nodes when number of Redis servers changes).  We can set either policy by changing `envoy.yaml`.  
+Currently Envoy Proxy recommends using MAGLEV lb_policy based on Google's load balancer.  With fixed table size of 65537 and 3 Redis servers behind proxy each host will hold about 21,845 hashes.  If we scale out to 4 Redis servers then each host will have about 16384 hashes.  MAGLEV is faster than RING_HASH (ketama) but less stable (more keys are routed to new nodes when number of Redis servers changes).  We can set either policy by changing `envoy.yaml`.  
 
-Sometimes we need to perform operations on muliple keys and we need to ensure that they are present on the same server.  For that Envoy supports same algorith of using hash tags as Redis Cluster.  If the key contains a substring between {} brackets than  only the part inside the {} is hashed.  We can still use pipelining but without transactions (hence `transaction=False` in the worker code).  Most Envoy commands are identical to their Redis counterparts but we can only execute Redis commands that can be reliably hashed to a server.  
+Sometimes we need to perform operations on multiple keys and we need to ensure that they are present on the same server.  For that Envoy supports the same algorithm of using hash tags as Redis Cluster.  If the key contains a substring between {} brackets than  only the part inside the {} is hashed.  We can still use pipelining but without transactions (hence `transaction=False` in the worker code).  Most Envoy commands are identical to their Redis counterparts but we can only execute Redis commands that can be reliably hashed to a server.  
 
 Additionally Envoy provides lots of great features for monitoring and tracing but that is beyond the scope of this article.
 
