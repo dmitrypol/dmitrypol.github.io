@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+
+  blog:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/opt/blog
+    ports:
+      - target: 4000
+        published: 4000
+    expose:
+      - 4000
