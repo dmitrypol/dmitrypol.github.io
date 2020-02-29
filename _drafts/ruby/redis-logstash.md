@@ -1,3 +1,8 @@
+---
+title: "Redis Logstash"
+date: 2017-05-28
+categories: redis
+---
 
 * TOC
 {:toc}
