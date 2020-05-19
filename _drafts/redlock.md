@@ -4,7 +4,7 @@ date: 2020-02-29
 categories: redis
 ---
 
-In a previous [article]({% post_url 2020-02-29-redis-data-eng %}) we explored how to use Redis to scale ETL pipelines.  The one issue we did not address is creating reliable scheduler that will ensure that our ETL jobs run on time.  In this article we will explore Distributed Lock Management and Redlock algorithm.  
+In a previous [article]({% post_url 2020-02-29-redis-data-eng %}) we explored how to use Redis to scale ETL pipelines.  One issue we did not address is creating redundant scheduler that will ensure that our jobs are executed on time.  In this article we will explore Distributed Lock Management and Redlock algorithm.  Code can be found [here](https://github.com/dmitrypol/dlm).
 
 * TOC
 {:toc}

@@ -126,9 +126,9 @@ Once data is in Mongo DB we can write additional code to create summaries and ev
 
 There are several pros and cons with this approach.  We MUST keep our API servers running at all times otherwise we will loose data.  But we can stop the workers and messages will simply pile up in SQS.  With SQS we pay per use so if we are running billions of messages this could become expensive.  To start with we can build this as one application and later separate it into microservices.  
 
-### ELB - S3 logs - Logstash - ElasticSearch
+### ELB - S3 logs - Logstash - Elasticsearch
 
-Alternative approach is to take server logs and extract parameters from them.  We will setup frontend Nginx web servers to simply load the 1x1 pixel.  AWS ELB will publish logs to S3 bucket every 5 minutes.  From there logs will be picked up by Logstash and processed into ElasticSearch.  Then we will build our reports, implement rollup indexes and snapshot data to a different S3 bucket (backup and archiving).
+Alternative approach is to take server logs and extract parameters from them.  We will setup frontend Nginx web servers to simply load the 1x1 pixel.  AWS ELB will publish logs to S3 bucket every 5 minutes.  From there logs will be picked up by Logstash and processed into Elasticsearch.  Then we will build our reports, implement rollup indexes and snapshot data to a different S3 bucket (backup and archiving).
 
 Sample line from ELB log file:
 
@@ -155,7 +155,7 @@ input {
 }
 {% endhighlight %}
 
-Then we configure ElasticSearch output plugin which will create daily indexes.  `stdout` is commented out but can be used for debugging.  
+Then we configure Elasticsearch output plugin which will create daily indexes.  `stdout` is commented out but can be used for debugging.  
 
 {% highlight ruby %}
 # /etc/logstash/conf.d/s3_elastic.conf

@@ -8,7 +8,7 @@ Integration and comparision with
 
 Spark
 Riak
-ElasticSearch
+Elasticsearch
 Hadoop
 
 Memcached

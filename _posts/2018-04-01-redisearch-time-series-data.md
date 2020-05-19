@@ -4,7 +4,7 @@ date: 2018-04-01
 categories: redis
 ---
 
-In previous [post]({% post_url 2018-01-16-elasticsearch-redis-streams %}) we explored integration between Redis and ElasticSearch for time series data.  Now we will take deeper dive into how to search for time series data w/in Redis with RediSearch module.  
+In previous [post]({% post_url 2018-01-16-elasticsearch-redis-streams %}) we explored integration between Redis and Elasticsearch for time series data.  Now we will take deeper dive into how to search for time series data w/in Redis with RediSearch module.  
 
 We will be using the same POC app for nationwide retail chain built using Ruby on Rails framework.  We want to search for various user interactions on the website such as which zipcodes users are coming from and what products are they looking for.  
 

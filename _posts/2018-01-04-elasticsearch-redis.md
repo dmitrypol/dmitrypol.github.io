@@ -1,12 +1,12 @@
 ---
-title: "ElasticSearch and Redis"
+title: "Elasticsearch and Redis"
 date: 2018-01-04
 categories: elastic redis
 ---
 
-[ElasticSearch](https://www.elastic.co/) and [Redis](https://redis.io/) are powerful technologies with different strengths.  They are very flexible and can be used for a variety of purposes.  We will explore different ways to integrate them.  
+[Elasticsearch](https://www.elastic.co/) and [Redis](https://redis.io/) are powerful technologies with different strengths.  They are very flexible and can be used for a variety of purposes.  We will explore different ways to integrate them.  
 
-ELK is ElasticSearch, Logstash and Kibana.   ElasticSearch stores data in indexes and supports powerful searching capabilities.  Logstash is an ETL pipeline to move data to and from different data sources (including Redis).  Kibana helps us build rich dashboards and do adhoc searches.  These tools are used not just by developers but by data analysts and devops engineers who often have different skillset.
+ELK is Elasticsearch, Logstash and Kibana.   Elasticsearch stores data in indexes and supports powerful searching capabilities.  Logstash is an ETL pipeline to move data to and from different data sources (including Redis).  Kibana helps us build rich dashboards and do adhoc searches.  These tools are used not just by developers but by data analysts and devops engineers who often have different skillset.
 
 Redis has speed and powerful data structures.  It can almost function as an extension of application memory but shared across processes / servers.  The downside is that records can ONLY be looked up by key.  Our applications can easily store all kinds of interesting data in Redis.  But if this data needs to be extracted and aggregated in different ways that requires writing code.  There is no easy way to do adhoc analysis (like writing SQL queries).  
 
@@ -15,7 +15,7 @@ Redis has speed and powerful data structures.  It can almost function as an exte
 
 ### Search for products
 
-We are building a website for a nationwide chain of stores.  The first requirement is enabling users to search for various products (in our case coffee brands which were generated using randomly).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify ElasticSearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
+We are building a website for a nationwide chain of stores.  The first requirement is enabling users to search for various products (in our case coffee brands which were generated using randomly).  We will use Ruby on Rails with [searchkick](https://github.com/ankane/searchkick) library to simplify Elasticsearch integration.  We set `callbacks: :async` option.  If we configure [Sidekiq](https://github.com/mperham/sidekiq) it will use Redis to queue a background job to update the documents in `products` index when record in primary DB is modified.  
 
 {% highlight ruby %}
 # app/models/
@@ -70,7 +70,7 @@ end
 
 ### Search by zipcode
 
-Another important feature is enabling users to find stores by zipcode.  Both Redis and ElasticSearch support geolocation searches.  We need to map zipcodes to lon/lat coordinates.  Here is a free [data source](https://gist.github.com/erichurst/7882666)
+Another important feature is enabling users to find stores by zipcode.  Both Redis and Elasticsearch support geolocation searches.  We need to map zipcodes to lon/lat coordinates.  Here is a free [data source](https://gist.github.com/erichurst/7882666)
 
 #### Redis geo
 
@@ -105,9 +105,9 @@ end
 "91608", "90025", "90034", "90064", "90035", "90049"]
 {% endhighlight %}
 
-#### ElasticSearch geo
+#### Elasticsearch geo
 
-Alternatively we can use ElasticSearch geo search.  We need to create an index and specify lon/lat for each zipcode.  Since we already have lon/lat stored in Redis we can use it for quick lookup (vs parsing CSV file).
+Alternatively we can use Elasticsearch geo search.  We need to create an index and specify lon/lat for each zipcode.  Since we already have lon/lat stored in Redis we can use it for quick lookup (vs parsing CSV file).
 
 {% highlight ruby %}
 class Store < ApplicationRecord
@@ -125,7 +125,7 @@ class Store < ApplicationRecord
 end
 {% endhighlight %}
 
-We run `Store.reindex`, verify that data shows up in ElasticSearch and modify `StoreLocator`.
+We run `Store.reindex`, verify that data shows up in Elasticsearch and modify `StoreLocator`.
 
 {% highlight ruby %}
 class StoreLocator
@@ -140,7 +140,7 @@ class StoreLocator
 end
 {% endhighlight %}
 
-Each document looks like this in ElasticSearch:
+Each document looks like this in Elasticsearch:
 
 {% highlight ruby %}
 {
@@ -156,7 +156,7 @@ Each document looks like this in ElasticSearch:
 }
 {% endhighlight %}
 
-Now we can take advantage of rich ElasticSearch querying capabilities including [geo queries](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-queries.html), get the IDs of matching stores and display data from the primary DB.
+Now we can take advantage of rich Elasticsearch querying capabilities including [geo queries](https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-queries.html), get the IDs of matching stores and display data from the primary DB.
 
 ### Search by product AND geo
 
@@ -184,7 +184,7 @@ class ProductStoreIndex < Chewy::Index
 end
 {% endhighlight %}
 
-`update_index` method ensures that ElasticSearch documents get updated when we update DB records.  Chewy supports async updates to indexes via background jobs.  Data in ElasticSearch looks like this:
+`update_index` method ensures that Elasticsearch documents get updated when we update DB records.  Chewy supports async updates to indexes via background jobs.  Data in Elasticsearch looks like this:
 
 {% highlight ruby %}
 {
@@ -229,7 +229,7 @@ Now we can do `StoreLocator.new(zipcode: 98174, query: 'kowboy').perform` to fin
 
 ### Autocomplete
 
-This problem can also be solved with both ElasticSearch and Redis.  
+This problem can also be solved with both Elasticsearch and Redis.  
 
 #### Redis
 
@@ -297,9 +297,9 @@ We can add / remove all keys by running `AutocompleteRedis.new.add_all('product'
 
 We can call `AutocompleteRedis.new.search prefix: 'am'` and get back JSON `["american select", "american cowboy"]`.  
 
-#### ElasticSearch
+#### Elasticsearch
 
-We will build a special index in ElasticSearch using Chewy library.  Read [here](https://www.elastic.co/guide/en/elasticsearch/guide/current/_index_time_search_as_you_type.html) about `filter` and `analyzer` configuration.  
+We will build a special index in Elasticsearch using Chewy library.  Read [here](https://www.elastic.co/guide/en/elasticsearch/guide/current/_index_time_search_as_you_type.html) about `filter` and `analyzer` configuration.  
 
 {% highlight ruby %}
 # app/models/
@@ -333,13 +333,13 @@ class AutocompleteIndex < Chewy::Index
 end
 {% endhighlight %}
 
-Now `AutocompleteIndex.query(match: {name: 'am'})` returns `American Cowboy`, `American Select` AND `Old America` products.  ElasticSearch is able to use the second word in the product name to match against.  
+Now `AutocompleteIndex.query(match: {name: 'am'})` returns `American Cowboy`, `American Select` AND `Old America` products.  Elasticsearch is able to use the second word in the product name to match against.  
 
 ### ETL
 
-Until now we were moving data between primary DB and Redis or ElasticSearch.  Now we will ETL data between Redis and ElasticSearch.  
+Until now we were moving data between primary DB and Redis or Elasticsearch.  Now we will ETL data between Redis and Elasticsearch.  
 
-#### Redis to ElasticSearch
+#### Redis to Elasticsearch
 
 The next requirement is to record which zipcodes are searched most often and when searches are performed (by hour_of_day and day_of_week).  To capture data in Redis we will use [leaderboard](https://github.com/agoragames/leaderboard) library to track searches and [minuteman](https://github.com/elcuervo/minuteman) to count when those searches occur.  
 
@@ -374,7 +374,7 @@ This will be very fast and data in Redis will be stored like this:
   "type":"string","value":"11"...}
 {% endhighlight %}
 
-But our internal business users do not want to look at raw data.  Our choice is writing custom dashboard or pulling data into ElasticSearch and leveraging Kibana.  Once it's in ElasticSearch we can also combine it with other data sources.  We will use [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) library directly since this data does not related to our application models.  
+But our internal business users do not want to look at raw data.  Our choice is writing custom dashboard or pulling data into Elasticsearch and leveraging Kibana.  Once it's in Elasticsearch we can also combine it with other data sources.  We will use [elasticsearch-ruby](https://github.com/elastic/elasticsearch-ruby) library directly since this data does not related to our application models.  
 
 {% highlight ruby %}
 ES_CLIENT = Elasticsearch::Client.new
@@ -407,11 +407,11 @@ private
 end
 {% endhighlight %}
 
-We are specifying our aggregation metrics (zipcode, hour_of_day, day_of_week) as the ID of ElasticSearch document.  
+We are specifying our aggregation metrics (zipcode, hour_of_day, day_of_week) as the ID of Elasticsearch document.  
 
-#### ElasticSearch to Redis
+#### Elasticsearch to Redis
 
-In our ElasticSearch cluster we have captured data from logs that contain IP and UserAgent.  Combination of IP and UserAgent can be used to fairly uniquely identify users.  Our next business requirement is to implement functionality where our website displays slightly different UI to users that we believe have visited our site before.  
+In our Elasticsearch cluster we have captured data from logs that contain IP and UserAgent.  Combination of IP and UserAgent can be used to fairly uniquely identify users.  Our next business requirement is to implement functionality where our website displays slightly different UI to users that we believe have visited our site before.  
 
 Now we will leverage Logstash with various plugins as our ETL pipeline.  We will be using [elasticsearch input plugin](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-elasticsearch.html), [redis output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-redis.html) and [ruby filter plugin](https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html) to transform the data into format expected by ActiveJob background job framework and pushing it straight into a Redis List data structure.  
 
@@ -479,7 +479,7 @@ Data in Redis will look like this
 
 Read here on manually creating [messages for Sidekiq](https://github.com/mperham/sidekiq/wiki/FAQ#how-do-i-push-a-job-to-sidekiq-without-ruby) and using [Ruby in Logstash](https://fabianlee.org/2017/04/24/elk-using-ruby-in-logstash-filters/)
 
-In future posts I will cover other technologies such as [RediSearch module](http://redisearch.io/) and [ElasticSearch Kibana dashboard](https://www.elastic.co/products/kibana).  
+In future posts I will cover other technologies such as [RediSearch module](http://redisearch.io/) and [Elasticsearch Kibana dashboard](https://www.elastic.co/products/kibana).  
 
 ### Links
 

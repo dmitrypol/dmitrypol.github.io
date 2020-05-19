@@ -1,12 +1,12 @@
 ---
-title: "ElasticSearch and Redis Pub/Sub"
+title: "Elasticsearch and Redis Pub/Sub"
 date: 2018-03-22
 categories: elastic redis
 ---
 
-In previous posts we discussed integration between [ElasticSearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-16-elasticsearch-redis-streams %}) to work with time series data.  Now we will explore [Redis PubSub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
+In previous posts we discussed integration between [Elasticsearch and Redis]({% post_url 2018-01-04-elasticsearch-redis %}) and using [Redis Streams]({% post_url 2018-01-16-elasticsearch-redis-streams %}) to work with time series data.  Now we will explore [Redis PubSub](https://redis.io/topics/pubsub) using the same example of Ruby on Rails website for national retail chain.  
 
-Why would we use Redis PubSub vs sending data directly to ElasticSearch?  One advantage is that multiple clients could be listening to our channel.  We also might not want to create a direct integration between our application and ElasticSearch.  
+Why would we use Redis PubSub vs sending data directly to Elasticsearch?  One advantage is that multiple clients could be listening to our channel.  We also might not want to create a direct integration between our application and Elasticsearch.  
 
 * TOC
 {:toc}
@@ -50,7 +50,7 @@ end
 
 ### Logstash
 
-To move data into ElasticSearch we will use Logstash [Redis input plugin](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-redis.html), [Ruby filter plugin](https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html) and [ElasticSearch output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html)
+To move data into Elasticsearch we will use Logstash [Redis input plugin](https://www.elastic.co/guide/en/logstash/current/plugins-inputs-redis.html), [Ruby filter plugin](https://www.elastic.co/guide/en/logstash/current/plugins-filters-ruby.html) and [Elasticsearch output plugin](https://www.elastic.co/guide/en/logstash/current/plugins-outputs-elasticsearch.html)
 
 Here is a basic Logstash config file:
 
@@ -70,7 +70,7 @@ output {
 }
 {% endhighlight %}
 
-We start logstash and point it to folder with our config file `bin/logstash -f /path/to/logstash/config/folder/ --config.reload.automatic`.  We will see `[logstash.inputs.redis    ] Subscribed {:channel=>"search_log", :count=>1}` in Logstash's own log.  If we send a message from our Rails app and query ElasticSearch index `search_log_2018.03.23` we will get a document:
+We start logstash and point it to folder with our config file `bin/logstash -f /path/to/logstash/config/folder/ --config.reload.automatic`.  We will see `[logstash.inputs.redis    ] Subscribed {:channel=>"search_log", :count=>1}` in Logstash's own log.  If we send a message from our Rails app and query Elasticsearch index `search_log_2018.03.23` we will get a document:
 
 {% highlight ruby %}
 {
@@ -97,7 +97,7 @@ We start logstash and point it to folder with our config file `bin/logstash -f /
 }
 {% endhighlight %}
 
-One problem is that we do not want "controller" and "acton" parameters in ElasticSearch.  We could remove them within Rails application or we could use a Logstash Ruby filter.  It allows us to write Ruby code to do various transformations.  We can add data as with `random_number` example below.  
+One problem is that we do not want "controller" and "acton" parameters in Elasticsearch.  We could remove them within Rails application or we could use a Logstash Ruby filter.  It allows us to write Ruby code to do various transformations.  We can add data as with `random_number` example below.  
 
 {% highlight ruby %}
 filter {

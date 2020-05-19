@@ -4,7 +4,7 @@ date: 2018-04-03
 categories: redis
 ---
 
-Ruby Goldberg machines are deliberately complex contraptions that require the designer to perform a series of excessively convoluted steps to accomplish a very simple task (turn on a light switch).  In my career I worked on some applications that also were a little too complex.  
+Rube Goldberg machines are deliberately complex contraptions that require the designer to perform a series of excessively convoluted steps to accomplish a very simple task (turn on a light switch).  In my career I worked on some applications that also were a little too complex.  
 
 For "fun" exercise we will build a system using Redis performing a simple task such as writing something to a log file.  Except to make it more interesting we will push data through multiple Redis data structures.  
 

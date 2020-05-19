@@ -58,7 +58,7 @@ JSON document structure is great for our purposes.  There will be a separate col
 
 ### Data curation
 
-To save space and $ our business requirement is to keep data for one week and then archive it.  However, we might need to restore data at some point in the future.  [ElasticSearch](https://www.elastic.co/) has a [Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/index.html) and we will model our process on that.  
+To save space and $ our business requirement is to keep data for one week and then archive it.  However, we might need to restore data at some point in the future.  [Elasticsearch](https://www.elastic.co/) has a [Curator](https://www.elastic.co/guide/en/elasticsearch/client/curator/index.html) and we will model our process on that.  
 
 One option is to build another background job in our core application for this task.  But frequently these kinds of data cleanups done via separate ETL processes.  So we will write a standalone Ruby CLI using [mixlib-cli](https://github.com/chef/mixlib-cli) library.  This script have 3 parts -  `mongodump`, upload via [AWS S3 client](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3.html) and drop collection via Mongo driver.  We will also have an option to pass specific date for which to run this process.  
 

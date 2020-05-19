@@ -118,7 +118,7 @@ https://aws.amazon.com/getting-started/tutorials/filter-messages-published-to-to
 
 ### Logstash
 
-Sometimes instead of writing code to work with data we use various ETL tools.  Logstash is a powerful tool that originally started for moving log data into ElasticSearch.  It can be extended with various plugins to move data in an out of various data stores.  
+Sometimes instead of writing code to work with data we use various ETL tools.  Logstash is a powerful tool that originally started for moving log data into Elasticsearch.  It can be extended with various plugins to move data in an out of various data stores.  
 
 
 https://www.elastic.co/guide/en/logstash/6.1/plugins-outputs-sns.html

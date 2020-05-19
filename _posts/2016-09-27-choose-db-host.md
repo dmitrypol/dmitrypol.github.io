@@ -23,7 +23,7 @@ When it comes to very common databases (MySQL, Postgres, MS SQL) major cloud pro
 
 Recently we switch to use [MongoDB Atlas](https://www.mongodb.com/cloud).  We looked at providers like [ScaleGrid](https://scalegrid.io/) and [mLab](https://mlab.com/).  Their solutions looked interesting but part of me wondered if they have resources to support their service 24/7/365?
 
-There are also some 3rd party companies that offer hosting services for variety of technologies.  For example, [Compose](https://www.compose.com/) (owned by IBM) can host Mongo, Redis, Postgres, ElasticSearch, [RethinkDB](https://www.rethinkdb.com/), [RabitMQ](https://www.rabbitmq.com/), [etcd](https://github.com/coreos/etcd) and [ScyllaDB](http://www.scylladb.com/).  And it is convinient to have one dashboard and one montly bill.  We have never used their services but part of me is cautious.  How they can be experts in such wide range of technologies?  
+There are also some 3rd party companies that offer hosting services for variety of technologies.  For example, [Compose](https://www.compose.com/) (owned by IBM) can host Mongo, Redis, Postgres, Elasticsearch, [RethinkDB](https://www.rethinkdb.com/), [RabitMQ](https://www.rabbitmq.com/), [etcd](https://github.com/coreos/etcd) and [ScyllaDB](http://www.scylladb.com/).  And it is convinient to have one dashboard and one montly bill.  We have never used their services but part of me is cautious.  How they can be experts in such wide range of technologies?  
 
 ### Configurability
 
