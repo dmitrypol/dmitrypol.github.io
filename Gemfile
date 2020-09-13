@@ -9,3 +9,4 @@ gem 'jekyll-seo-tag'
 gem 'html-proofer'
 gem 'rake'
 gem 'minima'
+#gem "kramdown", ">= 2.3.0"
