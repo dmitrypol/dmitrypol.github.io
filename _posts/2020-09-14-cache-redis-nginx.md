@@ -1,6 +1,6 @@
 ---
 title: "Caching:  Redis vs Nginx"
-date: 2020-09-12
+date: 2020-09-14
 categories: redis nginx
 ---
 
@@ -12,7 +12,7 @@ In previous articles in this blog we expored various options for using Redis for
 
 # Local environment
 
-We can bring up our environment with `docker-compose`.  It conists of two APIs (api1 and api2), Redis and Nginx.  Nginx will be used to route request to and between APIs and to cache their responses.  
+We can bring up our environment with `docker-compose`.  It conists of two APIs (api1 and api2), Redis and Nginx.  Nginx will be used to route requests to and between APIs and to cache their responses.  
 
 {% highlight yml %}
 version: '3.7'
@@ -115,7 +115,7 @@ server {
 }
 {% endhighlight %}
 
-To avoid confusion and not mix caching technologies we can disable Redis caching by commenting out `@CACHE.cached()` in Python.  If we browse to `http://localhost/api1/` for api1 and `http://localhost/api2/` for api2 these request will first pass through Nginx proxy.  
+To avoid confusion and not mix caching technologies we can disable Redis caching by commenting out `@CACHE.cached()` in Python.  If we browse to `http://localhost/api1/` for api1 and `http://localhost/api2/` for api2 these requests will pass through Nginx proxy.  
 
 If we look in `tmp/cache/api1/.../.../...` we will see files with contents like this:
 
@@ -125,7 +125,7 @@ HTTP/1.0 200 OK
 Content-Type: text/html; charset=utf-8
 Content-Length: 4
 Server: Werkzeug/1.0.1 Python/3.6.8
-Date: Sat, 13 Sep 2020 23:51:48 GMT
+Date: Sat, 14 Sep 2020 23:51:48 GMT
 
 api1
 {% endhighlight %}
@@ -149,7 +149,7 @@ Nginx allows us to create a shared proxy cache that can be used by many differen
 
 ## Cons
 
-The downside is that we loose flexibility in how and for how long we cache data.  Real APIs are much more complex and could use combination of cached and real-time data sources.  We can only apply caching logic on the URL pattern.
+The downside is that we loose flexibility in what and for how long we cache data.  Real APIs are much more complex and could use combination of cached and real-time data sources.  We can only apply caching logic on the URL pattern.
 
 With Redis we can use replication to create additional caches.  While we could store cache files in a shared folder Nginx stores the cache keys in memory so this makes it difficult to scale out our caching solution.  We could put individual cache proxy in front of each API instance but that can lead to different content cached in different proxies.  
 
