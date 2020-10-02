@@ -234,14 +234,24 @@ To make Sentinel forget about this instance that we killed manually we need to `
 
 ## Increasing / decreating amount of RAM on each instance
 
-* If decreasing the amount of RAM we need to make sure that the amount of data currently stored in Redis can fit into the new RAM amount.  
+* If decreasing the amount of RAM we need to make sure that the amount of data currently stored in Redis can fit into the new amount of RAM.  
+* The process is largely a repetition of various steps above.  
 * Launch new instances with appropriate amount of RAM.  
-* Make new instances replicas of current primary.  
-* Terminate original replicas.
-* Failover the current primary by sending `sentinel failover my_redis` to one of the Sentinels.
-* Terminate the previous primary.  
+* Make new instances replicas of the current primary.  
+* Terminate original replicas one at a time.  
+* Stop if there are any issues and rollback.  
+* Failover the primary by sending `sentinel failover my_redis` to one of the Sentinels and terminate the instance.
 * Do `sentinel reset my_redis` on all Sentinels.
 
+## Upgrading / downgrading Redis version
+
+* The process is also largely a repetition of various steps above.  
+* Launch new instances with new version of Redis.
+* Make new instances replicas of the current primary.  
+* Terminate original replicas one at a time.  
+* Stop if there are any issues and rollback.  
+* Failover the primary (with previous Redis version) and terminate the instance. 
+* Do `sentinel reset my_redis` on all Sentinels.
 
 # Links
 * https://redis.io/topics/sentinel
