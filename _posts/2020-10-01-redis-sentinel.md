@@ -232,7 +232,7 @@ But `docker exec -it sentinel1 redis-cli -p 26379 sentinel replicas my_redis` st
 
 To make Sentinel forget about this instance that we killed manually we need to `docker exec -it sentinel1 redis-cli -p 26379 sentinel reset my_redis`.  Repeat the process for `sentinel2` and `sentinel3`.  Now running `docker exec -it sentinel1 redis-cli -p 26379 sentinel replicas my_redis` will return only 2 records.  
 
-## Increasing / decreating amount of RAM on each instance
+## Increasing / decreasing amount of RAM on each instance
 
 * If decreasing the amount of RAM we need to make sure that the amount of data currently stored in Redis can fit into the new amount of RAM.  
 * The process is largely a repetition of various steps above.  
