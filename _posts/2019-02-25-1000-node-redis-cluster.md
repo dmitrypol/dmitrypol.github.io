@@ -62,7 +62,7 @@ output "ip_output" {
 
 When we run `terraform apply` the output will be the public IPs of the servers created.  
 
-## Provision Redis Cluser with Ansible 
+## Provision Redis Cluster with Ansible 
 
 The next step is to properly provision Redis Cluster nodes on top of Linux.  We will be using Ansible but it could be done with other tools or even bash scripts.  When we run `ansible-playbook redis_playbook.yml -i hosts.yml` this playbook (script) will be executed on all 10 bare metal servers.  
 It will install OS dependencies, clone the Redis repo and compile the code.  It will then create 100 subfolders, copy `redis-server` executable and config file specifying different ports.  Each physical server will be running 100 instances of Redis on ports 6379-6478.  
